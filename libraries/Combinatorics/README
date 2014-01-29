@@ -1,0 +1,72 @@
+
+==================================================================================
+    
+ Combinatorics library for the Processings
+
+ This library provides an easy way to generate combinations, variations and 
+ permutations from a given set of values.
+
+----------------------------------------------------------------------------------
+ 
+ Current release is now compatible with JavaScript mode in Processing 2.0
+
+==================================================================================
+
+ What?
+
+ Combinatorics library provides iterators for these combinatorical sets:
+    
+ – Combinations
+ – CombinationSets
+ – Variations
+ – VariationSets
+ – Permutations
+    
+ The iterators provide arrays of indices (addresses) into an imaginary 
+ array of a given length at each step. These adresses can then be used 
+ on any kind of real array. Example needed, so ..
+    
+ Say you have a String array:
+ 
+ { "A", "B", "C" }
+ 
+ ... and you'd like to find all possible combinations at any length.
+ A CombinationSet would return these indice arrays:
+ 
+ []                       empty (0 elements)
+ [0], [1], [2]            combinations of 1 element
+ [0, 1], [0, 2], [1, 2]   combinations of 2 elements
+ [0, 1, 2]                combinations of 3 elements
+ 
+ Using these indices to read from your array would give you:
+ 
+ (null)
+ ["A"], ["B"], ["C"]
+ ["A", "B"], ["A", "C"], ["B", "C"]
+ ["A", "B", "C"]
+    
+----------------------------------------------------------------------------------
+ 
+ A quick class overview:
+ 
+ Combination      unique combinations, no duplications, order is ignored
+ CombinationSet   range of combinations at different lengths
+ Variation        all possible variations, includes duplication, order matters
+ VariationSet     range of variations at different lengths
+ Permutation      all possible ways to order the elements, no duplications
+
+==================================================================================
+
+ Props, Thank-you's
+ 
+ The Java (and JavaScript) code for permutation is based on code by Michael Gillelands 
+ (at http://www.merriampark.com/perm.htm), which he claims to be an implementation of
+ Kenneth H. Rosen, Discrete Mathematics and Its Applications, 
+ 2nd edition (NY: McGraw-Hill, 1991), pp. 282-284
+
+ BigInteger (in JavaScript version) was written by John Tobey and Matthew Crumley
+ and is available at http://silentmatt.com/biginteger/ and
+ https://github.com/jtobey/javascript-bignum
+ 
+   
+    

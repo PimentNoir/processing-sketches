@@ -1,0 +1,57 @@
+import peasy.*;
+
+import shapes3d.utils.*;
+import shapes3d.animation.*;
+import shapes3d.*;
+
+import guicomponents.*;
+
+private PeasyCam pcam;
+
+private BezTube btube;
+
+// The greater segs the smoother the curve
+// slices must be >= 3 
+int segs = 100, slices = 8;
+
+void setup(){
+  size(600,600,P3D);
+  btube = makeBezTube();
+ 
+  pcam = new PeasyCam(this, 200);
+  pcam.setMinimumDistance(60);
+  pcam.setMaximumDistance(600);
+}
+
+void draw(){
+  background(215,255,175);
+  lights();
+ 
+  btube.draw();
+}
+
+public BezTube makeBezTube(){
+  float[] prf = new float[] {
+  //PRFPOINTS
+  };
+  
+  PVector[] p = new PVector[] {
+  //CPOINTS
+  };
+
+ 
+  BezTubeRadius btr = new BezTubeRadius(prf);
+  BezTube bt = new BezTube(this, new Bezier3D(p, p.length), btr, segs, slices);
+
+  bt.fill(color(32,32,200));
+  bt.stroke(color(64,200,200));
+  bt.strokeWeight(2.5f);
+  bt.drawMode(Shape3D.SOLID | Shape3D.WIRE);
+
+  bt.fill(color(150,255,255), BezTube.BOTH_CAP);
+  bt.drawMode(Shape3D.SOLID, BezTube.BOTH_CAP);
+
+  return bt;
+}
+
+

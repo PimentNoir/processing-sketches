@@ -1,0 +1,43 @@
+#######################       BezTube Editor       ####################### 
+ 
+The BezTube shape is a tube that follows a 3D Bezier curve. The shape of a Bezier 
+curve  is defined by 2 or more control points, where the first and last points define 
+the  ends of the curve. The intermediate points influence the path of the curve 
+between  the end points. Most graphics applications use cubic Bezier curves which 
+have  just 4 control points, in this application there is no upper limit to the number of 
+control  points. 
+The 'hull' is formed by linking the control points (in order) with straight lines. Both the 
+Bezier  curve and the hull will be visible when using this program. 
+ 
+When the program starts 6 separate windows will appear and you can move these to 
+suit  yourself, the view windows are also resizeable. 
+ 
+## 3D View Window: 
+This window shows the BezTube and hull in 3D. You can rotate the display in 3D 
+using  mouse-drag, zoom in and out using the wheel button and reset the display by 
+double  clicking (the PeasyCam library is used for this feature). Control points can be 
+added  and removed but not repositioned in this view. 
+ 
+## 2D View Windows: 
+There are three of these showing both hull and Bezier curve as seen down one of 
+the  three principle axies (X, Y & Z) Control points can be added, removed and 
+repositioned  in these views. 
+ 
+## Tube Profile Window: 
+This controls the tube profile (i.e. the tube radius at any point along its length. 
+ 
+## Control Window: 
+From this window you can perform 'global' manipulation of the control points as well 
+as  features to control the displays in the other windows. 
+ 
+## Adding and Removing Control Points (2D & 3D views): 
+Clicking on a control point removes it from the hull. Clicking on one of the hull lines 
+will  add a new control point at its mid point. 
+ 
+## Repositioning a Control Point (2D view): 
+Simply drag the point to a new position. 
+ 
+Three initial curves are provided to get you started. 
+ 
+Enjoy! 
+ 
