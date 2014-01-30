@@ -41,7 +41,7 @@ import processing.dxf.*;
 import java.util.Calendar;
 
 PGraphicsOpenGL pgl;
-GL gl;
+GL2 gl;
 
 
 // ------ initial parameters and declarations ------
@@ -114,7 +114,7 @@ void setup() {
   setupGUI();
 
   pgl = (PGraphicsOpenGL) g;
-  gl = pgl.pgl.gl;  
+  gl = pgl.beginPGL().gl.getGL2();  
 
   noStroke();
 
