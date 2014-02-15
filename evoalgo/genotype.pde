@@ -1,3 +1,6 @@
+
+float mute_rate = 0.05;
+
 class Genotype
 {
   float [] m_genes;
@@ -14,7 +17,7 @@ class Genotype
   {
     // 5% mutation rate
     for (int i = 0; i < m_genes.length; i++) {
-      if (random(0,1) < 0.05) {
+      if (random(0,1) < mute_rate) {
         m_genes[i] = random(0,1);
       }
     }
