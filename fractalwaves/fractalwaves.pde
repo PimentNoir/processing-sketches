@@ -1,4 +1,6 @@
 
+SimplexNoise simplexnoise;
+
 int i,w=500,h=w,x,y,s=3;
 float k,m,r,j=0.01;
 
@@ -83,6 +85,20 @@ float amp = 1.0;
   return rc;
 }
 
+float fractalsimplexnoise(float x, float y, float z) {
+int octave = 4; 
+float rc = 0;
+float amp = 1.0;
+  for (int l=0;l<octave;l++) {
+    rc += simplexnoise.noise(x, y, z)*amp;
+    amp = pow(amp, l);
+    x /= 2;
+    y /= 2;
+    z /= 2;    
+  }
+  return rc;
+}
+
 float n(float i){
   float xspeed = 0.1;
   float zspeed = 0.0125;
@@ -101,8 +117,8 @@ float n(float i){
   float ly = (i*j/w+r);
   float lz = (i*j/w-r);
   float dist = dist(lx, ly, lz, lx_prev, ly_prev, lz_prev);
-  float rc = fractalinoisef(lx + dist + pulse, ly + dist + pulse, lz + dist + pulse);
-  return rc*s*18+h/2;
+  float rc = fractalsimplexnoise(lx + dist + pulse, ly + dist + pulse, lz + dist + pulse);
+  return rc*s*4+h/2;
 }
 
 // Useless functions
@@ -110,8 +126,8 @@ float smoothnoise_cubic(float x, float y, float z) {
       return 3*pow(inoisef(x, y, z), 2) - 2*pow(inoisef(x, y, z), 3);
 }
 
-float smoothnoise_quintic(float x, float y, float z) {
-      return pow(noise(x,y,z), 3)*(noise(x,y,z)*(noise(x,y,z)*6-15)+10) ;
+double smoothnoise_quintic(float x, float y, float z) {
+      return simplexnoise.noise(x,y,z)*simplexnoise.noise(x,y,z)*simplexnoise.noise(x,y,z)*(simplexnoise.noise(x,y,z)*(simplexnoise.noise(x,y,z)*6-15)+10);
 }
 
 void draw()
@@ -127,7 +143,7 @@ void draw()
       float hue = millis() * 0.001;
       float saturation = 100 * constrain(pow(1.05 * n(k*w+m)*0.0125, 2.5), 0, 1);
       color c = color(
-         (n(k*w+m)*0.125+hue) % 100.0,
+         (n(k*w+m)*0.175+hue) % 100.0,
          saturation,
          100 * constrain(pow(1.00 * max(0, n(k*w+m) * 0.0125), 1.5), 0, 0.9)
          );
