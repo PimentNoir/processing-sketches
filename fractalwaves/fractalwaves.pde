@@ -71,8 +71,8 @@ float inoisef(float i, float j, float k)
 float n(float i){
   int octave = 4;
   float xspeed = 0.1;
-  float zspeed = 0.1;
-  float pulse = abs((sin(i*j/w)*0.75));
+  float zspeed = 0.0125;
+  float pulse = (sin(i*j/w)-0.75)*0.75;
   float rv = 0;
   float lx_prev,ly_prev,lz_prev;
   if ( i <= 0 ) {
@@ -98,7 +98,7 @@ float n(float i){
     dist /= 2;
     pulse /= 2;
   }
-  return rv*s*8+h/2;
+  return rv*s*18+h/2;
 }
 
 // Useless functions
@@ -123,7 +123,7 @@ void draw()
       float hue = millis() * 0.001;
       float saturation = 100 * constrain(pow(1.05 * n(k*w+m)*0.0125, 2.5), 0, 1);
       color c = color(
-         (n(k*w+m)*0.275%20+hue%80) % 100.0,
+         (n(k*w+m)*0.125+hue) % 100.0,
          saturation,
          100 * constrain(pow(1.00 * max(0, n(k*w+m) * 0.0125), 1.5), 0, 0.9)
          );
