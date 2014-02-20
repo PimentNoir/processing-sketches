@@ -68,12 +68,25 @@ float inoisef(float i, float j, float k)
   return (1 + ((float)(inoise((int)(mult*i),(int)(mult*j),(int)(mult*k))) / mult)) / 2.0f;
 }
 
+
+float fractalinoisef(float x, float y, float z) {
+int octave = 4; 
+float rc = 0;
+float amp = 1.0;
+  for (int l=0;l<octave;l++) {
+    rc += inoisef(x, y, z)*amp;
+    amp /= 2;
+    x /= 2;
+    y /= 2;
+    z /= 2;    
+  }
+  return rc;
+}
+
 float n(float i){
-  int octave = 4;
   float xspeed = 0.1;
   float zspeed = 0.0125;
   float pulse = (sin(i*j/w)-0.75)*0.75;
-  float rv = 0;
   float lx_prev,ly_prev,lz_prev;
   if ( i <= 0 ) {
     lx_prev = 0;
@@ -88,17 +101,8 @@ float n(float i){
   float ly = (i*j/w+r);
   float lz = (i*j/w-r);
   float dist = dist(lx, ly, lz, lx_prev, ly_prev, lz_prev);
-  float amp = 1.0;
-  for (int l=0;l<octave;l++) {
-    rv += inoisef(lx + dist + pulse, ly + dist + pulse, lz + dist + pulse)*amp;
-    amp /= 2;
-    lx /= 2;
-    ly /= 2;
-    lz /= 2;
-    dist /= 2;
-    pulse /= 2;
-  }
-  return rv*s*18+h/2;
+  float rc = fractalinoisef(lx + dist + pulse, ly + dist + pulse, lz + dist + pulse);
+  return rc*s*18+h/2;
 }
 
 // Useless functions
