@@ -8,16 +8,28 @@ double tt = 1;
 ImprovedNoise noisee = new ImprovedNoise();
 
 double Noise (double x, double y, double z) {
+  int octave = 8;
+  double persistence = 0.5;
+  double lacunarity = 2.0;
+  double frequency = 1.0;
   //Standard frequency ?
-  noiseDetail(1,0.25);
-  return (double)noise((float)x, (float)y, (float)z);  
+  noiseDetail(1,0);
+  double rc = 0; 
+  double amp = 1.0;
+  for (int l = 0; l < octave; l++) {
+    rc += (double)noise((float)(frequency * x), (float)(frequency * y), (float)(frequency * z));
+    amp *= persistence;
+    frequency *= lacunarity;
+  }
+  //println(rc * (1 - persistence)/(1 - amp));
+  return rc * (1 - persistence)/(1 - amp);  
 }
 
 double NoiseImproved (double x, double y, double z) {
   int octave = 8;
   double persistence = 0.5;
   double lacunarity = 2.0;
-  double frequency = 0.25;
+  double frequency = 1.0;
   
   double rc = 0; 
   double amp = 1.0;
@@ -55,7 +67,7 @@ void draw () {
     double noisea = u*v*noise00 + u*nv*noise01 + (1-u)*v*noise10 + (1-u)*nv*noise11;
     //println(noisea); 
     value = (int) (256 * noisea) + 50; 
-    pixels[offset] = color(constrain((int)noise00*255,0,255)
+    pixels[offset] = color(constrain((int)noise00,0,255)
                           ,constrain(value,0,255)
                           ,constrain(value +50,0,255)); 
     offset++;
