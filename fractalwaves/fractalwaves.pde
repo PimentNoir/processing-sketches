@@ -101,8 +101,13 @@ double smoothnoise_quintic(float x, float y, float z) {
 void draw()
 {
   background(0);
+    
+  if (mousePressed) {
+    rotateX(TWO_PI * mouseY / height);
+    rotateZ(TWO_PI * mouseX / width);  
+  }
+    
   lights();
-  
   beginShape(TRIANGLE);
   for(i=0;i<w*h;i+=s)
   {
@@ -119,6 +124,7 @@ void draw()
       quadraticVertex(x,n(y*w+x),y,m,n(y*w+m),y);
       quadraticVertex(m,n(k*w+m),k,m,n(k*w+m),k);
       quadraticVertex(x,n(k*w+x),k,x,n(y*w+x),y);
+      //rotateY(millis() * 0.001 * i * radians(0.01));
       i+=i%w==0?w*(s-2):0;
   }
   endShape();
