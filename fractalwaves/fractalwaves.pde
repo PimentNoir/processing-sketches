@@ -1,6 +1,8 @@
 
 SimplexNoise simplexnoise;
-INoise perlinnoise;
+INoise perlininoise = new INoise();
+ImprovedNoise perlinnoise = new ImprovedNoise();
+
 
 int i,w=500,h=w,x,y,s=3;
 float k,m,r,j=0.01;
@@ -13,18 +15,50 @@ void setup(){
   frameRate(framerate);
 }
 
-static final int mult = 1<<16;
+float inoise(float i, float j , float k) {
+  perlininoise.init();
+  return (1 + (float)perlininoise.noise((int)i,(int)j,(int)k)) / 2.0f;
+}
+
+float perlininoise(float i, float j, float k)
+{
+  int octave = 4;
+  float persistence = 0.5;
+  float lacunarity = 2.0;
+  float frequency = 1.0;
+  
+  float rc = 0;
+  float amp = 1.0;
+  for (int l = 0; l < octave; l++) { 
+    rc += ((1 + (float)perlininoise.noise((int)(frequency*i),(int)(frequency*j),(int)(frequency*k))) / 2.0f) * amp;
+    amp *= persistence;
+    frequency *= lacunarity;
+  }
+  return rc * (1 - persistence)/(1 - amp);
+}
 
 float perlinnoise(float i, float j, float k)
 {
-  return (1 + ((float)(perlinnoise.noise((int)(mult*i),(int)(mult*j),(int)(mult*k))) / mult)) / 2.0f;
+  int octave = 4;
+  float persistence = 0.5;
+  float lacunarity = 2.0;
+  float frequency = 1.0;
+  
+  float rc = 0;
+  float amp = 1.0;
+  for (int l = 0; l < octave; l++) { 
+    rc += ((1 + (float)perlinnoise.noise((double)(frequency*i),(double)(frequency*j),(double)(frequency*k))) / 2.0f) * amp;
+    amp *= persistence;
+    frequency *= lacunarity;
+  }
+  return rc * (1 - persistence)/(1 - amp);
 }
 
 float fractalperlinnoise(float x, float y, float z) {
 int octave = 4; 
 float rc = 0;
 float amp = 1.0;
-  for (int l=0;l<octave;l++) {
+  for (int l = 0; l < octave; l++) {
     rc += perlinnoise(x, y, z)*amp;
     amp /= octave;
     x /= 2;
@@ -35,14 +69,27 @@ float amp = 1.0;
 }
 
 float simplexnoise(float i, float j, float k) {
-  return (1 + ((float)(simplexnoise.noise((double)(mult*i),(double)(mult*j),(double)(mult*k))) / mult)) / 2.0f;  
+  int octave = 4;
+  float persistence = 0.25;
+  float lacunarity = 0.5;
+  float frequency = 1.0;
+  
+  float rc = 0;
+  float amp = 1.0;
+  for (int l = 0; l < octave; l++) {
+    //Keep the same behaviour as the processing perlin noise() function, return values in [0,1]
+    rc += (((float)simplexnoise.noise(frequency * i, frequency * j, frequency * k) + 1) / 2.0f) * amp;
+    amp *= persistence;
+    frequency *= lacunarity;
+  }
+  return rc * (1 - persistence)/(1 - amp);  
 }
 
 float fractalsimplexnoise(float x, float y, float z) {
 int octave = 4; 
 float rc = 0;
 float amp = 1.0;
-  for (int l=0;l<octave;l++) {
+  for (int l = 0; l < octave; l++) {
     rc += simplexnoise(x, y, z)*amp;
     amp /= octave;
     x /= 2;
@@ -83,10 +130,10 @@ float n(float i){
   float lx = i%w*j;
   float ly = (i*j/w+r);
   float lz = (i*j/w-r);
-  float dist = dist(lx, ly, lz, lx_prev, ly_prev, lz_prev);
-  float rc = fractalsimplexnoise(lx + dist + pulse, ly + dist + pulse, lz + dist + pulse);
+  //float dist = dist(lx, ly, lz, lx_prev, ly_prev, lz_prev);
+  float rc = simplexnoise(lx * 0.5 + abs(lx - lx_prev), ly * 0.5 + abs(ly - ly_prev), lz * 0.5 + abs(lz - lz_prev));
   //println(rc);
-  return rc*s*10+h/2;
+  return rc*s*6+h/2;
 }
 
 // Useless functions
@@ -129,6 +176,8 @@ void draw()
   }
   endShape();
   r-=j;
+  fill(100);
+  text(frameRate,22,22);
 }
 
 
