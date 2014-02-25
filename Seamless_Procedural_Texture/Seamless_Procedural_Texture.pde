@@ -1,13 +1,14 @@
 /*
  
-generate seamless tile using perlin noise
+generate seamless tile using different perlin noise implementation
  
 */
-double ns = 0.015;  //increase this to get higher density
-double tt = 1;
 ImprovedNoise perlinnoise = new ImprovedNoise();
 INoise perlininoise = new INoise();
 SimplexNoise simplexnoise = new SimplexNoise();
+
+double ns = 0.015;  //increase this to get higher density
+double tt = 1;
 
 double inoise(double x, double y , double z) {
   final int mult = 1<<16;
@@ -19,14 +20,14 @@ double Noise (double x, double y, double z) {
   int octave = 8;
   double persistence = 0.5;
   double lacunarity = 2.0;
-  double frequency = 1.0;
+  double frequency = 8.0;
   
   double rc = 0; 
   double amp = 1.0;
   //Standard frequency ?
   noiseDetail(1,0);
   for (int l = 0; l < octave; l++) {
-    rc += (double)noise((float)(frequency * x), (float)(frequency * y), (float)(frequency * z));
+    rc += (double)noise((float)(frequency * x), (float)(frequency * y), (float)(frequency * z))*amp;
     amp *= persistence;
     frequency *= lacunarity;
   }
@@ -51,11 +52,11 @@ double INoise (double x, double y, double z) {
   return rc * (1 - persistence)/(1 - amp);  
 }
 
-double NoiseImproved (double x, double y, double z) {
+double ImprovedNoise (double x, double y, double z) {
   int octave = 8;
   double persistence = 0.5;
   double lacunarity = 2.0;
-  double frequency = 1.0;
+  double frequency = 8.0;
   
   double rc = 0; 
   double amp = 1.0;
@@ -73,7 +74,7 @@ double SimplexNoise (double x, double y, double z) {
   int octave = 8;
   double persistence = 0.5;
   double lacunarity = 2.0;
-  double frequency = 1.0;
+  double frequency = 8.0;
   
   double rc = 0; 
   double amp = 1.0;
@@ -105,10 +106,10 @@ void draw () {
   double nv = 1.0 - v; 
   for (int x = 0; x < w; x++) {
     double u = (double) x / w; 
-    double noise00 = INoise(x*ns, y*ns, tt); 
-    double noise01 = INoise(x*ns, (y+h)*ns, tt); 
-    double noise10 = INoise((x+w)*ns, y*ns, tt); 
-    double noise11 = INoise((x+w)*ns, (y+h)*ns, tt); 
+    double noise00 = ImprovedNoise(x*ns, y*ns, tt); 
+    double noise01 = ImprovedNoise(x*ns, (y+h)*ns, tt); 
+    double noise10 = ImprovedNoise((x+w)*ns, y*ns, tt); 
+    double noise11 = ImprovedNoise((x+w)*ns, (y+h)*ns, tt); 
     double noisea = u*v*noise00 + u*nv*noise01 + (1-u)*v*noise10 + (1-u)*nv*noise11;
     //println(noisea); 
     value = (int) (256 * noisea) + 50; 

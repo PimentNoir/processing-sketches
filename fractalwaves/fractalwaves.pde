@@ -55,25 +55,11 @@ float perlinnoise(float i, float j, float k)
   return rc * (1 - persistence)/(1 - amp);
 }
 
-float fractalperlinnoise(float x, float y, float z) {
-int octave = 4; 
-float rc = 0;
-float amp = 1.0;
-  for (int l = 0; l < octave; l++) {
-    rc += perlinnoise(x, y, z)*amp;
-    amp /= octave;
-    x /= 2;
-    y /= 2;
-    z /= 2;    
-  }
-  return rc;
-}
-
 float simplexnoise(float i, float j, float k) {
   int octave = 4;
   float persistence = 0.25;
   float lacunarity = 0.5;
-  float frequency = 0.75;
+  float frequency = 1.0;
   
   float rc = 0;
   float amp = 1.0;
@@ -86,32 +72,22 @@ float simplexnoise(float i, float j, float k) {
   return rc * (1 - persistence)/(1 - amp);  
 }
 
-float fractalsimplexnoise(float x, float y, float z) {
+float Noise(float x, float y, float z) {
 int octave = 4; 
-float rc = 0;
-float amp = 1.0;
-  for (int l = 0; l < octave; l++) {
-    rc += simplexnoise(x, y, z)*amp;
-    amp /= octave;
-    x /= 2;
-    y /= 2;
-    z /= 2;    
-  }
-  return rc;
-}
+float persistence = 0.25;
+float lacunarity = 0.5;
+float frequency = 1.0;
 
-float fractalNoise(float x, float y, float z) {
-int octave = 4; 
 float rc = 0;
 float amp = 1.0;
+//Standard frequency ?
+noiseDetail(1,0);
   for (int l = 0; l < octave; l++) {
-    rc += noise(x, y, z)*amp;
-    amp /= octave;
-    x /= 2;
-    y /= 2;
-    z /= 2;    
+    rc += noise(frequency*x, frequency*y, frequency*z)*amp;
+    amp *= persistence;
+    frequency *= lacunarity;
   }
-  return rc;
+  return rc * (1 - persistence)/(1 - amp);
 }
 
 float n(float i){
@@ -131,9 +107,10 @@ float n(float i){
   float ly = (i*j/w+r);
   float lz = (i*j/w-r);
   float pulsey = (sin(ly_prev)-0.75)*0.75;
-  float rc = perlininoise(lx_prev * 0.5 + abs(lx - lx_prev), ly_prev * 0.5 + abs(ly - ly_prev) * pulsey, lz_prev * 0.5 + abs(lz - lz_prev));
+  float noise_scale = 0.5125;
+  float rc = simplexnoise(lx_prev * noise_scale + abs(lx - lx_prev), ly_prev * noise_scale + abs(ly - ly_prev) + pulsey, lz_prev * noise_scale + abs(lz - lz_prev));
   //println(rc);
-  return rc*s*12+h/2;
+  return rc*s*14+h/2;
 }
 
 // Useless functions
