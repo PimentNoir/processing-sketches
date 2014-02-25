@@ -16,7 +16,7 @@ void setup(){
 
 float inoise(float i, float j , float k) {
   final int mult = 1<<16;
-  //Keep the same behaviour as the processing perlin noise() function, return values in [0,1]
+  //Keep the same behaviour as the processing perlin noise() function, return values in [0,1] range
   return (1 + ((float)(perlininoise.noise((int)(i*mult),(int)(j*mult),(int)(k*mult))) / mult)) / 2.0f;
 }
 
@@ -37,22 +37,30 @@ float perlininoise(float i, float j, float k)
   return rc * (1 - persistence)/(1 - amp);
 }
 
+// Mimic the processing FBM
 float perlinnoise(float i, float j, float k)
 {
-  int octave = 4;
-  float persistence = 0.25;
-  float lacunarity = 0.5;
+  int octave = 8;
+  float persistence = 0.65;
+  float lacunarity = 2.0;
   float frequency = 1.0;
   
   float rc = 0;
-  float amp = 1.0;
+  float maxamp = 0;
+  float amp = 0.5;
   for (int l = 0; l < octave; l++) {
-    //Keep the same behaviour as the processing perlin noise() function, return values in [0,1] 
+    //Keep the same behaviour as the processing perlin noise() function: return values in [0,1] range and off by one the FBM. 
     rc += ((1 + (float)perlinnoise.noise((double)(frequency*i),(double)(frequency*j),(double)(frequency*k))) / 2.0f) * amp;
+    maxamp += amp;
     amp *= persistence;
     frequency *= lacunarity;
+    
   }
-  return rc * (1 - persistence)/(1 - amp);
+  //It's the same normalization with or without the off by one
+  //return rc * (1 - persistence)/(1 - amp);
+  //return rc / maxamp;
+  //No need to normalize with the processing FBM?
+  return rc;
 }
 
 float simplexnoise(float i, float j, float k) {
@@ -73,21 +81,41 @@ float simplexnoise(float i, float j, float k) {
 }
 
 float Noise(float x, float y, float z) {
-int octave = 4; 
-float persistence = 0.25;
-float lacunarity = 0.5;
-float frequency = 1.0;
+  int octave = 8; 
+  float persistence = 0.65;
+  float lacunarity = 2.0;
+  float frequency = 1.0;
 
-float rc = 0;
-float amp = 1.0;
-//Standard frequency ?
-noiseDetail(1,0);
+  float rc = 0;
+  float amp = 0.5;
+  float maxamp = 0;
+  //Standard frequency ?
+  noiseDetail(1,0);
   for (int l = 0; l < octave; l++) {
-    rc += noise(frequency*x, frequency*y, frequency*z)*amp;
+    //println(rc);
+    // The processing FBM for noise() is specific : persistence = 0.5 but they have introduced an off by one in the math common formula, initial amp = 0.5,
+    // which should mean that the perlin noise for the first octave should be half the processing perlin noise source. frequency = 1.0, lacunarity = 2.0 but the lacunarity is applied to 
+    // noise() function arguments, not an internal variable. There seem also to have some reseeding between octave in the FBM. libnoise do something that look similar in the idea but without the off by one.
+    // The normalization in processing noise() function is still a mystery, libnoise do not normalize but the reseeding or something elsewhere might normalize between [-1,1] or [0,1]. 
+    // Normalize properly the first processing noise() octave?
+    rc += noise(x*frequency, y*frequency, z*frequency) * amp;
+    maxamp += amp;
     amp *= persistence;
+    //x *= lacunarity;
+    //y *= lacunarity;
+    //z *= lacunarity;  
     frequency *= lacunarity;
   }
-  return rc * (1 - persistence)/(1 - amp);
+  //return rc * (1 - persistence)/(1 - amp);
+  //return rc / maxamp;
+  //No need for normalization?
+  return rc; 
+}
+
+float rawNoise(float x, float y, float z) {
+  //frequency = 1 and lacunarity = 2 but the processing implementation need more inspection.
+  noiseDetail(8, 0.65);
+  return noise(x,y,z);
 }
 
 float n(float i){
@@ -108,7 +136,7 @@ float n(float i){
   float lz = (i*j/w-r);
   float pulsey = (sin(ly_prev)-0.75)*0.75;
   float noise_scale = 0.5125;
-  float rc = simplexnoise(lx_prev * noise_scale + abs(lx - lx_prev), ly_prev * noise_scale + abs(ly - ly_prev) + pulsey, lz_prev * noise_scale + abs(lz - lz_prev));
+  float rc = perlininoise(lx_prev * noise_scale + abs(lx - lx_prev), ly_prev * noise_scale + abs(ly - ly_prev) + pulsey, lz_prev * noise_scale + abs(lz - lz_prev));
   //println(rc);
   return rc*s*14+h/2;
 }

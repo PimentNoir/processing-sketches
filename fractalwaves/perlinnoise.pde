@@ -41,7 +41,7 @@ public static final class INoise {
    138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180
    };
    static { for (int i=0; i < 256 ; i++) p[256+i] = p[i] = permutation[i]; }
-   static final int fade[] = new int[256];
+   static int fade[] = new int[256];
    static { for (int i=0; i < 256 ; i++) fade[i] = (int)((1<<12)*f(i/256.)); }     
 }
 
