@@ -1,6 +1,6 @@
 /*
  
-generate seamless tile using different perlin noise implementation
+generate seamless tile using differents perlin's noises implementation
  
 */
 ImprovedNoise perlinnoise = new ImprovedNoise();
@@ -12,7 +12,7 @@ double tt = 1;
 
 double inoise(double x, double y , double z) {
   final int mult = 1<<16;
-  //Keep the same behaviour as the processing perlin noise() function, return values in [0,1]
+  //Keep the same behaviour as the processing perlin noise() function, return values in [0,1] range. 
   return (1 + ((double)(perlininoise.noise((int)(x*mult),(int)(y*mult),(int)(z*mult))) / mult)) / 2.0d;
 }
 
@@ -24,7 +24,7 @@ double Noise (double x, double y, double z) {
   
   double rc = 0; 
   double amp = 1.0;
-  //Standard frequency ?
+  //Standard frequency = 1 and lacunarity = 2
   noiseDetail(1,0);
   for (int l = 0; l < octave; l++) {
     rc += (double)noise((float)(frequency * x), (float)(frequency * y), (float)(frequency * z))*amp;
@@ -61,7 +61,7 @@ double ImprovedNoise (double x, double y, double z) {
   double rc = 0; 
   double amp = 1.0;
   for (int l = 0; l < octave; l++) {
-    //Keep the same behaviour as the processing perlin noise() function, return values in [0,1]
+    //Keep the same behaviour as the processing perlin noise() function, return values in [0,1] range.
     rc += ((1 + perlinnoise.noise(frequency * x, frequency * y, frequency * z))/2)*amp;
     amp *= persistence;
     frequency *= lacunarity; 
@@ -79,7 +79,7 @@ double SimplexNoise (double x, double y, double z) {
   double rc = 0; 
   double amp = 1.0;
   for (int l = 0; l < octave; l++) {
-    //Keep the same behaviour as the processing perlin noise() function, return values in [0,1]
+    //Keep the same behaviour as the processing perlin noise() function, return values in [0,1] range. 
     rc += ((1 + simplexnoise.noise(frequency * x, frequency * y, frequency * z))/2)*amp;
     amp *= persistence;
     frequency *= lacunarity; 
