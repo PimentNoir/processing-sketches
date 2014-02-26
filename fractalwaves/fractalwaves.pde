@@ -89,7 +89,7 @@ float Noise(float x, float y, float z) {
   float rc = 0;
   float amp = 0.5;
   float maxamp = 0;
-  //Standard frequency ?
+  //Standard processing raw noise output?
   noiseDetail(1,0);
   for (int l = 0; l < octave; l++) {
     //println(rc);
@@ -160,7 +160,7 @@ void draw()
   }
     
   lights();
-  beginShape(TRIANGLE);
+  beginShape(TRIANGLES);
   for(i=0;i<w*h;i+=s)
   {
       x=i%w;y=i/w;     
