@@ -24,7 +24,7 @@ double Noise (double x, double y, double z) {
   
   double rc = 0; 
   double amp = 1.0;
-  //Standard frequency = 1 and lacunarity = 2
+  //FBM with frequency = 1.0, lacunarity = 2.0 and persistence = 0.5 on 4 octaves with initial amp = 0.5, take only the first octave with persistence = 0.0.
   noiseDetail(1,0);
   for (int l = 0; l < octave; l++) {
     rc += (double)noise((float)(frequency * x), (float)(frequency * y), (float)(frequency * z))*amp;
@@ -32,7 +32,9 @@ double Noise (double x, double y, double z) {
     frequency *= lacunarity;
   }
   //println(rc * (1 - persistence)/(1 - amp));
-  return rc * (1 - persistence)/(1 - amp);  
+  //return rc * (1 - persistence)/(1 - amp);
+  //println(rc);
+  return rc;  
 }
 
 double INoise (double x, double y, double z) {
@@ -106,10 +108,10 @@ void draw () {
   double nv = 1.0 - v; 
   for (int x = 0; x < w; x++) {
     double u = (double) x / w; 
-    double noise00 = ImprovedNoise(x*ns, y*ns, tt); 
-    double noise01 = ImprovedNoise(x*ns, (y+h)*ns, tt); 
-    double noise10 = ImprovedNoise((x+w)*ns, y*ns, tt); 
-    double noise11 = ImprovedNoise((x+w)*ns, (y+h)*ns, tt); 
+    double noise00 = Noise(x*ns, y*ns, tt); 
+    double noise01 = Noise(x*ns, (y+h)*ns, tt); 
+    double noise10 = Noise((x+w)*ns, y*ns, tt); 
+    double noise11 = Noise((x+w)*ns, (y+h)*ns, tt); 
     double noisea = u*v*noise00 + u*nv*noise01 + (1-u)*v*noise10 + (1-u)*nv*noise11;
     //println(noisea); 
     value = (int) (256 * noisea) + 50; 
