@@ -108,7 +108,7 @@ float Noise(float x, float y, float z) {
   return rc; 
 }
 
-float rawNoise(float x, float y, float z) {
+float rawnoise(float x, float y, float z) {
   //FBM with frequency = 1.0, lacunarity = 2.0 and persistence = 0.5 on 4 octaves with initial amp = 0.5. 
   //Take 8 octaves with persistence = 0.65.
   noiseDetail(8, 0.65);
@@ -133,7 +133,7 @@ float n(float i){
   float lz = (i*j/w-r);
   float pulsey = (sin(ly_prev)-0.75)*0.75;
   float noise_scale = 0.5125;
-  float rc = Noise(lx_prev * noise_scale + abs(lx - lx_prev), ly_prev * noise_scale + abs(ly - ly_prev) + pulsey, lz_prev * noise_scale + abs(lz - lz_prev));
+  float rc = rawnoise(lx_prev * noise_scale + abs(lx - lx_prev), ly_prev * noise_scale + abs(ly - ly_prev) + pulsey, lz_prev * noise_scale + abs(lz - lz_prev));
   //println(rc);
   return rc*s*14+h/2;
 }
