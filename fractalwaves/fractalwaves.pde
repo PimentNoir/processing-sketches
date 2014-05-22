@@ -57,9 +57,9 @@ float perlinnoise(float i, float j, float k)
   }
   //It's the same normalization with or without the off by one
   //return rc * (1 - persistence)/(1 - amp);
-  //return rc / maxamp;
+  return rc / maxamp;
   //No need to normalize with the processing FBM?
-  return rc;
+  //return rc;
 }
 
 float simplexnoise(float i, float j, float k) {
@@ -133,7 +133,7 @@ float n(float i){
   float lz = (i*j/w-r);
   float pulsey = (sin(ly_prev)-0.75)*0.75;
   float noise_scale = 0.5125;
-  float rc = rawnoise(lx_prev * noise_scale + abs(lx - lx_prev), ly_prev * noise_scale + abs(ly - ly_prev) + pulsey, lz_prev * noise_scale + abs(lz - lz_prev));
+  float rc = simplexnoise(lx_prev * noise_scale + abs(lx - lx_prev), ly_prev * noise_scale + abs(ly - ly_prev) + pulsey, lz_prev * noise_scale + abs(lz - lz_prev));
   //println(rc);
   return rc*s*14+h/2;
 }
