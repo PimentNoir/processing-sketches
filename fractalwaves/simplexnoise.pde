@@ -16,6 +16,9 @@
  */
 
 public static final class SimplexNoise {  // Simplex noise in 2D, 3D and 4D
+
+  private static Grad grad2[] = {new Grad(1,0),new Grad(-1,0),new Grad(0,1),new Grad(0,-1)};
+
   private static Grad grad3[] = {new Grad(1,1,0),new Grad(-1,1,0),new Grad(1,-1,0),new Grad(-1,-1,0),
                                  new Grad(1,0,1),new Grad(-1,0,1),new Grad(1,0,-1),new Grad(-1,0,-1),
                                  new Grad(0,1,1),new Grad(0,-1,1),new Grad(0,1,-1),new Grad(0,-1,-1)};
@@ -67,6 +70,9 @@ public static final class SimplexNoise {  // Simplex noise in 2D, 3D and 4D
     return x<xi ? xi-1 : xi;
   }
 
+  private static double dot(Grad g, double x) {
+    return g.x*x; }
+  
   private static double dot(Grad g, double x, double y) {
     return g.x*x + g.y*y; }
 
@@ -76,6 +82,30 @@ public static final class SimplexNoise {  // Simplex noise in 2D, 3D and 4D
   private static double dot(Grad g, double x, double y, double z, double w) {
     return g.x*x + g.y*y + g.z*z + g.w*w; }
 
+  // 1D simplex noise
+  public static double noise(double xin) {
+  double n0, n1; 
+    
+  int i0 = fastfloor(xin);
+  int i1 = i0 + 1;
+  double x0 = xin - i0;
+  double x1 = x0 - 1.0;
+  
+  // Work out the hashed gradient indices of the two simplex corners
+  int gi0 = perm[i0 & 255];
+  int gi1 = perm[i1 & 255];
+ 
+  double t0 = 1.0 - x0*x0;
+  t0 *= t0;
+  n0 = t0 * t0 * dot(grad2[gi0], x0);
+
+  double t1 = 1.0 - x1*x1;
+  t1 *= t1;
+  n1 = t1 * t1 * dot(grad2[gi1], x1);
+  // The maximum value of this noise is 8*(3/4)^4 = 2.53125
+  // A factor of 0.395 would scale to fit exactly within [-1,1]
+  return 0.395 * (n0 + n1);
+  }
 
   // 2D simplex noise
   public static double noise(double xin, double yin) {
@@ -337,6 +367,12 @@ public static final class SimplexNoise {  // Simplex noise in 2D, 3D and 4D
   private static class Grad
   {
     double x, y, z, w;
+    
+    Grad(double x, double y)
+    {
+      this.x = x;
+      this.y = y;
+    }
 
     Grad(double x, double y, double z)
     {

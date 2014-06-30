@@ -55,11 +55,7 @@ float perlinnoise(float i, float j, float k)
     amp *= persistence;
     frequency *= lacunarity;
   }
-  //It's the same normalization with or without the off by one
-  //return rc * (1 - persistence)/(1 - amp);
-  return rc / maxamp;
-  //No need to normalize with the processing FBM?
-  //return rc;
+    return rc / maxamp;
 }
 
 float simplexnoise(float i, float j, float k) {
