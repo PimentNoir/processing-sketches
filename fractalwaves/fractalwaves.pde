@@ -127,7 +127,7 @@ float n(float i){
   float lx = i%w*j;
   float ly = (i*j/w+r);
   float lz = (i*j/w-r);
-  float pulsey = (sin(ly_prev)-0.75)*0.75;
+  float pulsey = sin(ly) * 1.25 + cos(ly) * 1.25;
   float noise_scale = 0.5125;
   float rc = simplexnoise(lx_prev * noise_scale + abs(lx - lx_prev), ly_prev * noise_scale + abs(ly - ly_prev) + pulsey, lz_prev * noise_scale + abs(lz - lz_prev));
   //println(rc);
