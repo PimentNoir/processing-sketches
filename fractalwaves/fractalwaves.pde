@@ -7,7 +7,7 @@ int i,w=500,h=w,x,y,s=3;
 float k,m,r,j=0.01;
 
 void setup(){
-  size(w,h,P3D);
+  size(500,500,P3D);
   colorMode(HSB,100,100,100);
   noStroke();
   int framerate = 24;
@@ -176,5 +176,3 @@ void draw()
   fill(100);
   text(frameRate,22,22);
 }
-
-
