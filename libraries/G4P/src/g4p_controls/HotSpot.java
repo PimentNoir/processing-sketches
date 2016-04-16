@@ -1,3 +1,26 @@
+/*
+  Part of the G4P library for Processing 
+  	http://www.lagers.org.uk/g4p/index.html
+	http://sourceforge.net/projects/g4p/files/?source=navbar
+
+  Copyright (c) 2012 Peter Lager
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General
+  Public License along with this library; if not, write to the
+  Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+  Boston, MA  02111-1307  USA
+ */
+
 package g4p_controls;
 
 import processing.core.PApplet;
@@ -13,7 +36,7 @@ abstract class HotSpot implements GConstants, Comparable<HotSpot> {
 
 	public final Integer id;
 	public float x, y;
-	
+
 	abstract public boolean contains(float px, float py);
 
 	protected HotSpot(int id){
@@ -80,7 +103,7 @@ abstract class HotSpot implements GConstants, Comparable<HotSpot> {
 			return (a >= sa && a <= ea);
 		}
 	}
-	
+
 	/**
 	 * Hit is based on being inside a rectangle.
 	 * 
@@ -106,7 +129,7 @@ abstract class HotSpot implements GConstants, Comparable<HotSpot> {
 		 * If used the parameters must be in the order x, y then r. <br>
 		 * 
 		 */
-		 @SuppressWarnings(value={"fallthrough"})
+		@SuppressWarnings(value={"fallthrough"})
 		public void adjust(Object ... arguments){
 			switch(arguments.length){
 			case 3:
@@ -119,7 +142,7 @@ abstract class HotSpot implements GConstants, Comparable<HotSpot> {
 			}
 		}
 
-		
+
 		public String toString(){
 			return "HS circle ["+x+", "+y+"]  radius = "+r;
 		}
@@ -157,7 +180,7 @@ abstract class HotSpot implements GConstants, Comparable<HotSpot> {
 			}
 			return false;
 		}
-		
+
 		public String toString(){
 			return "HS mask ["+x+", "+y+"]";
 		}
@@ -172,9 +195,9 @@ abstract class HotSpot implements GConstants, Comparable<HotSpot> {
 	static class HSalpha extends HotSpot {
 
 		private PImage image = null;
-		
+
 		private int offX, offY;
-		
+
 		protected HSalpha(int id, float x, float y, PImage image, int imageMode) {
 			super(id);
 			this.image = image;
@@ -191,6 +214,7 @@ abstract class HotSpot implements GConstants, Comparable<HotSpot> {
 		/**
 		 * If used the parameters must be in the order x, y then image. <br>
 		 */
+		@SuppressWarnings(value={"fallthrough"})
 		public void adjust(Object ... arguments){
 			switch(arguments.length){
 			case 3:

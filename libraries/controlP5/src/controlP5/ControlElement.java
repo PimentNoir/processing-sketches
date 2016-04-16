@@ -4,15 +4,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Used for automated controller creation using annotations. Very much inspired
- * by Karsten Schmidt's (toxi) cp5magic 
+ * Used for automated controller creation using annotations. Very much inspired by Karsten Schmidt's
+ * (toxi) cp5magic
  * 
  * @example use/ControlP5annotation
  */
-@Retention(RetentionPolicy.RUNTIME)
+@Retention( RetentionPolicy.RUNTIME )
 public @interface ControlElement {
 
-	String[] properties() default {};
+	String[] properties() default { };
 
 	String label() default "";
 

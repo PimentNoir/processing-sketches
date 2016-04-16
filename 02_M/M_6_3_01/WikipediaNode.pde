@@ -88,14 +88,14 @@ class WikipediaNode extends Node {
     // load available links
     availableLinksLoaded = false;
     availableLinks = new ArrayList();
-    String url = encodeURL("http://fr.wikipedia.org/w/api.php?format=xml&action=query&prop=links&titles="+id+"&pllimit=500&plnamespace=0&redirects");
-    linksXML = GenerativeDesign.loadXMLAsync2(thisPApplet, url);
+    String url = encodeURL("http://en.wikipedia.org/w/api.php?format=xml&action=query&prop=links&titles="+id+"&pllimit=500&plnamespace=0&redirects");
+    linksXML = GenerativeDesign.loadXMLAsync(thisPApplet, url);
 
     // load available backlinks
     availableBacklinksLoaded = false;
     availableBacklinks = new ArrayList();
-    url = encodeURL("http://fr.wikipedia.org/w/api.php?format=xml&action=query&list=backlinks&bltitle="+id+"&bllimit=500&blnamespace=0&blredirect");
-    backlinksXML = GenerativeDesign.loadXMLAsync2(thisPApplet, url);
+    url = encodeURL("http://en.wikipedia.org/w/api.php?format=xml&action=query&list=backlinks&bltitle="+id+"&bllimit=500&blnamespace=0&blredirect");
+    backlinksXML = GenerativeDesign.loadXMLAsync(thisPApplet, url);
   }
 
 
@@ -117,8 +117,8 @@ class WikipediaNode extends Node {
         } 
         else {
           String plcontinue = querycontinue.getString("plcontinue");
-          String url = encodeURL("http://fr.wikipedia.org/w/api.php?format=xml&action=query&prop=links&titles="+id+"&pllimit=500&plnamespace=0&plcontinue="+plcontinue);
-          linksXML = GenerativeDesign.loadXMLAsync2(thisPApplet, url);
+          String url = encodeURL("http://en.wikipedia.org/w/api.php?format=xml&action=query&prop=links&titles="+id+"&pllimit=500&plnamespace=0&plcontinue="+plcontinue);
+          linksXML = GenerativeDesign.loadXMLAsync(thisPApplet, url);
         }
       } 
     }
@@ -140,8 +140,8 @@ class WikipediaNode extends Node {
         } 
         else {
           String blcontinue = querycontinue.getString("blcontinue");
-          String url = encodeURL("http://fr.wikipedia.org/w/api.php?format=xml&action=query&list=backlinks&bltitle="+id+"&bllimit=500&blnamespace=0&blcontinue="+blcontinue);
-          backlinksXML = GenerativeDesign.loadXMLAsync2(thisPApplet, url);
+          String url = encodeURL("http://en.wikipedia.org/w/api.php?format=xml&action=query&list=backlinks&bltitle="+id+"&bllimit=500&blnamespace=0&blcontinue="+blcontinue);
+          backlinksXML = GenerativeDesign.loadXMLAsync(thisPApplet, url);
         }
       } 
     }
@@ -219,11 +219,3 @@ class WikipediaNode extends Node {
   }
 
 }
-
-
-
-
-
-
-
-

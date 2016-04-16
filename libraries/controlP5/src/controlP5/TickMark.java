@@ -20,19 +20,20 @@ package controlP5;
  * Boston, MA 02111-1307 USA
  *
  * @author 		Andreas Schlegel (http://www.sojamo.de)
- * @modified	12/23/2012
- * @version		2.0.4
+ * @modified	07/30/2015
+ * @version		2.2.5
  *
  */
 
 import processing.core.PApplet;
+import processing.core.PGraphics;
 
 /**
  * Tickmarks are used by the Slider and Knob controller.
  */
 public class TickMark implements CDrawable {
 
-	protected Controller<?> _myParent;
+	protected Controller< ? > _myParent;
 
 	protected int _myLen = 4;
 
@@ -40,53 +41,53 @@ public class TickMark implements CDrawable {
 
 	protected boolean isLabel;
 
-	public TickMark(Controller<?> theController) {
+	public TickMark( Controller< ? > theController ) {
 		_myParent = theController;
 	}
 
-	public void draw(PApplet theApplet) {
-		draw(theApplet, ControlP5Constants.HORIZONTAL);
+	public void draw( PGraphics theGraphics ) {
+		draw( theGraphics , ControlP5Constants.HORIZONTAL );
 	}
 
-	public void draw(PApplet theApplet, int theDirection) {
-		theApplet.pushMatrix();
-		switch (theDirection) {
-		case (ControlP5Constants.HORIZONTAL):
-			theApplet.translate(0, _myLen);
-			theApplet.rect(0, 0, 1, _myLen);
-			if (isLabel) {
-				_myLabel.draw(theApplet, 0, _myLen + 4, _myParent);
+	public void draw( PGraphics theGraphics , int theDirection ) {
+		theGraphics.pushMatrix( );
+		switch ( theDirection ) {
+		case ( ControlP5Constants.HORIZONTAL ):
+			theGraphics.translate( 0 , _myLen );
+			theGraphics.rect( 0 , 0 , 1 , _myLen );
+			if ( isLabel ) {
+				_myLabel.draw( theGraphics , 0 , _myLen + 4 , _myParent );
 			}
 			break;
-		case (ControlP5Constants.VERTICAL):
-			theApplet.translate(-_myLen, 0);
-			theApplet.rect(0, 0, _myLen, 1);
-			if (isLabel) {
-				_myLabel.draw(theApplet, -_myLabel.getWidth(), 0, _myParent);
+		case ( ControlP5Constants.VERTICAL ):
+			theGraphics.translate( -_myLen , 0 );
+			theGraphics.rect( 0 , 0 , _myLen , 1 );
+			if ( isLabel ) {
+				_myLabel.draw( theGraphics , -_myLabel.getWidth( ) , 0 , _myParent );
 			}
 			break;
 		}
 
-		theApplet.popMatrix();
+		theGraphics.popMatrix( );
 	}
 
-	public void setLength(int theLength) {
+	public void setLength( int theLength ) {
 		_myLen = theLength;
 	}
 
-	public Label setLabel(String theLabeltext) {
-		if (_myLabel == null) {
-			_myLabel = new Label(_myParent.cp5,theLabeltext);
+	public Label setLabel( String theLabeltext ) {
+		if ( _myLabel == null ) {
+			_myLabel = new Label( _myParent.cp5 , theLabeltext );
 			isLabel = true;
 		} else {
-			_myLabel.set(theLabeltext);
+			_myLabel.set( theLabeltext );
 		}
 		return _myLabel;
 	}
 
-	public Label getLabel() {
-		if (_myLabel == null) {
-			setLabel("?");
+	public Label getLabel( ) {
+		if ( _myLabel == null ) {
+			setLabel( "?" );
 		}
 		return _myLabel;
 	}

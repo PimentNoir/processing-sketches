@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -94,7 +94,7 @@ public class GImageButton extends GAbstractControl {
 	 * @param fnames an array of up to 3 image filenames to represent the off/over/down state of the button.
 	 */
 	public GImageButton(PApplet theApplet, float p0, float p1, String[] fnames) {
-		this(theApplet, p0, p1, 0, 0, fnames, null);
+		this(theApplet, p0, p1, fnames, null);
 	}
 
 	/**
@@ -107,7 +107,68 @@ public class GImageButton extends GAbstractControl {
 	 * @param fnameMask the alpha mask filename or null if no mask
 	 */
 	public GImageButton(PApplet theApplet, float p0, float p1, String[] fnames, String fnameMask) {
-		this(theApplet, p0, p1, 0, 0, fnames, fnameMask);
+		super(theApplet, p0, p1);
+		if(errImage == null)
+			errImage = ImageManager.loadImage(winApp, new String[] { "err0.png", "err1.png", "err2.png" });
+		
+		//========================================================================
+		// First of all load images
+		// Make sure we have an array of filenames
+		if(fnames == null || fnames.length == 0)
+			fnames = new String[] { "err0.png", "err1.png", "err2.png" };
+		bimage = ImageManager.loadImage(winApp, fnames);
+		// There should be 3 images if not use as many as possible, 
+		// duplicating the last one if neccessary
+		if(bimage.length != 3){
+			PImage[] temp = new PImage[3];
+			for(int i = 0; i < 3; i++)
+				temp[i] = bimage[Math.min(i, bimage.length - 1)];
+			bimage = temp;
+		}
+		// Get mask image if available
+		if(fnameMask != null)
+			mask = winApp.loadImage(fnameMask);
+		//========================================================================
+
+		
+		//========================================================================
+		// Now decide whether to resize either the images or the button
+		if(width > 0 && height > 0){		// Resize images
+			for(int i = 0; i < bimage.length; i++){
+				if(bimage[i].width != width || bimage[i].height != height)
+					bimage[i].resize((int)width, (int)height);					
+			}
+			if(mask != null && (mask.width != width || mask.height != height))
+				mask.resize((int)width, (int)height);
+		}
+		else {								// resize button
+			resize(bimage[0].width, bimage[0].height);
+		}
+		//========================================================================
+		
+		//========================================================================
+		// Setup the hotspaots
+		if(mask != null){	// if we have a mask use it for the hot spot
+			hotspots = new HotSpot[]{
+					new HSmask(1, mask)
+			};
+		}
+		else {   // no mask then use alpha channel of the OFF image
+			hotspots = new HotSpot[]{
+					new HSalpha(1, 0, 0, bimage[0], PApplet.CORNER)
+			};
+		}
+		//========================================================================
+
+		z = Z_SLIPPY;
+		// Now register control with applet
+		createEventHandler(G4P.sketchWindow, "handleButtonEvents",
+				new Class<?>[]{ GImageButton.class, GEvent.class }, 
+				new String[]{ "button", "event" } 
+		);
+		registeredMethods = DRAW_METHOD | MOUSE_METHOD;
+		cursorOver = HAND;
+		G4P.registerControl(this);
 	}
 
 
@@ -177,7 +238,6 @@ public class GImageButton extends GAbstractControl {
 			resize(bimage[0].width, bimage[0].height);
 		}
 		//========================================================================
-
 		
 		//========================================================================
 		// Setup the hotspaots
@@ -195,13 +255,13 @@ public class GImageButton extends GAbstractControl {
 
 		z = Z_SLIPPY;
 		// Now register control with applet
-		createEventHandler(G4P.sketchApplet, "handleButtonEvents",
+		createEventHandler(G4P.sketchWindow, "handleButtonEvents",
 				new Class<?>[]{ GImageButton.class, GEvent.class }, 
 				new String[]{ "button", "event" } 
 		);
 		registeredMethods = DRAW_METHOD | MOUSE_METHOD;
 		cursorOver = HAND;
-		G4P.addControl(this);
+		G4P.registerControl(this);
 	}
 
 
@@ -209,7 +269,7 @@ public class GImageButton extends GAbstractControl {
 		if(!visible) return;
 
 		// Update buffer if invalid
-		updateBuffer();
+		//updateBuffer();
 		winApp.pushStyle();
 
 		winApp.pushMatrix();

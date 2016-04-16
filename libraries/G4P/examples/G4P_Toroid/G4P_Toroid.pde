@@ -1,7 +1,5 @@
-/**
- Interative Toroid with GUI controls from the G4P
- library
- (c)2012 Peter Lager
+/*
+ Interative Toroid with GUI controls from the G4P library
  
  Modification of the example
  Interactive Toroid by Ira Greenberg. 
@@ -11,6 +9,9 @@
  
  Illustrates the geometric relationship between Toroid, Sphere,
  and Helix 3D primitives, as well as lathing principal.
+ 
+ for Processing V2 and V3
+ (c) 2015 Peter Lager
  
  */
 
@@ -34,12 +35,12 @@ void setup() {
   // RED_SCHEME, GREEN_SCHEME, YELLOW_SCHEME, PURPLE_SCHEME
   // ORANGE_SCHEME, CYAN_SCHEME, BLUE_SCHEME, GOLD_SCHEME
   // Defaults to BLUE_SCHEME 
-  G4P.setGlobalColorScheme(G4P.GOLD_SCHEME);
+  G4P.setGlobalColorScheme(G4P.PURPLE_SCHEME);
 
   // Create the various GUI components
   p = new GPanel(this, 2, height - 30, 460, 300, "Toroid Control Panel");
-  lblSegs = new GLabel(this, 2, 40, 120,20, "Segment detail");
-  lblPts = new GLabel(this, 2, 100, 120, 20 , "Ellipse detail");
+  lblSegs = new GLabel(this, 2, 40, 120, 20, "Segment detail");
+  lblPts = new GLabel(this, 2, 100, 120, 20, "Ellipse detail");
   lblERad = new GLabel(this, 2, 160, 120, 20, "Ellipse Radius");
   lblLRad = new GLabel(this, 2, 220, 120, 20, "Toroid Radius");
 
@@ -47,7 +48,7 @@ void setup() {
   sdrSegs.setLimits(60, 3, 60);
   sdrSegs.setNbrTicks(58);
   sdrSegs.setStickToTicks(true);
-  
+
   sdrPts = new GCustomSlider(this, 110, 80, 325, 60, "purple18px");
   sdrPts.setLimits(32, 3, 32);
   sdrPts.setNbrTicks(30);
@@ -56,14 +57,14 @@ void setup() {
   sdrERad = new GCustomSlider(this, 110, 140, 325, 60, null);
   sdrERad.setLimits(60.0, 10.0, 100.0);  
   sdrERad.setEasing(20);
-  
+
   sdrLRad = new GCustomSlider(this, 110, 200, 325, 60, null);
   sdrLRad.setLimits(140.0, 10.0, 240.0);
   sdrLRad.setEasing(20);
 
   // Various options
   optTorroid = new GOption(this, 110, 260, 80, 20, "Toroid?");
-  optHelix = new GOption(this, 200, 260, 80, 20 , "Helix?");
+  optHelix = new GOption(this, 200, 260, 80, 20, "Helix?");
   cbxWire = new GCheckbox(this, 330, 260, 100, 20, "Wire frame?");
 
   // Torroid / helix option group
@@ -86,7 +87,8 @@ void setup() {
   // Set the alpha after adding the controls.
   // The true will mean it will be applied to 
   // anything already added to the panel.
-  p.setAlpha(200, true);
+  p.setAlpha(220, true);
+  p.setCollapsed(true);
 }
 
 public void handleSliderEvents(GValueControl slider, GEvent event) {

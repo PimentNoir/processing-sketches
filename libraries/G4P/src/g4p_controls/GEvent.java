@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -57,40 +57,56 @@ package g4p_controls;
  */
 public enum GEvent {
 	// GTextField and GTextArea events
-	CHANGED 			( "Text has changed" ),
-	SELECTION_CHANGED 	( "Text selection has changed" ),
-	ENTERED			 	( "Enter/return key typed" ),
-	LOST_FOCUS			( "TextField/Area lost focus" ),
-	GETS_FOCUS			( "TextField/Area got focus" ),
+	CHANGED 			( "CHANGED", "Text has changed" ),
+	SELECTION_CHANGED 	( "SELECTION_CHANGED", "Text selection has changed" ),
+	ENTERED			 	( "ENTERED", "Enter/return key typed" ),
+	LOST_FOCUS			( "LOST_FOCUS", "TextField/Area lost focus" ),
+	GETS_FOCUS			( "GETS_FOCUS", "TextField/Area got focus" ),
 	
 	
 	// GPanel events 
-	COLLAPSED  			( "Control was collapsed" ),
-	EXPANDED 			( "Control was expanded" ),
-	DRAGGED 			( "Control is being dragged" ),
+	COLLAPSED  			( "COLLAPSED", "Control was collapsed" ),
+	EXPANDED 			( "EXPANDED", "Control was expanded" ),
+	DRAGGED 			( "DRAGGED", "Control is being dragged" ),
 
 	// Button control events (PRESSED and RELEASED are not fired by default)
-	CLICKED  			( "Mouse button was clicked" ),
-	PRESSED  			( "Mouse button was pressed" ),
-	RELEASED  			( "Mouse button was released" ),
+	CLICKED  			( "CLICKED", "Mouse button was clicked" ),
+	PRESSED  			( "PRESSED", "Mouse button was pressed" ),
+	RELEASED  			( "RELEASED", "Mouse button was released" ),
 
 	// Slider control events events 
-	VALUE_CHANGING		( "Value is changing" ),
-	VALUE_STEADY		( "Value has reached a steady state" ),
-	DRAGGING			( "The mouse is being dragged over a component "),
+	VALUE_CHANGING		( "VALUE_CHANGING", "Value is changing" ),
+	VALUE_STEADY		( "VALUE_STEADY", "Value has reached a steady state" ),
+	DRAGGING			( "DRAGGING", "The mouse is being dragged over a component"),
 	
 	/// GCheckbox & GOption events
-	SELECTED			( "Option selected" ),
-	DESELECTED			( "Option de-selected" );
+	SELECTED			( "SELECTED", "Option selected" ),
+	DESELECTED			( "DESELECTED", "Option de-selected" );
 
 	
+	private String type;
 	private String description;
 	
-	private GEvent(String desc ){
+	private GEvent(String type, String desc ){
+		this.type = type;
 		description = desc;
 	}
 	
-	public String toString(){
+	/**
+	 * Get a textual description of this event
+	 */
+	public String getDesc(){
 		return description;
+	}
+	
+	/**
+	 * Get the error identifier.
+	 */
+	public String getType(){
+		return type;
+	}
+	
+	public String toString(){
+		return type;
 	}
 }

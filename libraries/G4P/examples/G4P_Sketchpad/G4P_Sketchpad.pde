@@ -1,3 +1,12 @@
+/*
+ This program demonstrates the the GSketchPad control. This control enables
+ drawings to be displayed on panels.
+ 
+ for Processing V2 and V3
+ (c) 2015 Peter Lager
+ 
+ */
+
 import g4p_controls.*;
 
 GPanel pnl;
@@ -62,4 +71,3 @@ void updateGraphic() {
     pg.ellipse(x0, y0, x1, y1);  
   pg.endDraw();
 }
-

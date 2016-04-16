@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -24,11 +24,7 @@
 package g4p_controls;
 
 import g4p_controls.HotSpot.HScircle;
-
-import java.awt.RenderingHints;
-
 import processing.core.PApplet;
-import processing.core.PGraphicsJava2D;
 import processing.event.MouseEvent;
 
 /**
@@ -123,13 +119,8 @@ public class GStick extends GAbstractControl {
 		super(theApplet, p0, p1, p2, p3);
 		// Enforce minimum size constraint
 		if(width < 40 || height < 40)
-			resize(PApplet.max(width,40), PApplet.max(height,40));
+			resize(PApplet.max(Math.round(width),40), PApplet.max(Math.round(height),40));
 
-		buffer = (PGraphicsJava2D) winApp.createGraphics((int)width, (int)height, PApplet.JAVA2D);
-		buffer.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-				RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-		buffer.rectMode(PApplet.CORNER);
-		buffer.ellipseMode(PApplet.CORNER);
 		opaque = false;
 		// Calculate stick metrics
 		float stickSize = PApplet.min(width, height);
@@ -148,13 +139,13 @@ public class GStick extends GAbstractControl {
 		z = Z_SLIPPY;
 
 		// Now register control with applet
-		createEventHandler(G4P.sketchApplet, "handleStickEvents",
+		createEventHandler(G4P.sketchWindow, "handleStickEvents",
 				new Class<?>[]{ GStick.class, GEvent.class }, 
 				new String[]{ "stick", "event" } 
 		);
 		registeredMethods = DRAW_METHOD | MOUSE_METHOD ;
 		cursorOver = HAND;
-		G4P.addControl(this);
+		G4P.registerControl(this);
 	}
 
 	/**
@@ -173,7 +164,6 @@ public class GStick extends GAbstractControl {
 	
 	/**
 	 * Get the current mode
-	 * @return
 	 */
 	public int getMode(){
 		return mode;
@@ -370,15 +360,15 @@ public class GStick extends GAbstractControl {
 			buffer.beginDraw();
 			// Back ground colour
 			if(opaque == true)
-				buffer.background(palette[BACK]);
+				buffer.background(palette[BACK].getRGB());
 			else
 				buffer.background(buffer.color(255,0));
 			// Move origin to centre
 
 			buffer.translate(width/2, height/2);
 
-			buffer.fill(palette[OUTERRING]);
-			buffer.stroke(palette[BORDERS]);
+			buffer.fill(palette[OUTERRING].getRGB());
+			buffer.stroke(palette[BORDERS].getRGB());
 			buffer.strokeWeight(1.0f);
 			buffer.ellipse(0,0,2*ledRingRad, 2*ledRingRad);
 			buffer.ellipse(0,0,2*actionRad, 2*actionRad);
@@ -386,16 +376,16 @@ public class GStick extends GAbstractControl {
 			buffer.pushMatrix();
 			int led = 0x00000001, delta = 2/mode;
 			for(int i = 0; i < 8; i += delta){
-				buffer.stroke(palette[BORDERS]);
+				buffer.stroke(palette[BORDERS].getRGB());
 				buffer.strokeWeight(1.0f);
 				buffer.line(0,0,ledRingRad,0);
 				// Only draw LEDs on even directions
 				if(i%2 == 0){
 					buffer.noStroke();
 					if(position >= 0 && (posMap[position] & led) == led)
-						buffer.fill(palette[LED_ACTIVE]);
+						buffer.fill(palette[LED_ACTIVE].getRGB());
 					else
-						buffer.fill(palette[LED_INACTIVE]);
+						buffer.fill(palette[LED_INACTIVE].getRGB());
 					buffer.ellipse(ledRingRad,0,ledWidth,ledHeight);
 				}
 				led <<= delta;
@@ -404,8 +394,8 @@ public class GStick extends GAbstractControl {
 			buffer.popMatrix();
 			
 			// Draw the inactive area near the centre of the 
-			buffer.fill(palette[ACTIONRING]);
-			buffer.stroke(palette[BORDERS]);
+			buffer.fill(palette[ACTIONRING].getRGB());
+			buffer.stroke(palette[BORDERS].getRGB());
 			buffer.strokeWeight(1.0f);
 			buffer.ellipse(0,0,2*actionRad, 2*actionRad);
 
@@ -413,25 +403,24 @@ public class GStick extends GAbstractControl {
 			buffer.pushMatrix();
 			buffer.rotate(stickAngle);
 			buffer.noStroke();
-			buffer.fill(palette[ROD]);
+			buffer.fill(palette[ROD].getRGB());
 			buffer.ellipse(0,0,2*rodRad,2*rodRad);
 			buffer.rect(0,-rodRad,rodLength,2*rodRad);
 			buffer.strokeWeight(1);
-			buffer.stroke(palette[ROD]);
-			buffer.fill(palette[STICK_TOP_DRAG]);
+			buffer.stroke(palette[ROD].getRGB());
 			// Draw thumb
 			switch(status){
 			case OFF_CONTROL:
-				buffer.fill(palette[STICK_TOP]);
+				buffer.fill(palette[STICK_TOP].getRGB());
 				break;
 			case OVER_CONTROL:
-				buffer.fill(palette[STICK_TOP_OVER]);
+				buffer.fill(palette[STICK_TOP_OVER].getRGB());
 				break;
 			case PRESS_CONTROL:
-				buffer.fill(palette[STICK_TOP_PRESS]);
+				buffer.fill(palette[STICK_TOP_PRESS].getRGB());
 				break;
 			case DRAG_CONTROL:
-				buffer.fill(palette[STICK_TOP_DRAG]);
+				buffer.fill(palette[STICK_TOP_DRAG].getRGB());
 				break;
 			}
 			buffer.ellipse(rodLength,0,2*gripRad, 2*gripRad);		

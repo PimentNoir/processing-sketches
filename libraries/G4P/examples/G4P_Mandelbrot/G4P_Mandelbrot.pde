@@ -1,9 +1,11 @@
-/**
- * The most complicated example so far. This will display the Mandelbrot
- * set in a separate window. Draw a rectangle over the image to create 
- * a new Mandelbrot in a new window ...
- *
- * (c) 2012 by Peter Lager
+/*
+ The most complicated example so far. This will display the Mandelbrot
+ set in a separate window. Draw a rectangle over the image to create 
+ a new Mandelbrot in a new window ...
+ 
+ for Processing V3
+ (c) 2015 Peter Lager
+ 
  */
 
 import g4p_controls.*;
@@ -130,8 +132,7 @@ public boolean makeNewBrotWindow(double nsx, double nex, double nsy, double ney,
   if (ratio > MAX_WIDTH/MAX_HEIGHT) {
     mydata.w = MAX_WIDTH;
     mydata.h = (int)( MAX_HEIGHT / ratio);
-  }
-  else {
+  } else {
     mydata.h = MAX_HEIGHT;
     mydata.w = (int)( MAX_WIDTH * ratio);
   }
@@ -143,7 +144,7 @@ public boolean makeNewBrotWindow(double nsx, double nex, double nsy, double ney,
 
   if (mydata.w >= MIN_WIDTH && mydata.h >= MIN_HEIGHT) {
     mydata.img = new PImage(mydata.w, mydata.h);
-    window = new GWindow(this, title, locX, locY, mydata.w, mydata.h, false, null);
+    window = GWindow.getWindow(this, title, locX, locY, mydata.w, mydata.h, JAVA2D);
     // Need to replace with screen.width and screen.height for
     // Processing 1.5.1
     locX = (locX + mydata.w + 20)%(displayWidth - MAX_WIDTH);
@@ -178,7 +179,7 @@ public void handleButtonEvents(GButton button, GEvent event) {
  * @param data the data for the GWindow being used
  * @param event the mouse event
  */
-public void windowMouse(GWinApplet appc, GWinData data, MouseEvent event) {
+public void windowMouse(PApplet appc, GWinData data, MouseEvent event) {
   MyWinData d = (MyWinData)data;
   if (d.imgDone == false)
     return;
@@ -240,7 +241,7 @@ double dmap(double value, double istart, double istop, double ostart, double ost
  * @param appc the PApplet object embeded into the frame
  * @param data the data for the GWindow being used
  */
-public void windowDraw(GWinApplet appc, GWinData data) {
+public void windowDraw(PApplet appc, GWinData data) {
   MyWinData d = (MyWinData)data;
   if (d.imgDone) {
     appc.image(d.img, 0, 0);

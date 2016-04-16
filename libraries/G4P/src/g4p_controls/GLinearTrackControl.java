@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,7 @@
 
 package g4p_controls;
 
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.font.TextLayout;
 
@@ -58,6 +59,9 @@ public abstract class GLinearTrackControl extends GValueControl {
 	// For labels
 	protected StyledString[] labels;
 	protected boolean labelsInvalid = true;
+
+	// Introduced 4.0.2
+	protected Font localFont = G4P.numericLabelFont;
 
 	public GLinearTrackControl(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		super(theApplet, p0, p1, p2, p3);
@@ -274,11 +278,10 @@ public abstract class GLinearTrackControl extends GValueControl {
 		winApp.popStyle();
 	}
 
-	protected void drawValue(){
-		Graphics2D g2d = buffer.g2;
+	protected void drawValue(Graphics2D g2d){
 		float px, py;
 		TextLayout line;
-		ssValue = new StyledString(getNumericDisplayString(getValueF()));
+		ssValue.setText(getNumericDisplayString(getValueF()));
 		line = ssValue.getLines(g2d).getFirst().layout;
 		float advance = line.getVisibleAdvance();
 		switch(textOrientation){
@@ -313,13 +316,12 @@ public abstract class GLinearTrackControl extends GValueControl {
 		}
 	}
 	
-	protected void drawLimits(){
-		Graphics2D g2d = buffer.g2;
+	protected void drawLimits(Graphics2D g2d){
 		float px, py;
 		TextLayout line;
 		if(limitsInvalid){
-			ssStartLimit = new StyledString(getNumericDisplayString(startLimit));
-			ssEndLimit = new StyledString(getNumericDisplayString(endLimit));
+			ssStartLimit.setText(getNumericDisplayString(startLimit));
+			ssEndLimit.setText(getNumericDisplayString(endLimit));
 			limitsInvalid = false;
 		}
 		switch(textOrientation){
@@ -372,13 +374,12 @@ public abstract class GLinearTrackControl extends GValueControl {
 		}	
 	}
 
-	protected void drawLabels(){
-		Graphics2D g2d = buffer.g2;
+	protected void drawLabels(Graphics2D g2d){
 		float px, py;
 		TextLayout line;
 		if(labelsInvalid){
-			ssStartLimit = new StyledString(getNumericDisplayString(startLimit));
-			ssEndLimit = new StyledString(getNumericDisplayString(endLimit));
+			ssStartLimit.setText(getNumericDisplayString(startLimit));
+			ssEndLimit.setText(getNumericDisplayString(endLimit));
 			limitsInvalid = false;
 		}
 		float deltaX = 1.0f / (nbrTicks - 1);

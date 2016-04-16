@@ -1,7 +1,13 @@
-/**
- This example demonstrates the `GStick control.
-
- (c) 2013 Peter Lager
+/*
+ This example demonstrates the GStick control.
+ 
+ The stick can operate with 8 directions, as shown
+ here or just 4 directions with
+ joystick.setMode(G4P.X4);
+ 
+ for Processing V2 and V3
+ (c) 2015 Peter Lager
+ 
  */
 import g4p_controls.*;
 
@@ -59,4 +65,3 @@ public void handleStickEvents(GStick stick, GEvent event) {
     }
   }
 }
-

@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -26,12 +26,10 @@ package g4p_controls;
 import g4p_controls.StyledString.TextLayoutInfo;
 
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.font.TextLayout;
 import java.util.LinkedList;
 
 import processing.core.PApplet;
-import processing.core.PGraphicsJava2D;
 
 /**
  * The label component.
@@ -61,19 +59,14 @@ public class GLabel extends GTextIconAlignBase {
 	 */
 	public GLabel(PApplet theApplet, float p0, float p1, float p2, float p3, String text) {
 		super(theApplet, p0, p1, p2, p3);
-		// The image buffer is just for the typing area
-		buffer = (PGraphicsJava2D) winApp.createGraphics((int)width, (int)height, PApplet.JAVA2D);
-		buffer.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-				RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-		buffer.rectMode(PApplet.CORNER);
-		buffer.g2.setFont(localFont);
 		setText(text);
 		opaque = false;
 		// Now register control with applet
 		registeredMethods = DRAW_METHOD;
-		G4P.addControl(this);
+		// Must register control
+		G4P.registerControl(this);
 	}
-	
+
 	public void draw(){
 		if(!visible) return;
 
@@ -99,16 +92,15 @@ public class GLabel extends GTextIconAlignBase {
 	
 	protected void updateBuffer(){
 		if(bufferInvalid) {
-			Graphics2D g2d = buffer.g2;
-			// Get the latest lines of text
-			LinkedList<TextLayoutInfo> lines = stext.getLines(g2d);	
 			bufferInvalid = false;
 			buffer.beginDraw();
+			Graphics2D g2d = buffer.g2;
+			g2d.setFont(localFont);
+
+			// Get the latest lines of text
+			LinkedList<TextLayoutInfo> lines = stext.getLines(g2d);	
 			// Back ground colour
-			if(opaque == true)
-				buffer.background(palette[6]);
-			else
-				buffer.background(buffer.color(255,0));
+			buffer.background(opaque ? palette[6].getRGB() : palette[2].getRGB() & 0xFFFFFF);
 			// Calculate text and icon placement
 			calcAlignment();
 			// If there is an icon draw it
@@ -137,7 +129,7 @@ public class GLabel extends GTextIconAlignBase {
 					sx = 0;		
 				}
 				// display text
-				g2d.setColor(jpalette[2]);
+				g2d.setColor(palette[2]);
 				lineInfo.layout.draw(g2d, sx, 0);
 				buffer.translate(0, layout.getDescent() + layout.getLeading());
 			}

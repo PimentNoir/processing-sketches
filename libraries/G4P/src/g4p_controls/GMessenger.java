@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-09 Peter Lager
+  Copyright (c) 2009 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -55,16 +55,25 @@ class GMessenger implements GConstants, GConstantsInternal {
 		case NONEXISTANT:
 			nonexistantEventHandler(info);
 			break;
+		case INVALID_TYPE:
+			inavlidControlType(info);
+			break;
+		case INVALID_PAPPLET:
+			unmatchedPApplet(info);
+			break;
 		case EXCP_IN_HANDLER:
 			eventHandlerFailed(info);
 			break;
 		}
 	}
-	
+
 	/**
 	 * Error message when an exception is create inside an event handler.
-	 * @param handler
-	 * @param info
+	 * 
+	 * info[0] event generator class
+	 * info[1] event handling method name
+	 * info[2] the exception thrown
+	 * 
 	 */
 	private static void eventHandlerFailed(Object[] info) {
 		String className = info[0].getClass().getSimpleName();
@@ -79,13 +88,9 @@ class GMessenger implements GConstants, GConstantsInternal {
 		output.append("\n\tCaused by " + t.toString());
 		for(Object line : calls)
 			output.append("\n\t"+ line.toString());			
-//		if(calls.length > 0)
-//			output.append("\n\t"+ calls[0].toString());
 		output.append("\n##############################################################\n");
 		System.out.println(output);
 	}
-
-	//			GMessenger.message(, this, new Object[] {methodName, param_classes, param_names});
 
 	/**
 	 * Unable to find the default handler method.
@@ -95,8 +100,6 @@ class GMessenger implements GConstants, GConstantsInternal {
 	 * info[2] the parameter class names
 	 * info[3] the parameter names (identifiers)
 	 * 
-	 * @param event_generator the object creating the events
-	 * @param info method signature information.
 	 */
 	private static void missingEventHandler(Object[] info) {
 		String className = info[0].getClass().getSimpleName();
@@ -127,10 +130,6 @@ class GMessenger implements GConstants, GConstantsInternal {
 	 * info[1] event handling method name
 	 * info[2] the parameter class names
 	 * 
-	 * 
-	 * @param obj1 the object generating the method
-	 * @param obj2 the method name
-	 * @param obj3 parameter types (Class[])
 	 */
 	private static void nonexistantEventHandler(Object[] info) {
 		String className = info[0].getClass().getSimpleName();
@@ -144,12 +143,37 @@ class GMessenger implements GConstants, GConstantsInternal {
 		for(int i = 0; i < param_names.length; i++){
 			pname = (param_names[i]).getSimpleName();
 			output.append(pname + " " + pname.substring(1).toLowerCase());
-				if(i < param_names.length - 1)
-					output.append(", ");
+			if(i < param_names.length - 1)
+				output.append(", ");
 		}
 		output.append(") { /* code */ }\n");
 		System.out.println(output.toString());
 	}
 
+	/**
+	 * An attempt was made to add a G4P control that does not have a visual appearance or one that 
+	 * does not respond to mouse / keyboard events. 
+	 * 
+	 * info[0] the group class
+	 * info[1] the G4P control class
+	 */
+	private static void inavlidControlType(Object[] info){
+		String groupClassName = info[0].getClass().getSimpleName();
+		String className = info[1].getClass().getSimpleName();
 
+		System.out.println("Controls of type " + className+" cannot be added to a control group (" + groupClassName  + "\n");
+	}
+
+	/**
+	 * An attempt was made to add a G4P control that does not have a visual appearance or one that 
+	 * does not respond to mouse / keyboard events. 
+	 * 
+	 * info[0] the group class
+	 * info[1] the G4P control class
+	 */
+	private static void unmatchedPApplet(Object[] info){
+		String groupClassName = info[0].getClass().getSimpleName();
+		String className = info[1].getClass().getSimpleName();
+		System.out.println("The " + className + " object cannot be added to this control group (" + groupClassName  + ") because they are for different windows.\n");
+	}
 }

@@ -1,13 +1,14 @@
-/**
-Balls of Vesuvius.  
+/*
+ Balls of Vesuvius.  
  
-A simple program to demonstrate the use of the GTimer
-class which is part of the G4P (GUI for Processing)
-library.
-
-(c)2012 Peter Lager
-
-*/
+ A simple program to demonstrate the use of the GTimer
+ class which is part of the G4P (GUI for Processing)
+ library.
+ 
+ for Processing V2 and V3
+ (c) 2015 Peter Lager
+ 
+ */
 
 import g4p_controls.*;
 
@@ -19,8 +20,8 @@ ArrayList liveBalls, deadBalls;
 int rate;
 PImage rear, front;
 
-void setup(){
-  size(768,600);
+void setup() {
+  size(768, 600);
   // Create 2 buttons to start and stop the balls
   btnStart = new GButton(this, 10, 10, 100, 20, "Start");
   btnStop = new GButton(this, 120, 10, 100, 20, "Stop");
@@ -28,7 +29,7 @@ void setup(){
   sdrRate = new GSlider(this, 230, 10, 360, 20, 10);
   sdrRate.setLimits(50, 10, 120); // (init, min, max)
   sdrRate.setEasing(5);
-  
+
   // Get timer interval based on initial slider value and limits
   rate = 130 - sdrRate.getValueI();
   // Create a GTimer object that will call the method
@@ -57,53 +58,53 @@ void setup(){
 }
 
 // This method is now called before each call to draw()
-public void pre(){
+public void pre() {
   Ball b;
   int i;
   // Update all live balls
-  for(i = 0; i < liveBalls.size(); i++){
+  for (i = 0; i < liveBalls.size(); i++) {
     b = (Ball)liveBalls.get(i);
     b.update();
     // See if this ball should die if so remember it
-    if(b.y > height + 20)
+    if (b.y > height + 20)
       deadBalls.add(b);
   }
   // Remove dead balls from the list of live balls
-  for(i = 0; i < deadBalls.size(); i++){
+  for (i = 0; i < deadBalls.size(); i++) {
     liveBalls.remove(deadBalls.get(i));
   }
   // Done with dead balls
   deadBalls.clear();
 }
 
-void draw(){
+void draw() {
   int i;
   Ball b;
 
   background(rear);
-  for(i = 0; i < liveBalls.size(); i++){
+  for (i = 0; i < liveBalls.size(); i++) {
     b = (Ball)liveBalls.get(i);
     b.display();
   }
-  image(front,0,0);
+  image(front, 0, 0);
 }
 
 // This is called when the user drags on the slider
-void handleSliderEvents(GValueControl slider, GEvent event){
+void handleSliderEvents(GValueControl slider, GEvent event) {
   rate = 130 - sdrRate.getValueI();
   timer.setInterval(rate);
 }
 
 // This method is called when a button is clicked
-void handleButtonEvents(GButton button, GEvent event){
-  if(button == btnStart && event == GEvent.CLICKED)
+void handleButtonEvents(GButton button, GEvent event) {
+  if (button == btnStart && event == GEvent.CLICKED)
     timer.start();
-  if(button == btnStop && event == GEvent.CLICKED)
+  if (button == btnStop && event == GEvent.CLICKED)
     timer.stop();
 }
 
 // This method is called by the timer
-void fireBall(GTimer timer){
+void fireBall(GTimer timer) {
   Ball ball = new Ball();
   liveBalls.add(ball);
 }
@@ -118,28 +119,27 @@ class Ball {
   public float drag = 0.99;
   public float shrink = 0.999;
 
-  public Ball(){
-    x = random(500,540);
+  public Ball() {
+    x = random(500, 540);
     y = 290;
-    col = color(random(200,255),random(20,55),0);
-    radius = random(3,10);
+    col = color(random(200, 255), random(20, 55), 0);
+    radius = random(3, 10);
     vx = random(-3.0, 1.9);
     vy = random(5.5, 8.2);
   }
 
-  public void update(){
+  public void update() {
     x += vx;
     y -= vy;
     vy -= gravity;
-    if(vy < 0)
+    if (vy < 0)
       vx *= drag;
     radius *= shrink;
   }
 
-  public void display(){
+  public void display() {
     noStroke();
     fill(col);
-    ellipse(x,y,radius,radius);
+    ellipse(x, y, radius, radius);
   }
-
 }

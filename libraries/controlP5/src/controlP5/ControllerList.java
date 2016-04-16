@@ -20,8 +20,8 @@ package controlP5;
  * Boston, MA 02111-1307 USA
  *
  * @author 		Andreas Schlegel (http://www.sojamo.de)
- * @modified	12/23/2012
- * @version		2.0.4
+ * @modified	07/30/2015
+ * @version		2.2.5
  *
  */
 
@@ -29,70 +29,69 @@ import java.util.List;
 import java.util.Vector;
 
 /**
- * Stores objects of type ControllerInterface and CDrawable, mainly for internal
- * use.
+ * Stores objects of type ControllerInterface and CDrawable, mainly for internal use.
  */
 public class ControllerList {
 
-	protected List<ControllerInterface<?>> controllers;
+	protected List< ControllerInterface< ? >> controllers;
 
-	protected List<CDrawable> drawables;
+	protected List< CDrawable > drawables;
 
-	public ControllerList() {
-		controllers = new Vector<ControllerInterface<?>>();
-		drawables = new Vector<CDrawable>();
+	public ControllerList( ) {
+		controllers = new Vector< ControllerInterface< ? >>( );
+		drawables = new Vector< CDrawable >( );
 	}
 
-	public void add(ControllerInterface<?> theController) {
-		if (controllers.indexOf(theController) < 0) {
-			controllers.add(theController);
+	public void add( ControllerInterface< ? > theController ) {
+		if ( controllers.indexOf( theController ) < 0 ) {
+			controllers.add( theController );
 		}
 	}
 
-	protected void remove(ControllerInterface<?> theController) {
-		controllers.remove(theController);
+	protected void remove( ControllerInterface< ? > theController ) {
+		controllers.remove( theController );
 	}
 
-	protected void addDrawable(CDrawable theController) {
-		if (drawables.indexOf(theController) < 0) {
-			drawables.add(theController);
+	protected void addDrawable( CDrawable theController ) {
+		if ( drawables.indexOf( theController ) < 0 ) {
+			drawables.add( theController );
 		}
 	}
 
-	protected void removeDrawable(CDrawable theController) {
-		drawables.remove(theController);
+	protected void removeDrawable( CDrawable theController ) {
+		drawables.remove( theController );
 	}
 
-	public ControllerInterface<?> get(int theIndex) {
-		return controllers.get(theIndex);
+	public ControllerInterface< ? > get( int theIndex ) {
+		return controllers.get( theIndex );
 	}
 
-	public List<ControllerInterface<?>> get() {
+	public List< ControllerInterface< ? >> get( ) {
 		return controllers;
 	}
 
-	public CDrawable getDrawable(int theIndex) {
-		return drawables.get(theIndex);
+	public CDrawable getDrawable( int theIndex ) {
+		return drawables.get( theIndex );
 	}
 
-	public List<CDrawable> getDrawables() {
+	public List< CDrawable > getDrawables( ) {
 		return drawables;
 	}
 
-	public int sizeDrawable() {
-		return drawables.size();
+	public int sizeDrawable( ) {
+		return drawables.size( );
 	}
 
-	public int size() {
-		return controllers.size();
+	public int size( ) {
+		return controllers.size( );
 	}
 
-	protected void clear() {
-		controllers.clear();
+	protected void clear( ) {
+		controllers.clear( );
 	}
 
-	protected void clearDrawable() {
-		drawables.clear();
+	protected void clearDrawable( ) {
+		drawables.clear( );
 	}
 
 }

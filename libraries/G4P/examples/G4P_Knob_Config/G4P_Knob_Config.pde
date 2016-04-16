@@ -1,23 +1,24 @@
-/**
- * This program demonstrates the various configuration options available
- * for the knob control (GKnob).
- * 
- * The only thing not set is the range limits. By default the knob returns
- * vales in the range 0.0 to 1.0 inclusive. Use setLimits() to set your 
- * own range.
- * 
- * (c) 2013 Peter Lager
- *
+/*
+  This program demonstrates the various configuration options available
+ for the knob control (GKnob).
+ 
+ The only thing not set is the range limits. By default the knob returns
+ vales in the range 0.0 to 1.0 inclusive. Use setLimits() to set your 
+ own range.
+ 
+ for Processing V2 and V3
+ (c) 2015 Peter Lager
+ 
  */
 
 import g4p_controls.*;
- 
+
 GKnob kb;
 int bgcol = 128;
 
 public void setup() {
   size(500, 360);
-  G4P.setCursorOff(CROSS);
+  G4P.setCursor(CROSS);
   // Create the knob using default settings
   kb = new GKnob(this, 60, 60, 180, 180, 0.8f);
   // Now make the configuration controls
@@ -46,8 +47,7 @@ public void handleButtonEvents(GButton button, GEvent event) {
   if (button.tagNo >= 1000) {
     kb.setLocalColorScheme(button.tagNo - 1000);
     lblValue.setLocalColorScheme(button.tagNo - 1000);
-  }
-  else if (btnMakeCode == button)
+  } else if (btnMakeCode == button)
     placeCodeOnClipboard();
 }
 
@@ -123,5 +123,3 @@ private void placeCodeOnClipboard() {
   else
     System.err.println("UNABLE TO ACCESS CLIPBOARD");
 }
-
-

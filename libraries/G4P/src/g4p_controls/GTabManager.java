@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -42,10 +42,10 @@ import java.util.LinkedList;
  */
 public class GTabManager {
 	
-	private LinkedList<GEditableTextControl> textControls;
+	private LinkedList<Focusable> textControls;
 	
 	public GTabManager(){
-		textControls = new LinkedList<GEditableTextControl>();
+		textControls = new LinkedList<Focusable>();
 	}
 	
 	/**
@@ -55,9 +55,9 @@ public class GTabManager {
 	 * @param controls a comma separated list of text field or text area controls.
 	 * @return true if any or all of the controls were added and false if none were added.
 	 */
-	public boolean addControls(GEditableTextControl... controls){
+	public boolean addControls(Focusable... controls){
 		boolean result = false;
-		for(GEditableTextControl control : controls)
+		for(Focusable control : controls)
 			result |= addControl(control);
 		return result;
 	}
@@ -68,9 +68,9 @@ public class GTabManager {
 	 * @param control to add
 	 * @return true if added successfully
 	 */
-	public boolean addControl(GEditableTextControl control){
+	public boolean addControl(Focusable control){
 		if(!textControls.contains(control)){
-			control.tabManager = this;
+			control.setTabManager(this);
 			textControls.addLast(control);
 			return true;
 		}
@@ -84,10 +84,10 @@ public class GTabManager {
 	 * @param control
 	 * @return true if remove successfully
 	 */
-	public boolean removeControl(GEditableTextControl control){
+	public boolean removeControl(Focusable control){
 		int index = textControls.lastIndexOf(control);
 		if(index > 0){
-			control.tabManager = null;
+			control.setTabManager(null);
 			textControls.remove(index);
 			return true;
 		}
@@ -99,11 +99,11 @@ public class GTabManager {
 	 * @param control
 	 * @return true if it found a next control else false
 	 */
-	boolean nextControl(GEditableTextControl control){
+	boolean nextControl(Focusable control){
 		int index = textControls.lastIndexOf(control);
 		if(textControls.size() > 1 && index >= 0 && index < textControls.size() - 1){
 			index++;
-			GAbstractControl.controlToTakeFocus = textControls.get(index);;
+			GAbstractControl.controlToTakeFocus = (GAbstractControl)textControls.get(index);;
 			return true;
 		}
 		return false;
@@ -114,11 +114,11 @@ public class GTabManager {
 	 * @param control
 	 * @return true if it found a previous control else false
 	 */
-	boolean prevControl(GEditableTextControl control){
+	boolean prevControl(Focusable control){
 		int index = textControls.lastIndexOf(control);
 		if(textControls.size() > 1 && index > 0){
 			index--;
-			GAbstractControl.controlToTakeFocus = textControls.get(index);
+			GAbstractControl.controlToTakeFocus = (GAbstractControl)textControls.get(index);
 			return true;
 		}
 		return false;

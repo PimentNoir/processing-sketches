@@ -1,7 +1,7 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
   Copyright (c) 2012 Peter Lager
 
@@ -35,7 +35,7 @@ import java.util.LinkedList;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import processing.core.PGraphicsJava2D;
+import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 
 /**
@@ -49,8 +49,11 @@ import processing.event.MouseEvent;
  * 
  * Enables user text input at runtime. Text can be selected using the mouse
  * or keyboard shortcuts and then copied or cut to the clipboard. Text
- * can also be pasted in.
+ * can also be pasted in. <br>
  *
+ * Fires SELECTION_CHANGED, CHANGED, ENTERED, LOST_FOCUS, GETS_FOCUS events.<br>
+ * The focus events are only fired if the control is added to a GTabManager object. <br>
+ * 
  * @author Peter Lager
  *
  */
@@ -103,10 +106,6 @@ public class GTextField extends GEditableTextControl {
 		gpTextDisplayArea.lineTo(tw,  0);
 		gpTextDisplayArea.closePath();
 
-		// The image buffer is just for the typing area
-		buffer = (PGraphicsJava2D) winApp.createGraphics((int)width, (int)height, PApplet.JAVA2D);
-		buffer.rectMode(PApplet.CORNER);
-		buffer.g2.setFont(localFont);
 		hotspots = new HotSpot[]{
 				new HSrect(1, tx, ty, tw, th),			// typing area
 				new HSrect(9, 0, 0, width, height)		// control surface
@@ -120,19 +119,22 @@ public class GTextField extends GEditableTextControl {
 		G4P.control_mode = GControlMode.CORNER;
 		if((scrollbarPolicy & SCROLLBAR_HORIZONTAL) != 0){
 			hsb = new GScrollbar(theApplet, 0, 0, tw, 10);
-			addControl(hsb, tx, ty + th + 2, 0);
+			addControl(hsb, tx, ty + th - hsb.halfHeight + 2, 0);
 			hsb.addEventHandler(this, "hsbEventHandler");
 			hsb.setAutoHide(autoHide);
 		}
 		G4P.popStyle();
 		setText("");
-		//		z = Z_STICKY;
-		createEventHandler(G4P.sketchApplet, "handleTextEvents", 
+
+		createEventHandler(G4P.sketchWindow, "handleTextEvents", 
 				new Class<?>[]{ GEditableTextControl.class, GEvent.class }, 
 				new String[]{ "textcontrol", "event" } 
 				);
 		registeredMethods = PRE_METHOD | DRAW_METHOD | MOUSE_METHOD | KEY_METHOD;
-		G4P.addControl(this);
+		
+		// Must register control
+		G4P.registerControl(this);
+		bufferInvalid = true;
 	}
 
 	/**
@@ -154,7 +156,7 @@ public class GTextField extends GEditableTextControl {
 		// If needed update the horizontal scrollbar
 		if(hsb != null){
 			if(stext.getMaxLineLength() < tw)
-				hsb.setValue(0,1);
+				hsb.setValue(0, 1);
 			else
 				hsb.setValue(0, tw/stext.getMaxLineLength());
 		}
@@ -167,9 +169,11 @@ public class GTextField extends GEditableTextControl {
 	 * @param text
 	 */
 	public void setText(String text){
-		if(text == null)
-			text = "";
-		setStyledText(new StyledString(text, Integer.MAX_VALUE));
+		if(text != null){
+			stext.setText(text, Integer.MAX_VALUE);
+			setScrollbarValues(0,0);
+			bufferInvalid = true;
+		}
 	}
 
 	/**
@@ -180,9 +184,8 @@ public class GTextField extends GEditableTextControl {
 	public void appendText(String extraText){
 		if(extraText == null || extraText.equals(""))
 			return;
-		if(stext.insertCharacters(stext.length(), extraText) == 0)
+		if(stext.insertCharacters(extraText, stext.length()) == 0)
 			return;
-		//		text = stext.getPlainText();
 		LinkedList<TextLayoutInfo> lines = stext.getLines(buffer.g2);
 		endTLHI.tli = lines.getLast();
 		endTLHI.thi = endTLHI.tli.layout.getNextRightHit(endTLHI.tli.nbrChars - 1);
@@ -203,12 +206,12 @@ public class GTextField extends GEditableTextControl {
 
 	public PGraphics getSnapshot(){
 		updateBuffer();
-		PGraphicsJava2D snap = (PGraphicsJava2D) winApp.createGraphics(buffer.width, buffer.height, PApplet.JAVA2D);
+		PGraphics snap = winApp.createGraphics(buffer.width, buffer.height, PApplet.JAVA2D);
 		snap.beginDraw();
 		snap.image(buffer,0,0);
 		if(hsb != null){
 			snap.pushMatrix();
-			snap.translate(hsb.getX(), hsb.getY());
+			snap.translate(hsb.getX(), hsb.getY() - hsb.halfHeight + 4);
 			snap.image(hsb.getBuffer(), 0, 0);
 			snap.popMatrix();
 		}
@@ -269,12 +272,22 @@ public class GTextField extends GEditableTextControl {
 					takeFocus();
 				}
 				dragging = false;
-				if(stext == null || stext.length() == 0){
-					stext = new StyledString(" ", wrapWidth);
-					stext.getLines(buffer.g2);
+				// If there is just a space then select it so it gets deleted on first key press
+				if(stext.getPlainText().equals(""))
+					stext.setText(" ");
+				if(stext.getPlainText().equals(" ")){
+					LinkedList<TextLayoutInfo> lines = stext.getLines(buffer.g2);
+					startTLHI = new TextLayoutHitInfo(lines.getFirst(), null);
+					startTLHI.thi = startTLHI.tli.layout.getNextLeftHit(1);
+
+					endTLHI = new TextLayoutHitInfo(lines.getLast(), null);
+					int lastChar = endTLHI.tli.layout.getCharacterCount();
+					endTLHI.thi = startTLHI.tli.layout.getNextRightHit(lastChar-1);
 				}
-				endTLHI = stext.calculateFromXY(buffer.g2, ox + ptx, oy + pty);
-				startTLHI = new TextLayoutHitInfo(endTLHI);
+				else {
+					endTLHI = stext.calculateFromXY(buffer.g2, ox + ptx, oy + pty);
+					startTLHI = new TextLayoutHitInfo(endTLHI);
+				}
 				calculateCaretPos(endTLHI);
 				bufferInvalid = true;
 			}
@@ -300,6 +313,64 @@ public class GTextField extends GEditableTextControl {
 		}
 	}
 
+	public void keyEvent(KeyEvent e) {
+		if(!visible  || !enabled || !textEditEnabled || !available) return;
+		if(focusIsWith == this && endTLHI != null){
+			char keyChar = e.getKey();
+			int keyCode = e.getKeyCode();
+			int keyID = e.getAction();
+			boolean shiftDown = e.isShiftDown();
+			boolean ctrlDown = e.isControlDown();
+
+			textChanged = false;
+			keepCursorInView = true;
+
+			int startPos = pos, startNbr = nbr;
+
+			// Get selection details
+			endChar = endTLHI.tli.startCharIndex + endTLHI.thi.getInsertionIndex();
+			startChar = (startTLHI != null) ? startTLHI.tli.startCharIndex + startTLHI.thi.getInsertionIndex() : endChar;
+			pos = endChar;
+			nbr = 0;
+			adjust = 0;
+			if(endChar != startChar){ // Have we some text selected?
+				if(startChar < endChar){ // Forward selection
+					pos = startChar; nbr = endChar - pos;
+				}
+				else if(startChar > endChar){ // Backward selection
+					pos = endChar;	nbr = startChar - pos;
+				}
+			}
+			if(startPos >= 0){
+				if(startPos != pos || startNbr != nbr)
+					fireEvent(this, GEvent.SELECTION_CHANGED);
+			}
+			// Select either keyPressedProcess or keyTypeProcess. These two methods are overridden in child classes
+			if(keyID == KeyEvent.PRESS) {
+				keyPressedProcess(keyCode, keyChar, shiftDown, ctrlDown);
+				setScrollbarValues(ptx, pty);
+			}
+			else if(keyID == KeyEvent.TYPE ){ // && e.getKey()  != KeyEvent.CHAR_UNDEFINED && !ctrlDown){
+				keyTypedProcess(keyCode, keyChar, shiftDown, ctrlDown);
+				setScrollbarValues(ptx, pty);
+			}
+			if(textChanged){
+				changeText();
+				fireEvent(this, GEvent.CHANGED);
+			}
+		}
+	}
+
+	/**
+	 * Do not call this method directly, G4P uses it to handle input from
+	 * the horizontal scrollbar.
+	 */
+	public void hsbEventHandler(GScrollbar scrollbar, GEvent event){
+		keepCursorInView = false;
+		ptx = hsb.getValue() * (stext.getMaxLineLength() + 4);
+		bufferInvalid = true;
+	}
+
 	protected void keyPressedProcess(int keyCode, char keyChar, boolean shiftDown, boolean ctrlDown){
 		boolean validKeyCombo = true;
 
@@ -317,32 +388,36 @@ public class GTextField extends GEditableTextControl {
 			moveCaretEndOfLine(endTLHI);
 			break;
 		case 'A':
-			if(ctrlDown){
+			if(ctrlDown){ // Ctrl + A select all
 				moveCaretStartOfLine(startTLHI);
 				moveCaretEndOfLine(endTLHI);
 				// Make shift down so that the start caret position is not
 				// moved to match end caret position.
 				shiftDown = true; 
 			}
+			else
+				validKeyCombo = false;
 			break;
 		case 'C':
-			if(ctrlDown)
+			if(ctrlDown) // Ctrl + C copy selected text
 				GClip.copy(getSelectedText());
 			validKeyCombo = false;
 			break;
 		case 'V':
-			if(ctrlDown){
+			if(ctrlDown){ // Ctrl + V paste selected text
 				String p = GClip.paste();
 				p.replaceAll("\n", "");
 				if(p.length() > 0){
 					// delete selection and add 
 					if(hasSelection())
 						stext.deleteCharacters(pos, nbr);
-					stext.insertCharacters(pos, p);
+					stext.insertCharacters(p, pos);
 					adjust = p.length();
 					textChanged = true;
 				}
 			}
+			else
+				validKeyCombo = false;
 			break;
 		default:
 			validKeyCombo = false;	
@@ -358,11 +433,10 @@ public class GTextField extends GEditableTextControl {
 
 	protected void keyTypedProcess(int keyCode, char keyChar, boolean shiftDown, boolean ctrlDown){
 		int ascii = (int)keyChar;
-
-		if(ascii >= 32 && ascii < 127){
+		if(isDisplayable(ascii)){
 			if(hasSelection())
 				stext.deleteCharacters(pos, nbr);
-			stext.insertCharacters(pos, "" + keyChar);
+			stext.insertCharacters("" + keyChar, pos);
 			adjust = 1; textChanged = true;
 		}
 		else if(keyChar == BACKSPACE){
@@ -403,9 +477,21 @@ public class GTextField extends GEditableTextControl {
 		}
 		// If we have emptied the text then recreate a one character string (space)
 		if(stext.length() == 0){
-			stext.insertCharacters(0, " ");
+			stext.insertCharacters(" ", 0);
 			adjust++; textChanged = true;
 		}
+//		if(stext.length() == 0){
+//			stext.insertCharacters(" ", 0);
+//			adjust++; textChanged = true;
+//			LinkedList<TextLayoutInfo> lines = stext.getLines(buffer.g2);
+//			startTLHI = new TextLayoutHitInfo(lines.getFirst(), null);
+//			startTLHI.thi = startTLHI.tli.layout.getNextLeftHit(1);
+//
+//			endTLHI = new TextLayoutHitInfo(lines.getLast(), null);
+//			int lastChar = endTLHI.tli.layout.getCharacterCount();
+//			endTLHI.thi = startTLHI.tli.layout.getNextRightHit(lastChar-1);
+//		}
+
 	}
 
 	protected boolean changeText(){
@@ -442,8 +528,8 @@ public class GTextField extends GEditableTextControl {
 			float y_top = - pty + endTLHI.tli.yPosInPara; 
 			float y_bot = y_top - cinfo[3] + cinfo[5];
 			if(x_left >= 0 && x_left <= tw && y_top >= 0 && y_bot <= th){
-				winApp.strokeWeight(1.9f);
-				winApp.stroke(palette[15]);
+				winApp.strokeWeight(1.5f);
+				winApp.stroke(palette[12].getRGB());
 				winApp.line(tx+x_left, ty+Math.max(0, y_top), tx+x_left, ty+Math.min(th, y_bot));
 			}
 		}
@@ -464,19 +550,30 @@ public class GTextField extends GEditableTextControl {
 	 */
 	protected void updateBuffer(){
 		if(bufferInvalid) {
+			bufferInvalid = false;
+			buffer.beginDraw();
 			Graphics2D g2d = buffer.g2;
+			g2d.setFont(localFont);
+			
 			// Get the latest lines of text
 			LinkedList<TextLayoutInfo> lines = stext.getLines(g2d);	
-			if(lines.isEmpty() && defaultText != null)
-				lines = defaultText.getLines(g2d);
+			
+			boolean usePromptText = promptText != null && !hasFocus() && (lines.isEmpty() || stext.getPlainText().equals("") || stext.getPlainText().equals(" "));
+			if(usePromptText)
+				lines = promptText.getLines(g2d);
 
-			bufferInvalid = false;
+			// If needed update the horizontal scrollbar
+//			if(hsb != null){
+//				if(stext.getMaxLineLength() < tw)
+//					hsb.setValue(0, 1);
+//				else
+//					hsb.setValue(0, tw/stext.getMaxLineLength());
+//			}
+
 			TextLayoutHitInfo startSelTLHI = null, endSelTLHI = null;
-
-			buffer.beginDraw();
 			// Whole control surface if opaque
 			if(opaque)
-				buffer.background(palette[6]);
+				buffer.background(palette[6].getRGB());
 			else
 				buffer.background(buffer.color(255,0));
 
@@ -485,12 +582,22 @@ public class GTextField extends GEditableTextControl {
 
 			// Typing area surface
 			buffer.noStroke();
-			buffer.fill(palette[7]);
+			buffer.fill(palette[7].getRGB());
 			buffer.rect(-1,-1,tw+2,th+2);
 
 			g2d.setClip(gpTextDisplayArea);
 			buffer.translate(-ptx, -pty);
 			// Translate in preparation for display selection and text
+
+			if(hasFocus() && stext.getPlainText().equals(" ")){
+				lines = stext.getLines(buffer.g2);
+				startTLHI = new TextLayoutHitInfo(lines.getFirst(), null);
+				startTLHI.thi = startTLHI.tli.layout.getNextLeftHit(1);
+
+				endTLHI = new TextLayoutHitInfo(lines.getLast(), null);
+				int lastChar = endTLHI.tli.layout.getCharacterCount();
+				endTLHI.thi = startTLHI.tli.layout.getNextRightHit(lastChar-1);
+			}
 
 			if(hasSelection()){
 				if(endTLHI.compareTo(startTLHI) == -1){
@@ -507,15 +614,15 @@ public class GTextField extends GEditableTextControl {
 				TextLayout layout = lineInfo.layout;
 				buffer.translate(0, layout.getAscent());
 				// Draw selection if any
-				if(hasSelection() && lineInfo.compareTo(startSelTLHI.tli) >= 0 && lineInfo.compareTo(endSelTLHI.tli) <= 0 ){				
+				if(!usePromptText && hasSelection() && lineInfo.compareTo(startSelTLHI.tli) >= 0 && lineInfo.compareTo(endSelTLHI.tli) <= 0 ){				
 					int ss = startSelTLHI.thi.getInsertionIndex();
 					int ee = endSelTLHI.thi.getInsertionIndex();
-					g2d.setColor(jpalette[14]);
+					g2d.setColor(palette[14]);
 					Shape selShape = layout.getLogicalHighlightShape(ss, ee);
 					g2d.fill(selShape);
 				}
 				// Draw text
-				g2d.setColor(jpalette[2]);
+				g2d.setColor(palette[2]);
 				lineInfo.layout.draw(g2d, 0, 0);
 				buffer.translate(0, layout.getDescent() + layout.getLeading());
 			}

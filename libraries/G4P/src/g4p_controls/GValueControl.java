@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -48,7 +48,6 @@ public abstract class GValueControl extends GAbstractControl {
 	protected String unit = "";
 	protected boolean showValue = false;
 	
-
 	protected float parametricPos = 0.5f, parametricTarget = 0.5f;
 	protected float easing  = 1.0f; // must be >= 1.0
 	
@@ -58,6 +57,7 @@ public abstract class GValueControl extends GAbstractControl {
 	protected boolean showTicks = false;
 	
 	protected boolean limitsInvalid = true;
+	protected boolean valueInvalid = true;
 	
 	// Offset to between mouse and thumb centre
 	protected float offset;
@@ -72,6 +72,7 @@ public abstract class GValueControl extends GAbstractControl {
 			updateDueToValueChanging();
 			bufferInvalid = true;
 			if(Math.abs(parametricTarget - parametricPos) > epsilon){
+				valueInvalid = true;
 				fireEvent(this, GEvent.VALUE_CHANGING);
 			}
 			else {

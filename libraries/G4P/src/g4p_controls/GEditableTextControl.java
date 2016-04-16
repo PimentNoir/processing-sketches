@@ -1,7 +1,7 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
   Copyright (c) 2013 Peter Lager
 
@@ -42,14 +42,11 @@ import processing.event.KeyEvent;
  * @author Peter Lager
  *
  */
-public abstract class GEditableTextControl extends GTextBase {
-
-	protected static float HORZ_SCROLL_RATE = 4f;
-	protected static float VERT_SCROLL_RATE = 8;
+public abstract class GEditableTextControl extends GTextBase implements Focusable {
 
 	GTabManager tabManager = null;
 
-	protected StyledString defaultText = null;
+	protected StyledString promptText = null;
 	// The width to break a line
 	protected int wrapWidth = Integer.MAX_VALUE;
 
@@ -93,6 +90,10 @@ public abstract class GEditableTextControl extends GTextBase {
 		cursorOver = TEXT;
 	}
 
+	public void setTabManager(GTabManager tm){
+		tabManager = tm;
+	}
+
 	/**
 	 * Give up focus but if the text is only made from spaces
 	 * then set it to null text. <br>
@@ -107,11 +108,11 @@ public abstract class GEditableTextControl extends GTextBase {
 			cursorIsOver = null;
 		focusIsWith = grabber;
 		// If only blank text clear it out allowing default text (if any) to be displayed
-		if(stext.length() > 0){
-			int tl = stext.getPlainText().trim().length();
-			if(tl == 0)
-				stext = new StyledString("", wrapWidth);
-		}
+//		if(stext.length() > 0){
+//			int tl = stext.getPlainText().trim().length();
+//			if(tl == 0)
+//				stext.setText("", wrapWidth);
+//		}
 		keepCursorInView = true;
 		bufferInvalid = true;
 	}
@@ -137,8 +138,6 @@ public abstract class GEditableTextControl extends GTextBase {
 
 	/**
 	 * Determines whether this component is to have focus or not. <br>
-	 * Fire focus events for the GTextField and GTextArea controls
-	 * @param focus
 	 */
 	public void setFocus(boolean focus){
 		if(!focus){
@@ -149,8 +148,7 @@ public abstract class GEditableTextControl extends GTextBase {
 		if(focusIsWith != this){
 			dragging = false;
 			if(stext == null || stext.length() == 0)
-				stext = new StyledString(" ", wrapWidth);
-			//			text = stext.getPlainText();
+				stext.setText(" ", wrapWidth);
 			LinkedList<TextLayoutInfo> lines = stext.getLines(buffer.g2);
 			startTLHI = new TextLayoutHitInfo(lines.getFirst(), null);
 			startTLHI.thi = startTLHI.tli.layout.getNextLeftHit(1);
@@ -167,20 +165,21 @@ public abstract class GEditableTextControl extends GTextBase {
 	}
 
 	/**
-	 * Set the default text for this control. If provided this text will be 
-	 * displayed in italic whenever it is empty.
-	 * @param dtext
+	 * Set the prompt text for this control. When the text control is empty 
+	 * the prompt text (italic) is displayed instead.
+	 * .
+	 * @param ptext prompt text
 	 */
-	public void setDefaultText(String dtext){
-		if(dtext == null || dtext.length() == 0)
-			defaultText = null;
+	public void setPromptText(String ptext){
+		if(ptext == null || ptext.length() == 0)
+			promptText = null;
 		else {
-			defaultText = new StyledString(dtext, wrapWidth);
-			defaultText.addAttribute(G4P.POSTURE, G4P.POSTURE_OBLIQUE);
+			promptText = new StyledString(ptext, wrapWidth);
+			promptText.addAttribute(G4P.POSTURE, G4P.POSTURE_OBLIQUE);
 		}
 		bufferInvalid = true;
 	}
-	
+
 	/**
 	 * @return the wrapWidth
 	 */
@@ -196,11 +195,11 @@ public abstract class GEditableTextControl extends GTextBase {
 	}
 
 	/**
-	 * Get the default text for this control
-	 * @return the default text without styling
+	 * Get the prompt text used in this control.
+	 * @return the prompt text without styling
 	 */
-	public String getDefaultText(){
-		return defaultText.getPlainText();
+	public String getPromptText(){
+		return promptText.getPlainText();
 	}
 
 	/**
@@ -225,7 +224,6 @@ public abstract class GEditableTextControl extends GTextBase {
 	 * 
 	 * @param attr the text attribute to add
 	 * @param value value of the text attribute
-	 * @param lineNo the line number (starts at 0)
 	 * @param charStart the position of the first character to apply the attribute
 	 * @param charEnd the position after the last character to apply the attribute
 	 */
@@ -242,9 +240,6 @@ public abstract class GEditableTextControl extends GTextBase {
 	 * 
 	 * @param attr the text attribute to add
 	 * @param value value of the text attribute
-	 * @param lineNo the line number (starts at 0)
-	 * @param charStart the position of the first character to apply the attribute
-	 * @param charEnd the position after the last character to apply the attribute
 	 */
 	public void addStyle(TextAttribute attr, Object value){
 		if(stext != null){
@@ -285,8 +280,6 @@ public abstract class GEditableTextControl extends GTextBase {
 	public void setFont(Font font) {
 		if(font != null && font != localFont && buffer != null){
 			localFont = font;
-			buffer.g2.setFont(localFont);
-			stext.getLines(buffer.g2);
 			ptx = pty = 0;
 			setScrollbarValues(ptx, pty);
 			bufferInvalid = true;
@@ -525,12 +518,11 @@ public abstract class GEditableTextControl extends GTextBase {
 
 	/**
 	 * Is this control keyboard enabled
-	 * @return
 	 */
 	public boolean isTextEditEnabled(){
 		return textEditEnabled;
 	}
-	
+
 	public void keyEvent(KeyEvent e) {
 		if(!visible  || !enabled || !textEditEnabled || !available) return;
 		if(focusIsWith == this && endTLHI != null){
@@ -630,18 +622,6 @@ public abstract class GEditableTextControl extends GTextBase {
 		// Cursor at end of paragraph graphic
 		calculateCaretPos(endTLHI);
 
-//			// Is do we have to move cursor to start of next line
-//			if(newline) {
-//				if(pos >= stext.length()){
-//					stext.insertCharacters(pos, " ");
-//					stext.getLines(buffer.g2);
-//				}
-//				moveCaretRight(endTLHI);
-//				calculateCaretPos(endTLHI);
-//			}
-//			// Finish off by ensuring no selection, invalidate buffer etc.
-//			startTLHI.copyFrom(endTLHI);
-//		}
 		bufferInvalid = true;
 		return true;
 	}

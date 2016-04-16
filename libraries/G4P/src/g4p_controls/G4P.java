@@ -1,7 +1,7 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
   Copyright (c) 2008-13 Peter Lager
 
@@ -34,9 +34,8 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.JColorChooser;
 import javax.swing.JDialog;
@@ -50,50 +49,68 @@ import processing.core.PConstants;
 
 /**
  * The core class for the global manipulation and execution of G4P. <br>
- * It also gives access to many of the constants used in this library.
+ * All the methods and constants are static so to call a method or
+ * reference a constant prefix it's name with 'G4P.' for example <br>
+ * <pre>
+ * G4P.<i>method_name(parameters);</i>
+ * G4P.<i>name_of_constant;</i>
+ * </pre><br>
+ * 
+ * Prior to version 3.5 G4P used logical fonts to be cross-platform, 
+ * unfortunately logical fonts do not use uniform metrics so it caused 
+ * serious errors when formatting the text layout. In version 3.5 G4P 
+ * will attempt to use a system fonts selected from this list <br>
+ * "Arial", "Trebuchet MS", "Tahoma", "Helvetica", "Verdana" <br>
+ * 
+ * Arial is the preferred font (since most systems will have it installed)
+ * but if not found it will attempt to use the next one in the list. If
+ * the list is exhausted and no matching system font found it will use
+ * a logical font. <br>
+ * If this causes a problem with older sketches simple call <br>
+ * <pre>
+ * G4P.usePre35Fonts();
+ * </pre>
+ * before you create any GUI controls. <br>
+ * 
  * 
  * @author Peter Lager
  *
  */
 public class G4P implements GConstants, PConstants {
 
-	static PApplet sketchApplet = null;
+	static PApplet sketchWindow = null;
+	// Relays events to main sketch window
+	static GWindowImpl sketchWindowImpl = null;
 
-	public static GWindowCloser windowCloser = null;
+	// List of all GWindows currently open
+	static List<GWindow> allWindows = new LinkedList<GWindow>();
+	// List of all GWindows marked for closure
+	static List<GWindow> windowsForClosing = new LinkedList<GWindow>();
+
+	static boolean announced = false;
 
 	/**
 	 * return the pretty version of the library.
 	 */
 	public static String getPrettyVersion() {
-		return "3.4";
+		return "4.0.3";
 	}
 
 	/**
 	 * return the version of the library used by Processing
 	 */
 	public static String getVersion() {
-		return "17";
+		return "26";
 	}
 
 	static int globalColorScheme = GCScheme.BLUE_SCHEME;
 	static int globalAlpha = 255;
 
-	/**
-	 * Java has cross platform support for 5 logical fonts so use one of these
-	 * in preference to platform specific fonts or include them here.
-	 * <ul>
-	 * <li>Dialog </li>
-	 * <li>DialogInput </li>t
-	 * <li>Monospaced </li>
-	 * <li>Serif </li>
-	 * <li>SansSerif </li>
-	 * </ul>
-	 */
-	static Font globalFont = new Font("Dialog", Font.PLAIN, 12);
-	static Font numericLabelFont = new Font("DialogInput", Font.BOLD, 12);
+	// Font used for all text controls
+	static Font globalFont = FontManager.getPriorityFont(null, Font.PLAIN, 12);
+	// Font used for slider numbers
+	static Font numericLabelFont = FontManager.getPriorityFont(null, Font.BOLD, 11);;
 
-	// Store of info about windows and controls
-	static HashMap<PApplet, GWindowInfo> windows = new HashMap<PApplet, GWindowInfo>();
 	// Used to order controls
 	static GAbstractControl.Z_Order zorder = new GAbstractControl.Z_Order();
 
@@ -104,14 +121,48 @@ public class G4P implements GConstants, PConstants {
 	static boolean showMessages = true;
 
 	// Determines how position and size parameters are interpreted when
-	// a control is created
-	// Introduced V3.0
+	// a control is created. Introduced G4P V3.0
 	static GControlMode control_mode = GControlMode.CORNER;
 
+	// Used to create a stack of styles with pushStyle and popStyle
 	static LinkedList<G4Pstyle> styles = new LinkedList<G4Pstyle>();
 
+	// Colour chooser
 	static JColorChooser chooser = null;
 	static Color lastColor = Color.white; // White
+
+	/**
+	 * Register a GWindow so we can keep track of all GWindows in the application.
+	 * This will be needed for global transformations e.g. setGlobalAlpha(...)
+	 * This is called from the controls constructor, and also when a GWindow is created.
+	 * @param window
+	 */
+	static void registerWindow(GWindow window){
+		if(!allWindows.contains(window)){
+			allWindows.add(window);
+		}
+	}
+
+	/**
+	 * De-register a window , this is done when a window is closed
+	 * @param window
+	 */
+	static void deregisterWindow(GWindow window){
+		allWindows.remove(window);
+	}
+
+	/**
+	 * Used internally to register a control with its window.
+	 * It will replace the addControl method in the controls constructors
+	 * @param control
+	 */
+	static void registerControl(GAbstractControl control){
+		PApplet app = control.getPApplet();
+		if(app == sketchWindow)
+			sketchWindowImpl.addToWindow(control);
+		else if(app instanceof GWindow)
+			((GWindow)app).addToWindow(control);
+	}
 
 	/**
 	 * Used to register the main sketch window with G4P. This is ignored if any
@@ -130,16 +181,25 @@ public class G4P implements GConstants, PConstants {
 	 * @param app
 	 */
 	public static void registerSketch(PApplet app){
-		if(sketchApplet == null) {
-			sketchApplet = app;
-			GWindowInfo winfo = windows.get(app);
-			if(winfo == null){
-				winfo = new GWindowInfo(app);
-				windows.put(app, winfo);
-			}			
+		if(sketchWindow == null && app != null) {
+			sketchWindow = app;
+			sketchWindowImpl = new GWindowImpl(sketchWindow);
+			announceG4P();
 		}
 	}
-
+	
+	/**
+	 * Set the global colour scheme. This will change the local
+	 * colour scheme for every control.
+	 * @param cs colour scheme to use (0-15)
+	 */
+	static void invalidateBuffers(){
+		for(GWindow window : allWindows)
+			window.invalidateBuffers();
+		if(sketchWindowImpl != null)
+			sketchWindowImpl.invalidateBuffers();
+	}
+	
 	/**
 	 * Set the global colour scheme. This will change the local
 	 * colour scheme for every control.
@@ -149,9 +209,22 @@ public class G4P implements GConstants, PConstants {
 		cs = Math.abs(cs) % 16; // Force into valid range
 		if(globalColorScheme != cs){
 			globalColorScheme = cs;
-			for(GWindowInfo winfo : windows.values())
-				winfo.setColorScheme(globalColorScheme);
+			for(GWindow window : allWindows)
+				window.setColorScheme(globalColorScheme);
+			if(sketchWindowImpl != null)
+				sketchWindowImpl.setColorScheme(globalColorScheme);
 		}
+	}
+
+	/**
+	 * Versions of G4P prior to 3.5 used logical fonts for the controls. So if you 
+	 * have old sketches then the text may look different with this and later versions
+	 * of G4P. <br>
+	 * If this is causing a problem then call this method before creating any controls.
+	 */
+	public static void usePre35Fonts(){
+		globalFont = new Font("Dialog", Font.PLAIN, 10);
+		numericLabelFont = new Font("DialogInput", Font.BOLD, 12);
 	}
 
 	/**
@@ -163,25 +236,13 @@ public class G4P implements GConstants, PConstants {
 	 */
 	public static void setWindowColorScheme(PApplet app, int cs){
 		cs = Math.abs(cs) % 16; // Force into valid range
-		GWindowInfo winfo = windows.get(app);
-		if(winfo != null)
-			winfo.setColorScheme(cs);
+		if(app == sketchWindow){
+			if(sketchWindowImpl != null)
+				sketchWindowImpl.setColorScheme(cs);
+		}
+		else if(app instanceof GWindow)
+			((GWindow)app).setColorScheme(cs);
 	}
-
-	/**
-	 * Set the colour scheme for all the controls drawn by the given 
-	 * GWindow. This will override any previous colour scheme for 
-	 * these controls.
-	 * @param win
-	 * @param cs
-	 */
-	public static void setWindowColorScheme(GWindow win, int cs){
-		cs = Math.abs(cs) % 16; // Force into valid range
-		GWindowInfo winfo = windows.get(win.papplet);
-		if(winfo != null)
-			winfo.setColorScheme(cs);
-	}
-
 
 	/**
 	 * Set the transparency of all controls. If the alpha level for a 
@@ -194,9 +255,11 @@ public class G4P implements GConstants, PConstants {
 		alpha = Math.abs(alpha) % 256; // Force into valid range
 		if(globalAlpha != alpha){
 			globalAlpha = alpha;
-			for(GWindowInfo winfo : windows.values())
-				winfo.setAlpha(globalAlpha);
-		}
+			for(GWindow window : allWindows)
+				window.setAlpha(globalAlpha);
+			if(sketchWindowImpl != null)
+				sketchWindowImpl.setAlpha(globalAlpha);
+		}	
 	}
 
 	/**
@@ -210,72 +273,24 @@ public class G4P implements GConstants, PConstants {
 	 */
 	public static void setWindowAlpha(PApplet app, int alpha){
 		alpha = Math.abs(alpha) % 256; // Force into valid range
-		GWindowInfo winfo = windows.get(app);
-		if(winfo != null)
-			winfo.setAlpha(alpha);
-	}
-
-	/**
-	 * Set the transparency level for all controls drawn by the given
-	 * GWindow. If the alpha level for a control falls below 
-	 * G4P.ALPHA_BLOCK then it will no longer respond to mouse
-	 * and keyboard events.
-	 * 
-	 * @param win apply to this window
-	 * @param alpha value in the range 0 (transparent) to 255 (opaque)
-	 */
-	public static void setWindowAlpha(GWindow win, int alpha){
-		alpha = Math.abs(alpha) % 256; // Force into valid range
-		GWindowInfo winfo = windows.get(win.papplet);
-		if(winfo != null)
-			winfo.setAlpha(alpha);
-	}
-
-	/**
-	 * Register a GWindow object.
-	 * 
-	 * @param window
-	 */
-	static void addWindow(GWindow window){
-		PApplet app = window.papplet;
-		GWindowInfo winfo = windows.get(app);
-		if(winfo == null){
-			winfo = new GWindowInfo(app);
-			windows.put(app, winfo);
+		if(app == sketchWindow){
+			if(sketchWindowImpl != null)
+				sketchWindowImpl.setAlpha(alpha);
 		}
-		// Create and start windows closer object
-		if(windowCloser == null){
-			windowCloser = new GWindowCloser();
-			sketchApplet.registerMethod("post", windowCloser);
-		}
+		else if(app instanceof GWindow)
+			((GWindow)app).setAlpha(alpha);
 	}
 
 	/**
-	 * This is called by the GWindow's WindowAdapter when it detects a 
-	 * WindowClosing event. It adds this window to a list of windows to
-	 * be closed by the GWindowCloser object in its 'post' method.
-	 * 
-	 * @param window the GWindow to be closed
+	 * Display the library version in the ProcessingIDE
 	 */
-	static void markWindowForClosure(GWindow window){
-		windowCloser.addWindow(window);
-	}
-
-	/**
-	 * Used internally to register a control with its applet.
-	 * @param control
-	 */
-	static void addControl(GAbstractControl control){
-		PApplet app = control.getPApplet();
-		// The first applet must be the sketchApplet
-		if(G4P.sketchApplet == null)
-			G4P.sketchApplet = app;
-		GWindowInfo winfo = windows.get(app);
-		if(winfo == null){
-			winfo = new GWindowInfo(app);
-			windows.put(app, winfo);
+	static void announceG4P(){
+		if(!announced){
+			System.out.println("===================================================");
+			System.out.println("   G4P V4.0.3 created by Peter Lager");
+			System.out.println("===================================================");
+			announced = true;
 		}
-		winfo.addControl(control);
 	}
 
 	/**
@@ -286,9 +301,15 @@ public class G4P implements GConstants, PConstants {
 	 */
 	static boolean removeControl(GAbstractControl control){
 		PApplet app = control.getPApplet();
-		GWindowInfo winfo = windows.get(app);
-		if(winfo != null){
-			winfo.removeControl(control);
+		if(app == sketchWindow){
+			if(sketchWindowImpl != null){
+				sketchWindowImpl.removeFromWindow(control);
+				return true;
+			}
+			return false;
+		}
+		if(app instanceof GWindow){
+			((GWindow)app).removeFromWindow(control);
 			return true;
 		}
 		return false;
@@ -320,10 +341,13 @@ public class G4P implements GConstants, PConstants {
 	/**
 	 * G4P has a range of support messages eg <br>if you create a GUI component 
 	 * without an event handler or, <br>a slider where the visible size of the
-	 * slider is less than the difference between min and max values.
+	 * slider is less than the difference between min and max values. <br>
 	 * 
 	 * This method allows the user to enable (default) or disable this option. If
-	 * disable then it should be called before any GUI components are created.
+	 * disable then it should be called before any GUI components are created. <br>
+	 * 
+	 * If you are adding your own event handlers then I suggest that you disable 
+	 * messages.
 	 * 
 	 * @param enable
 	 */
@@ -343,11 +367,6 @@ public class G4P implements GConstants, PConstants {
 	}
 
 	/**
-	 * Inform G4P which cursor shapes will be used.
-	 * Initial values are ARROW (off) and HAND (over)
-	 * use setCursor method
-	 * @param cursorOff
-	 * 
 	 * @deprecated use setCursor(int)
 	 */
 	@Deprecated
@@ -355,27 +374,24 @@ public class G4P implements GConstants, PConstants {
 		mouseOff = cursorOff;
 	}
 
+	/**
+	 * Set the cursor shape to be used when the mouse is not over a 
+	 * G4P control for the entire application including secondary
+	 * windows.
+	 * @param cursorOff the cursor shape.
+	 */
 	public static void setCursor(int cursorOff){
 		mouseOff = cursorOff;
-		for(GWindowInfo winfo : windows.values())
-			winfo.app.cursor(cursorOff);
-	}
-
-	public static void setCursor(int cursorOff, GWindow window){
-		PApplet app = window.papplet;
-		setCursor(cursorOff, app);
-	}
-
-	public static void setCursor(int cursorOff, PApplet app){
-		GWindowInfo winfo = windows.get(app);
-		if(winfo != null){
-			mouseOff = cursorOff;
-			winfo.app.cursor(cursorOff);
-		}
+		for(GWindow window : allWindows)
+			window.cursor(cursorOff);
+		if(sketchWindow != null)
+			sketchWindow.cursor(cursorOff);
 	}
 
 	/**
-	 * Inform G4P which cursor to use for mouse over.
+	 * Get the cursor shape used when the mouse is not over a G4P 
+	 * control
+	 * set for the 
 	 * 
 	 */
 	public static int getCursor(){
@@ -441,11 +457,8 @@ public class G4P implements GConstants, PConstants {
 			list = new ArrayList<GWindow>();
 		else
 			list.clear();
-		Collection<GWindowInfo> windowInfos = windows.values();
-		for(GWindowInfo info : windowInfos){
-			if(info.isGWindow)
-				list.add( ((GWinApplet)info.app).owner);
-		}
+		for(GWindow window : allWindows)
+			list.add(window);
 		return list;
 	}
 
@@ -466,14 +479,9 @@ public class G4P implements GConstants, PConstants {
 	 * @return true if G4P still thinks it is open
 	 */
 	public static boolean isWindowOpen(GWindow window){
-		if(window != null){
-			ArrayList<GWindow> list = getOpenWindowsAsList(null);
-			return list.contains(window);
-		}
-		else
-			return false;
+		return (window != null && allWindows.contains(window));
 	}
-	
+
 	/**
 	 * This will open a version of the Java Swing color chooser dialog. The dialog's
 	 * UI is dependent on the OS and JVM implementation running. <br>
@@ -483,7 +491,7 @@ public class G4P implements GConstants, PConstants {
 	 * @return the ARGB colour as a 32 bit integer (as used in Processing). 
 	 */
 	public static int selectColor(){
-		Frame owner = (sketchApplet == null) ? null : sketchApplet.frame;
+		Frame frame = getFrame(sketchWindow);
 		if(chooser == null){
 			chooser = new JColorChooser();
 			AbstractColorChooserPanel[] oldPanels = chooser.getChooserPanels();
@@ -509,7 +517,7 @@ public class G4P implements GConstants, PConstants {
 		((ColorPreviewPanel)chooser.getPreviewPanel()).setPrevColor(lastColor);
 		// Use the last color selected to start it off
 		chooser.setColor(lastColor);
-		JDialog dialog = JColorChooser.createDialog(owner,
+		JDialog dialog = JColorChooser.createDialog(frame,
 				"Color picker", 
 				true, 
 				chooser, 
@@ -532,7 +540,8 @@ public class G4P implements GConstants, PConstants {
 	 */
 	public static String selectFolder(String prompt){
 		String selectedFolder = null;
-		Frame frame = (sketchApplet == null) ? null : sketchApplet.frame;
+		Frame frame = getFrame(sketchWindow);
+		//Frame frame = (sketchWindow == null) ? null : sketchWindow.frame;
 		if (PApplet.platform == MACOSX && PApplet.useNativeSelect != false) {
 			FileDialog fileDialog =
 					new FileDialog(frame, prompt, FileDialog.LOAD);
@@ -637,10 +646,10 @@ public class G4P implements GConstants, PConstants {
 		// Assume that a file will not be selected
 		String selectedFile = null;
 		// Get the owner
-		Frame owner = (sketchApplet == null) ? null : sketchApplet.frame;
+		Frame frame = getFrame(sketchWindow);
 		// Create a file filter
 		if (PApplet.useNativeSelect) {
-			FileDialog dialog = new FileDialog(owner, prompt, mode);
+			FileDialog dialog = new FileDialog(frame, prompt, mode);
 			FilenameFilter filter = null;
 			if(types != null && types.length() > 0){
 				filter = new FilenameChooserFilter(types);
@@ -668,9 +677,9 @@ public class G4P implements GConstants, PConstants {
 			}
 			int result = JFileChooser.ERROR_OPTION;
 			if (mode == FileDialog.SAVE) {
-				result = chooser.showSaveDialog(owner);
+				result = chooser.showSaveDialog(frame);
 			} else if (mode == FileDialog.LOAD) {
-				result = chooser.showOpenDialog(owner);
+				result = chooser.showOpenDialog(frame);
 			}
 			if (result == JFileChooser.APPROVE_OPTION) {
 				try {
@@ -684,7 +693,6 @@ public class G4P implements GConstants, PConstants {
 	}
 
 	/*
-
 	Component parentComponent
 	    The first argument to each showXxxDialog method is always the parent component, which must be a 
 	    Frame, a component inside a Frame, or null. If you specify a Frame or Dialog, then the Dialog 
@@ -753,7 +761,7 @@ public class G4P implements GConstants, PConstants {
 	 * @param title the text to appear in the dialog's title bar.
 	 * @param messageType the message type
 	 */
-	public static void showMessage(Object owner, String message, String title, int messageType){
+	public static void showMessage(PApplet owner, String message, String title, int messageType){
 		Frame frame = getFrame(owner);
 		String m;
 		if(PApplet.platform == PApplet.MACOSX){
@@ -796,7 +804,7 @@ public class G4P implements GConstants, PConstants {
 	 * @param optionType
 	 * @return which button was clicked
 	 */
-	public static int selectOption(Object owner, String message, String title, int messageType, int optionType){
+	public static int selectOption(PApplet owner, String message, String title, int messageType, int optionType){
 		Frame frame = getFrame(owner);
 		String m;
 		if(PApplet.platform == PApplet.MACOSX){
@@ -814,20 +822,16 @@ public class G4P implements GConstants, PConstants {
 	 * Find the Frame associated with this object.
 	 * 
 	 * @param owner the object that is responsible for this message
-	 * @return the frame (if any) that owns this object
+	 * @return the frame (if any) that owns this object else return null
 	 */
-	private static Frame getFrame(Object owner){
+	private static Frame getFrame(PApplet owner){
 		Frame frame = null;
-		if(owner instanceof PApplet || owner instanceof GWinApplet)
-			frame = ((PApplet)owner).frame;
-		else if(owner instanceof GWindow)
-			frame = (Frame)owner;
-		else if(owner instanceof GAbstractControl)
-			frame = ((GAbstractControl) owner).getPApplet().frame;
+		try {
+			frame = (Frame) ((processing.awt.PSurfaceAWT.SmoothCanvas) owner.getSurface().getNative()).getFrame();
+		}
+		catch(Exception e){
+		}
 		return frame;
 	}
-
-
-
 
 }

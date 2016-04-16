@@ -26,12 +26,12 @@ class Agent {
   Agent() {
     p = new PVector(random(width),random(height));
     pOld = new PVector(p.x,p.y);
-    randomizer = random(0,1);
+    randomizer = random(1);
     stepSize = 1+randomizer*4;
     
     // colors
-    if (randomizer < 0.5) col = color((int)random(0,180), (int)random(0,50), (int)random(0,50));
-    else col = color((int)random(180,360), (int)random(50,100), (int)random(50,100));
+    if (randomizer < 0.5) col = color((int)random(170,190), 70, (int)random(0,100));
+    else col = color((int)random(40,60), 70, (int)random(0,100));
     
     // init zNoise
     setNoiseSticking(0.4);
@@ -87,7 +87,7 @@ class Agent {
 
 
   void setNoiseSticking(float stickingRange) {
-    // small values will increase sticking of the agents
+    // small values will increase stinking of the agents
     zNoise = random(stickingRange);
   }
 }

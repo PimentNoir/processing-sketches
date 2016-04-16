@@ -52,7 +52,6 @@ void setup() {
   setupGUI();
   smooth();
   colorMode(HSB, 360, 100, 100);
-  //colorMode(RGB, 255, 255, 255);
   for(int i=0; i<agents.length; i++) agents[i] = new Agent();
 }
 
@@ -74,11 +73,11 @@ void draw() {
 
 void keyReleased(){
   if (key=='m' || key=='M') {
-    showGUI = controlP5.group("menu").isOpen();
+    showGUI = controlP5.getGroup("menu").isOpen();
     showGUI = !showGUI;
   }
-  if (showGUI) controlP5.group("menu").open();
-  else controlP5.group("menu").close();
+  if (showGUI) controlP5.getGroup("menu").open();
+  else controlP5.getGroup("menu").close();
 
   if (key == '1') drawMode = 1;
   if (key == '2') drawMode = 2;

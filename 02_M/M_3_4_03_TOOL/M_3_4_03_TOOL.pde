@@ -36,12 +36,9 @@
 // ------ imports ------
 
 import processing.opengl.*;
-import javax.media.opengl.*;
 import processing.dxf.*;
 import java.util.Calendar;
 
-PGraphicsOpenGL pgl;
-GL gl;
 
 // ------ image output ------
 
@@ -113,12 +110,9 @@ Toggle[] toggles;
 
 
 void setup() {
-  size(1000, 1000, OPENGL);
+  size(1000, 1000, P3D);
 
   setupGUI(); 
-
-  pgl = (PGraphicsOpenGL) g;
-  gl = pgl.pgl.gl;  
 
   noStroke();
 
@@ -142,9 +136,6 @@ void draw() {
   else background(255);
 
   if (useBlendWhite || useBlendBlack) {
-    pgl.beginPGL();
-    if (useBlendWhite) gl.glBlendFunc(GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_COLOR); 
-    if (useBlendBlack) gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_COLOR); 
   }
 
 
@@ -188,7 +179,7 @@ void draw() {
 
 
   // Set parameters and draw meshes
-  frame.setTitle("Current form: " + myMeshes[0].getFormName());
+  surface.setTitle("Current form: " + myMeshes[0].getFormName());
 
   colorMode(HSB, 360, 100, 100, 100);
 
@@ -236,7 +227,6 @@ void draw() {
   popMatrix();
 
   if (useBlendWhite || useBlendBlack) {
-    pgl.endPGL();
   }
 
   // Image output
@@ -253,8 +243,6 @@ void draw() {
   // Draw GUI
   if (tiler.checkStatus() == false) {
     if (useBlendBlack || useBlendWhite) {
-      pgl.beginPGL();
-      gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA); 
     }
 
     hint(DISABLE_DEPTH_TEST);
@@ -262,14 +250,13 @@ void draw() {
     drawGUI();
 
     if (useBlendBlack || useBlendWhite) {
-      pgl.endPGL();
     }
   }
 
 
   // Image output
   if (saveOneFrame) {
-    if (controlP5.group("menu").isOpen()) {
+    if (controlP5.getGroup("menu").isOpen()) {
       saveFrame(timestamp()+"_menu.png");
     }
     saveOneFrame = false;
@@ -283,21 +270,21 @@ void draw() {
 
 void keyPressed() {
   if (key=='m' || key=='M') {
-    GUI = controlP5.group("menu").isOpen();
+    GUI = controlP5.getGroup("menu").isOpen();
     GUI = !GUI;
   }
 
-  if (GUI) controlP5.group("menu").open();
-  else controlP5.group("menu").close();
+  if (GUI) controlP5.getGroup("menu").open();
+  else controlP5.getGroup("menu").close();
 
   if (key=='s' || key=='S') {
     saveOneFrame = true;
   }
   if (key=='p' || key=='P') {
-    if (controlP5.group("menu").isOpen()) {
+    if (controlP5.getGroup("menu").isOpen()) {
       saveFrame(timestamp()+"_menu.png");
     }
-    if (controlP5.group("menu").isOpen()) controlP5.group("menu").close();
+    if (controlP5.getGroup("menu").isOpen()) controlP5.getGroup("menu").close();
     tiler.init(timestamp()+".png", qualityFactor);
   }
   if (key=='d' || key=='D') {
@@ -326,9 +313,3 @@ void mouseExited(MouseEvent e) {
 String timestamp() {
   return String.format("%1$ty%1$tm%1$td_%1$tH%1$tM%1$tS", Calendar.getInstance());
 }
-
-
-
-
-
-

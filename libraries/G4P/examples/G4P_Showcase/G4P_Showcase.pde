@@ -3,10 +3,11 @@
  on the 'G4P config window' button to open the control window 
  for more options.
  
- Some of the other examples  demonstrate individual controls 
+ Some of the other examples demonstrate individual controls 
  in more detail.
  
- (c) 2013 Peter Lager
+ for Processing V3
+ (c) 2015 Peter Lager
  */
 
 import g4p_controls.*;

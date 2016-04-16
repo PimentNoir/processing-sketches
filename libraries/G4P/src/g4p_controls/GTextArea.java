@@ -1,7 +1,7 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
   Copyright (c) 2012 Peter Lager
 
@@ -37,25 +37,32 @@ import java.util.LinkedList;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import processing.core.PGraphicsJava2D;
 import processing.event.MouseEvent;
 
 /**
  * The text area component. <br>
  * 
  * This control allows the user to enter and edit multiple lines of text. The control
- * also allows default text, horizontal and vertical scrollbars.
+ * also allows default text, horizontal and vertical scrollbars. <br>
  * 
- * Enables user text input at runtime. Text can be selected using the mouse
+ * Enables user to enter text at runtime. Text can be selected using the mouse
  * or keyboard shortcuts and then copied or cut to the clipboard. Text
- * can also be pasted in.
+ * can also be pasted in. <br>
+ * 
+ * There are some methods to add and clear text attributes to all or some of the
+ * text in the control. If a method is expecting a line number, you should specify 
+ * the actual line number for the entire text (lines numbers start at 0). It is 
+ * not the line number in the visible display because this can change if the text 
+ * has been scrolled vertically. <br>
+ * 
+ * 
+ * Fires SELECTION_CHANGED, CHANGED, ENTERED, LOST_FOCUS, GETS_FOCUS events.<br>
+ * The focus events are only fired if the control is added to a GTabManager object. <br>
  *
  * @author Peter Lager
  *
  */
 public class GTextArea extends GEditableTextControl {
-
-	private static float pad = 6;
 
 	protected boolean newline = false, backspace = false;
 
@@ -112,9 +119,9 @@ public class GTextArea extends GEditableTextControl {
 	public GTextArea(PApplet theApplet, float p0, float p1, float p2, float p3, int sbPolicy, int wrapWidth) {
 		super(theApplet, p0, p1, p2, p3, sbPolicy);
 		children = new LinkedList<GAbstractControl>();
-		tx = ty = pad;
-		tw = width - 2 * pad - ((scrollbarPolicy & SCROLLBAR_VERTICAL) != 0 ? 18 : 0);
-		th = height - 2 * pad - ((scrollbarPolicy & SCROLLBAR_HORIZONTAL) != 0 ? 18 : 0);
+		tx = ty = TPAD6;
+		tw = width - 2 * TPAD6 - ((scrollbarPolicy & SCROLLBAR_VERTICAL) != 0 ? 18 : 0);
+		th = height - 2 * TPAD6 - ((scrollbarPolicy & SCROLLBAR_HORIZONTAL) != 0 ? 18 : 0);
 		// The text wrap width is based on the width of the text display area unless
 		// some other value is specified.
 		this.wrapWidth = (wrapWidth == Integer.MAX_VALUE) ? (int)tw : wrapWidth;
@@ -126,14 +133,11 @@ public class GTextArea extends GEditableTextControl {
 		gpTextDisplayArea.lineTo(tw,  0);
 		gpTextDisplayArea.closePath();
 
-		// The image buffer is just for the typing area
-		buffer = (PGraphicsJava2D) winApp.createGraphics((int)width, (int)height, PApplet.JAVA2D);
-		buffer.rectMode(PApplet.CORNER);
-		buffer.g2.setFont(localFont);
 		hotspots = new HotSpot[]{
 				new HSrect(1, tx, ty, tw, th),			// typing area
 				new HSrect(9, 0, 0, width, height)		// control surface
 		};
+		// Create scrollbars
 		G4P.pushStyle();
 		G4P.showMessages = false;
 		z = Z_STICKY;
@@ -150,29 +154,17 @@ public class GTextArea extends GEditableTextControl {
 			vsb.addEventHandler(this, "vsbEventHandler");
 			vsb.setAutoHide(autoHide);
 		}
+		setScrollbarValues(0,0);
 		G4P.popStyle();
-		setText("", (int)tw);
-		//		z = Z_STICKY;
-		createEventHandler(G4P.sketchApplet, "handleTextEvents", 
+		
+		setText("");
+		createEventHandler(G4P.sketchWindow, "handleTextEvents", 
 				new Class<?>[]{ GEditableTextControl.class, GEvent.class }, 
 				new String[]{ "textcontrol", "event" } 
 				);
 		registeredMethods = PRE_METHOD | DRAW_METHOD | MOUSE_METHOD | KEY_METHOD;
-		G4P.addControl(this);
-	}
-
-	/**
-	 * Set the default text for this control. If provided this text will be 
-	 * displayed in italic whenever it is empty. It will also be wrapped to the control size.
-	 * @param dtext
-	 */
-	public void setDefaultText(String dtext){
-		if(dtext == null || dtext.length() == 0)
-			defaultText = null;
-		else {
-			defaultText = new StyledString(dtext, wrapWidth);
-			defaultText.addAttribute(G4P.POSTURE, G4P.POSTURE_OBLIQUE);
-		}
+		// Must register control
+		G4P.registerControl(this);
 		bufferInvalid = true;
 	}
 
@@ -181,13 +173,12 @@ public class GTextArea extends GEditableTextControl {
 	 * text wrapwidth or if there is no text then the text width 
 	 * of the control.
 	 * 
-	 * @param text
+	 * @param text to be displayed
 	 */
 	public void setText(String text){
-		if(stext == null)
-			setText(text, wrapWidth);
-		else
-			setText(text, stext.getWrapWidth());
+		stext.setText(text, wrapWidth);
+		if(text != null)
+			stext.setText(text, wrapWidth);
 		bufferInvalid = true;
 	}
 
@@ -197,14 +188,14 @@ public class GTextArea extends GEditableTextControl {
 	 * @param wrapWidth the wrap width
 	 */
 	public void setText(String text, int wrapWidth){
-//		this.wrapWidth = wrapWidth;
-		setStyledText(new StyledString(text, wrapWidth));
+		stext.setText(text, wrapWidth);
+		setStyledText(stext);
 		bufferInvalid = true;
 	}
 
 	/**
 	 * Set the text to display and adjust any scrollbars
-	 * @param text lines of text to display
+	 * @param lines an array of Strings representing the text to display
 	 */
 	public void setText(String[] lines){
 		if(lines != null){
@@ -215,7 +206,7 @@ public class GTextArea extends GEditableTextControl {
 
 	/**
 	 * Set the text to display and adjust any scrollbars
-	 * @param text lines of text to display
+	 * @param lines an array of Strings representing the text to display
 	 * @param wrapWidth the wrap width
 	 */
 	public void setText(String[] lines, int wrapWidth){
@@ -235,36 +226,54 @@ public class GTextArea extends GEditableTextControl {
 	}
 
 	/**
-	 * Adds the text attribute to a range of characters on a particular line. If charEnd
-	 * is past the EOL then the attribute will be applied to the end-of-line.
+	 * Adds the text attribute to a range of characters on a particular display line. If charEnd
+	 * is past the EOL then the attribute will be applied to the end-of-line. 
 	 * 
 	 * @param attr the text attribute to add
 	 * @param value value of the text attribute
-	 * @param lineNo the line number (starts at 0)
+	 * @param lineNo the display line number (starts at 0)
 	 * @param charStart the position of the first character to apply the attribute
 	 * @param charEnd the position after the last character to apply the attribute
 	 */
 	public void addStyle(TextAttribute attr, Object value, int lineNo, int charStart, int charEnd){
-		if(stext != null){
-			stext.addAttribute(attr, value, lineNo, charStart, charEnd);
-			bufferInvalid = true;
-		}
+		stext.addAttribute(attr, value, lineNo, charStart, charEnd);
+		bufferInvalid = true;
 	}
 
 	/**
-	 * Clears all text attribute from a range of characters on a particular line. 
+	 * Adds the text attribute to an entire display line. 
+	 * 
+	 * @param attr the text attribute to add
+	 * @param value value of the text attribute
+	 * @param lineNo the display line number (starts at 0)
+	 */
+	public void addStyle(TextAttribute attr, Object value, int lineNo){
+		stext.addAttribute(attr, value, lineNo);
+		bufferInvalid = true;
+	}
+
+	/**
+	 * Clears all text attribute from a range of characters on a particular display line. 
 	 * If charEnd is past the EOL then the attributes will be cleared to the 
 	 * end-of-line.
 	 * 
-	 * @param lineNo the line number (starts at 0)
+	 * @param lineNo the display line number (starts at 0)
 	 * @param charStart the position of the first character to apply the attribute
 	 * @param charEnd the position after the last character to apply the attribute
 	 */
 	public void clearStyles(int lineNo, int charStart, int charEnd){
-		if(stext != null){
-			stext.clearAttributes(lineNo, charStart, charEnd);
-			bufferInvalid = true;
-		}
+		stext.clearAttributes(lineNo, charStart, charEnd);
+		bufferInvalid = true;
+	}
+
+	/**
+	 * Clears all text attribute from an entire display line.
+	 * 
+	 * @param lineNo the display line number (starts at 0)
+	 */
+	public void clearStyles(int lineNo){
+		stext.clearAttributes(lineNo);
+		bufferInvalid = true;
 	}
 
 	/**
@@ -286,58 +295,213 @@ public class GTextArea extends GEditableTextControl {
 			keepCursorInView = true;
 		}
 		ptx = pty = 0;
-		float sTextHeight;
-		// If needed update the vertical scrollbar
-		if(vsb != null){
-			sTextHeight = stext.getTextAreaHeight();
-			if(sTextHeight < th)
-				vsb.setValue(0.0f, 1.0f);
-			else 
-				vsb.setValue(0, th/sTextHeight);
-		}
-		// If needed update the horizontal scrollbar
-		if(hsb != null){
-			if(stext.getMaxLineLength() < tw)
-				hsb.setValue(0,1);
-			else
-				hsb.setValue(0, tw/stext.getMaxLineLength());
-		}
+		setScrollbarValues(ptx,pty);
 		bufferInvalid = true;				
 	}
 
 	/**
-	 * Add text to the end of the current text. This is useful for a logging' type activity.
+	 * Add text to the end of the current text. This is useful for a logging' type activity. <br>
 	 * 
-	 * @param extraText the text to append
+	 * No events will be generated and the caret will be moved to the end of any appended text. <br>
+	 * 
+	 * @param text the text to append
+	 * @return true if some characters were added
 	 */
-	public void appendText(String extraText){
-		if(extraText == null || extraText.equals(""))
-			return;
-		if(stext.insertCharacters(stext.length(), extraText, true) == 0)
-			return;
-
+	public boolean appendText(String text){
+		if(text == null || text.equals("") || stext.insertCharacters(text, stext.length(), true, false) == 0)
+			return false;
 		LinkedList<TextLayoutInfo> lines = stext.getLines(buffer.g2);
 		endTLHI.tli = lines.getLast();
 		endTLHI.thi = endTLHI.tli.layout.getNextRightHit(endTLHI.tli.nbrChars - 1);
 		startTLHI.copyFrom(endTLHI);
 		calculateCaretPos(endTLHI);
-		if(vsb != null){
-			float vfiller = Math.min(1, th/stext.getTextAreaHeight());
-			vsb.setValue(1 - vfiller, vfiller);
-			keepCursorInView = true;
-		}
-		// If needed update the horizontal scrollbar
-		if(hsb != null){
-			float hvalue = lines.getLast().layout.getVisibleAdvance();
-			float hlinelength = stext.getMaxLineLength();
-			float hfiller = Math.min(1, tw/hlinelength);
-			if(caretX < tw)
-				hsb.setValue(0,hfiller);
-			else 
-				hsb.setValue(hvalue/hlinelength, hfiller);
-			keepCursorInView = true;
-		}
+		setScrollbarValues(ptx,pty);
 		bufferInvalid = true;
+		return true;
+	}
+
+
+	/**
+	 * Insert text at the display position specified. <br>
+	 * 
+	 * The area line number starts at 0 and includes any lines scrolled off the top. So if
+	 * three lines have been scrolled off the top the first visible line is number 3. <br>
+	 * 
+	 * No events will be generated and the caret will be moved to the end of any inserted text. <br>
+	 * 
+	 * @param text the text to insert
+	 * @param lineNo the area line number
+	 * @param charNo the character position to insert text in display line
+	 * @return true if some characters were inserted
+	 */
+	public boolean insertText(String text, int lineNo, int charNo){
+		return insertText(text, lineNo, charNo, false, false);
+	}
+
+	/**
+	 * Insert text at the display position specified. <br>
+	 * 
+	 * The area line number starts at 0 and includes any lines scrolled off the top. So if
+	 * three lines have been scrolled off the top the first visible line is number 3. <br>
+	 * 
+	 * No events will be generated and the caret will be moved to the end of any inserted text. <br>
+	 * 
+	 * @param text the text to insert
+	 * @param lineNo the area line number
+	 * @param charNo the character position to insert text in display line
+	 * @param startWithEOL if true,inserted text will start on newline
+	 * @param endWithEOL if true, text after inserted text will start on new line
+	 * @return true if some characters were inserted
+	 */
+	public boolean insertText(String text, int lineNo, int charNo, boolean startWithEOL, boolean endWithEOL){
+		if(text != null && text.length() > 0){
+			int pos = stext.getPos(lineNo, charNo);
+			int change = stext.insertCharacters(text, lineNo, charNo, startWithEOL, endWithEOL);
+//			displayCaretPos("Caret starts at ");
+			if(change != 0){
+				// Move caret to end of insert if possible
+				pos += change;
+				TextLayoutHitInfo tlhi = stext.getTLHIforCharPosition(pos);
+				if(tlhi != null){
+					endTLHI.copyFrom(tlhi);
+					moveCaretLeft(endTLHI);
+					startTLHI.copyFrom(endTLHI);
+//					displayCaretPos("Caret ends at ");
+					calculateCaretPos(tlhi);
+					keepCursorInView = true;
+					showCaret = true;
+				}
+				setScrollbarValues(ptx,pty);
+				bufferInvalid = true;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Insert text at the current caret position. If the current caret position is undefined
+	 * the text will be inserted at the beginning of the text. <br>
+	 * 
+	 * No events will be generated and the caret will be moved to the end of any inserted text. <br>
+	 * 
+	 * @param text the text to insert
+	 * @param startWithEOL if true,inserted text will start on newline
+	 * @param endWithEOL if true, text after inserted text will start on new line
+	 * @return true if some characters were inserted
+	 */
+	public boolean insertText(String text, boolean startWithEOL, boolean endWithEOL){
+		int lineNo = 0, charNo = 0;
+		if(endTLHI.tli != null && endTLHI.thi != null){
+			lineNo = endTLHI.tli.lineNo;
+			charNo = endTLHI.thi.getCharIndex();
+		}
+		return insertText(text, lineNo, charNo, startWithEOL, endWithEOL);
+	}
+
+	/**
+	 * Insert text at the current caret position. If the current caret position is undefined
+	 * the text will be inserted at the beginning of the text. <br>
+	 * 
+	 * No events will be generated and the caret will be moved to the end of any inserted text. <br>
+	 * 
+	 * @param text the text to insert
+	 * @return true if some characters were inserted
+	 */
+	public boolean insertText(String text){
+		return insertText(text, false, false);
+	}
+
+	// For debugging only
+	@SuppressWarnings("unused")
+	private void displayCaretPos(String title){
+		if(endTLHI != null && endTLHI.tli != null && endTLHI.thi != null){
+			System.out.println(title + "  :: Carat on line " + endTLHI.tli.lineNo + "   at char " + endTLHI.thi.getCharIndex());
+		}
+		else {
+			System.out.println(title + "  :: unknown caret position");
+		}
+	}
+
+//	private void updateScrollbars(float hvalue){
+//		if(vsb != null){
+//			float vfiller = Math.min(1, th/stext.getTextAreaHeight());
+//			vsb.setValue(1 - vfiller, vfiller);
+//			keepCursorInView = true;
+//		}
+//		// If needed update the horizontal scrollbar
+//		if(hsb != null){
+//			//float hvalue = lines.getLast().layout.getVisibleAdvance();
+//			float hlinelength = stext.getMaxLineLength();
+//			float hfiller = Math.min(1, tw/hlinelength);
+//			if(caretX < tw)
+//				hsb.setValue(0,hfiller);
+//			else 
+//				hsb.setValue(hvalue/hlinelength, hfiller);
+//			keepCursorInView = true;
+//		}
+//	}
+
+	/**
+	 * Get the text on a particular line in the text area. <br>
+	 * The line does not need to be visible and the line numbers
+	 * always start at 0. <br>
+	 * The result is not dependent on what is visible at any 
+	 * particular time but on the overall position in text area 
+	 * control. <br>
+	 * If the line number is invalid then an empty string is returned. <br>
+	 * Trailing EOL characters are removed.
+	 * 
+	 * @param lineNo the text area line number we want
+	 * @return the plain text in a display line
+	 */
+	public String getText(int lineNo){
+		Graphics2D g2d = buffer.g2;
+		// Get the latest lines of text
+		LinkedList<TextLayoutInfo> lines = stext.getLines(g2d);
+		if(lineNo < 0 || lineNo >= lines.size())
+			return "";
+		TextLayoutInfo tli = lines.get(lineNo);
+		String s = stext.getPlainText(tli.startCharIndex, tli.startCharIndex + tli.nbrChars);
+		// Strip off trailing EOL
+		int p = s.length() - 1;
+		while(p > 0 && s.charAt(p) == EOL)
+			p--;
+		return (p == s.length() - 1) ? s : s.substring(0, p+1);
+	}
+
+	/**
+	 * Get the length of text on a particular line in the text area. <br>
+	 * The line does not need to be visible and the line numbers
+	 * always start at 0. <br>
+	 * The result is not dependent on what is visible at any 
+	 * particular time but on the overall position in text area 
+	 * control. <br>
+	 * If ignoreEOL is true then EOL characters are not included in the count.
+	 * 
+	 * @param lineNo the text area line number we want
+	 * @param ignoreEOL if true do not include trailing end=of-line characters
+	 * @return the length of the line, or <) if the line number is invalid
+	 */
+	public int getTextLength(int lineNo, boolean ignoreEOL){
+		Graphics2D g2d = buffer.g2;
+		// Get the latest lines of text
+		LinkedList<TextLayoutInfo> lines = stext.getLines(g2d);
+		if(lineNo < 0 || lineNo >= lines.size())
+			return -1;
+		TextLayoutInfo tli = lines.get(lineNo);
+		//	String s = stext.getPlainText(tli.startCharIndex, tli.startCharIndex + tli.nbrChars);
+		String s = stext.getPlainText();
+		int len = tli.nbrChars;
+		if(ignoreEOL){
+			// Strip off trailing EOL
+			int p = tli.startCharIndex + tli.nbrChars-1;
+			while(p > tli.startCharIndex && s.charAt(p) == EOL){
+				p--;
+				len--;
+			}
+		}
+		return len;
 	}
 
 	/**
@@ -345,19 +509,21 @@ public class GTextArea extends GEditableTextControl {
 	 */
 	protected void updateBuffer(){
 		if(bufferInvalid) {
+			bufferInvalid = false;
+			buffer.beginDraw();
 			Graphics2D g2d = buffer.g2;
+			g2d.setFont(localFont);
 			// Get the latest lines of text
 			LinkedList<TextLayoutInfo> lines = stext.getLines(g2d);
-			if(lines.isEmpty() && defaultText != null)
-				lines = defaultText.getLines(g2d);
 
-			bufferInvalid = false;
+			boolean usePromptText = promptText != null && !hasFocus() && (lines.isEmpty() || stext.getPlainText().equals("") || stext.getPlainText().equals(" "));
+			if(usePromptText)
+				lines = promptText.getLines(g2d);
 
 			TextLayoutHitInfo startSelTLHI = null, endSelTLHI = null;
-			buffer.beginDraw();
 			// Whole control surface if opaque
 			if(opaque)
-				buffer.background(palette[6]);
+				buffer.background(palette[6].getRGB());
 			else
 				buffer.background(buffer.color(255,0));
 
@@ -366,12 +532,23 @@ public class GTextArea extends GEditableTextControl {
 
 			// Typing area surface
 			buffer.noStroke();
-			buffer.fill(palette[7]);
+			buffer.fill(palette[7].getRGB());
 			buffer.rect(-1,-1,tw+2,th+2);
 
 			g2d.setClip(gpTextDisplayArea);
 			buffer.translate(-ptx, -pty);
 			// Translate in preparation for display selection and text
+
+			if(hasFocus() && stext.getPlainText().equals(" ")){
+				lines = stext.getLines(buffer.g2);
+				startTLHI = new TextLayoutHitInfo(lines.getFirst(), null);
+				startTLHI.thi = startTLHI.tli.layout.getNextLeftHit(1);
+
+				endTLHI = new TextLayoutHitInfo(lines.getLast(), null);
+				int lastChar = endTLHI.tli.layout.getCharacterCount();
+				endTLHI.thi = startTLHI.tli.layout.getNextRightHit(lastChar-1);
+			}
+
 			if(hasSelection()){
 				if(endTLHI.compareTo(startTLHI) == -1){
 					startSelTLHI = endTLHI;
@@ -388,17 +565,17 @@ public class GTextArea extends GEditableTextControl {
 				TextLayout layout = lineInfo.layout;
 				buffer.translate(0, layout.getAscent());
 				// Draw selection if any
-				if(hasSelection() && lineInfo.compareTo(startSelTLHI.tli) >= 0 && lineInfo.compareTo(endSelTLHI.tli) <= 0 ){				
+				if(!usePromptText && hasSelection() && lineInfo.compareTo(startSelTLHI.tli) >= 0 && lineInfo.compareTo(endSelTLHI.tli) <= 0 ){				
 					int ss = 0;
 					ss = (lineInfo.compareTo(startSelTLHI.tli) == 0) ? startSelTLHI.thi.getInsertionIndex()  : 0;
 					int ee = endSelTLHI.thi.getInsertionIndex();
 					ee = (lineInfo.compareTo(endSelTLHI.tli) == 0) ? endSelTLHI.thi.getInsertionIndex() : lineInfo.nbrChars-1;
-					g2d.setColor(jpalette[14]);
+					g2d.setColor(palette[14]);
 					Shape selShape = layout.getLogicalHighlightShape(ss, ee);
 					g2d.fill(selShape);
 				}
 				// display text
-				g2d.setColor(jpalette[2]);
+				g2d.setColor(palette[2]);
 				lineInfo.layout.draw(g2d, 0, 0);
 				buffer.translate(0, layout.getDescent() + layout.getLeading());
 			}
@@ -452,7 +629,6 @@ public class GTextArea extends GEditableTextControl {
 		// Update buffer if invalid
 		updateBuffer();
 		winApp.pushStyle();
-
 		winApp.pushMatrix();
 		// Perform the rotation
 		winApp.translate(cx, cy);
@@ -474,12 +650,11 @@ public class GTextArea extends GEditableTextControl {
 			float y_top = - pty + endTLHI.tli.yPosInPara; 
 			float y_bot = y_top - cinfo[3] + cinfo[5];
 			if(x_left >= 0 && x_left <= tw && y_top >= 0 && y_bot <= th){
-				winApp.strokeWeight(1.9f);
-				winApp.stroke(palette[15]);
-				winApp.line(tx+x_left, ty+Math.max(0, y_top), tx+x_left, ty+Math.min(th, y_bot));
+				winApp.strokeWeight(1.5f);
+				winApp.stroke(palette[12].getRGB());
+				winApp.line(tx+x_left, ty + Math.max(0, y_top), tx+x_left, ty + Math.min(th, y_bot));
 			}
 		}
-
 		winApp.popMatrix();
 		// Draw scrollbars
 		if(children != null){
@@ -492,7 +667,7 @@ public class GTextArea extends GEditableTextControl {
 
 	public PGraphics getSnapshot(){
 		updateBuffer();
-		PGraphicsJava2D snap = (PGraphicsJava2D) winApp.createGraphics(buffer.width, buffer.height, PApplet.JAVA2D);
+		PGraphics snap = winApp.createGraphics(buffer.width, buffer.height, PApplet.JAVA2D);
 		snap.beginDraw();
 		snap.image(buffer,0,0);
 		if(hsb != null){
@@ -503,7 +678,8 @@ public class GTextArea extends GEditableTextControl {
 		}
 		if(vsb != null){
 			snap.pushMatrix();
-			snap.translate(vsb.getX(), vsb.getY());
+			//snap.translate(vsb.getX(), vsb.getY() - vsb.width);
+			snap.translate(width - TPAD6, TPAD6);
 			snap.rotate(PApplet.PI/2);
 			snap.image(vsb.getBuffer(), 0, 0);
 			snap.popMatrix();
@@ -548,6 +724,8 @@ public class GTextArea extends GEditableTextControl {
 				// moved to match end caret position.
 				shiftDown = true;
 			}
+			else
+				validKeyCombo = false;
 			break;
 		case 'C':
 			if(ctrlDown)
@@ -561,11 +739,13 @@ public class GTextArea extends GEditableTextControl {
 					// delete selection and add 
 					if(hasSelection())
 						stext.deleteCharacters(pos, nbr);
-					stext.insertCharacters(pos, p);
+					stext.insertCharacters(p, pos);
 					adjust = p.length();
 					textChanged = true;
 				}
 			}
+			else
+				validKeyCombo = false;
 			break;
 		default:
 			validKeyCombo = false;
@@ -574,7 +754,7 @@ public class GTextArea extends GEditableTextControl {
 		if(validKeyCombo){
 			calculateCaretPos(endTLHI);
 			//****************************************************************
-			// If we have moved  to the end of a paragraph marker
+			// If we have moved to the end of a paragraph marker
 			if(caretX > stext.getWrapWidth()){
 				switch(keyCode){
 				case LEFT:
@@ -607,11 +787,10 @@ public class GTextArea extends GEditableTextControl {
 		int ascii = (int)keyChar;
 		newline = false;
 		backspace = false;
-
-		if(ascii >= 32 && ascii < 127){
+		if(isDisplayable(ascii)){
 			if(hasSelection())
 				stext.deleteCharacters(pos, nbr);
-			stext.insertCharacters(pos, "" + keyChar);
+			stext.insertCharacters("" + keyChar, pos);
 			adjust = 1; textChanged = true;
 		}
 		else if(keyChar == BACKSPACE){
@@ -650,7 +829,7 @@ public class GTextArea extends GEditableTextControl {
 		}
 		// If we have emptied the text then recreate a one character string (space)
 		if(stext.length() == 0){
-			stext.insertCharacters(0, " ");
+			stext.insertCharacters(" ", 0);
 			adjust++; textChanged = true;
 		}
 	}
@@ -662,7 +841,7 @@ public class GTextArea extends GEditableTextControl {
 		// Do we have to move cursor to start of next line
 		if(newline) {
 			if(pos >= stext.length()){
-				stext.insertCharacters(pos, " ");
+				stext.insertCharacters(" ", pos);
 				stext.getLines(buffer.g2);
 			}
 			moveCaretRight(endTLHI);
@@ -675,7 +854,7 @@ public class GTextArea extends GEditableTextControl {
 				calculateCaretPos(endTLHI);
 			}
 			if(pos >= stext.length()){
-				stext.insertCharacters(pos, " ");
+				stext.insertCharacters(" ", pos);
 				stext.getLines(buffer.g2);
 			}
 		}
@@ -802,17 +981,59 @@ public class GTextArea extends GEditableTextControl {
 	 */
 	public void moveCaretTo(int lineNo, int charNo){
 		try {
-			TextLayoutHitInfo thli = stext.getTLHIforCharPosition(lineNo, charNo);
-			if(thli != null){
-				startTLHI.copyFrom(thli);
-				endTLHI.copyFrom(thli);
-				calculateCaretPos(thli);
+			TextLayoutHitInfo tlhi = stext.getTLHIforCharPosition(lineNo, charNo);
+			if(tlhi != null){
+				startTLHI.copyFrom(tlhi);
+				endTLHI.copyFrom(tlhi);
+				calculateCaretPos(tlhi);
 				keepCursorInView = true;
 				showCaret = true;
 			}
 		}
 		catch(Exception e){}
 	}
+
+	/**
+	 * Get the current caret position. <br>
+	 * 
+	 * The method will always return a 2 element array with the current caret position 
+	 * { line no, char no } <br>
+	 * 
+	 * If the current caret position is undefined then it will return the array { -1, -1 }
+	 * 
+	 * @return a two element int array holding the caret position.
+	 */
+	public int[] getCaretPos(){
+		return getCaretPos(null);
+	}
+	
+	/**
+	 * Get the current caret position. <br>
+	 * 
+	 * If the parameter is a 2 element int array then it will be populated with the line number [0]
+	 * and character no [1] of the caret's current position. <br>
+	 * 
+	 * The method will always return a 2 element array with the current caret position 
+	 * { line no, char no } <br>
+	 * 
+	 * If the current caret position is undefined then it will return the array { -1, -1 }
+	 * 
+	 * @param cpos array to be populated with caret position
+	 * @return a two element int array holding the caret position.
+	 */
+	public int[] getCaretPos(int [] cpos){
+		if(cpos == null || cpos.length != 2)
+			cpos = new int[2];
+		if(endTLHI == null || endTLHI.tli == null || endTLHI.thi == null){
+			cpos[0] = cpos[1] = -1;
+		}
+		else {
+			cpos[0] = endTLHI.tli.lineNo;
+			cpos[1] = endTLHI.thi.getCharIndex();
+		}
+		return cpos;
+	}
+	
 	/**
 	 * Will respond to mouse events.
 	 */
@@ -837,12 +1058,22 @@ public class GTextArea extends GEditableTextControl {
 					takeFocus();
 				}
 				dragging = false;
-				if(stext == null || stext.length() == 0){
-					stext = new StyledString(" ", wrapWidth);
-					stext.getLines(buffer.g2);
+				// If there is just a space then select it so it gets deleted on first key press
+				if(stext.getPlainText().equals(""))
+					stext.setText(" ", stext.getWrapWidth());
+				if(stext.getPlainText().equals(" ")){
+					LinkedList<TextLayoutInfo> lines = stext.getLines(buffer.g2);
+					startTLHI = new TextLayoutHitInfo(lines.getFirst(), null);
+					startTLHI.thi = startTLHI.tli.layout.getNextLeftHit(1);
+
+					endTLHI = new TextLayoutHitInfo(lines.getLast(), null);
+					int lastChar = endTLHI.tli.layout.getCharacterCount();
+					endTLHI.thi = startTLHI.tli.layout.getNextRightHit(lastChar-1);
 				}
-				endTLHI = stext.calculateFromXY(buffer.g2, ox + ptx, oy + pty);
-				startTLHI = new TextLayoutHitInfo(endTLHI);
+				else {
+					endTLHI = stext.calculateFromXY(buffer.g2, ox + ptx, oy + pty);
+					startTLHI = new TextLayoutHitInfo(endTLHI);
+				}
 				calculateCaretPos(endTLHI);
 				bufferInvalid = true;
 			}
@@ -873,7 +1104,5 @@ public class GTextArea extends GEditableTextControl {
 		caretX = temp[0];		
 		caretY = tlhi.tli.yPosInPara;
 	}
-
-
 
 }

@@ -81,4 +81,3 @@ public void makeSliderConfigControls() {
 
   btnMakeCode = new GButton(this, x + 100, y + 20, 182, 38, "Place code for existing configuration on clipboard");
 }
-

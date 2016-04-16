@@ -1,7 +1,7 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
   Copyright (c) 2013 Peter Lager
 
@@ -24,11 +24,7 @@
 package g4p_controls;
 
 import g4p_controls.HotSpot.HSrect;
-
-import java.awt.RenderingHints;
-
 import processing.core.PApplet;
-import processing.core.PGraphicsJava2D;
 import processing.event.MouseEvent;
 
 /**
@@ -79,16 +75,12 @@ public class GSlider2D extends GValueControl2D {
 		super(theApplet, p0, p1, p2, p3);
 		// Enforce minimum size constraint
 		if(width < 40 || height < 40)
-			resize(PApplet.max(width,40), PApplet.max(height,40));
+			resize(PApplet.max(Math.round(width),40), PApplet.max(Math.round(height),40));
 	
 		dragWidth = width - THUMB_SIZE - 2 * BORDER_WIDTH;
 		dragHeight = height - THUMB_SIZE - 2 * BORDER_WIDTH;
 		dragD = 2 + THUMB_SIZE/2;
 		
-		buffer = (PGraphicsJava2D) winApp.createGraphics((int)width, (int)height, PApplet.JAVA2D);
-		buffer.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-				RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-		buffer.g2.setFont(G4P.numericLabelFont);
 		hotspots = new HotSpot[]{
 				new HSrect(THUMB_SPOT, dragD - HALF_THUMB_SIZE + parametricPosX * dragWidth, 
 						dragD - HALF_THUMB_SIZE + parametricPosY * dragHeight, THUMB_SIZE, THUMB_SIZE ),  // thumb
@@ -100,13 +92,13 @@ public class GSlider2D extends GValueControl2D {
 		opaque = true;
 		
 		// Now register control with applet
-		createEventHandler(G4P.sketchApplet, "handleSlider2DEvents",
+		createEventHandler(G4P.sketchWindow, "handleSlider2DEvents",
 				new Class<?>[]{ GSlider2D.class, GEvent.class },
 				new String[]{ "slider2d", "event" }
 		);
 		registeredMethods = PRE_METHOD | DRAW_METHOD | MOUSE_METHOD;
 		cursorOver = HAND;
-		G4P.addControl(this);
+		G4P.registerControl(this);
 	}
 
 	/**
@@ -570,7 +562,7 @@ public class GSlider2D extends GValueControl2D {
 			buffer.rectMode(PApplet.CENTER);
 			// Back ground colour
 			if(opaque == true)
-				buffer.background(palette[BACK]);
+				buffer.background(palette[BACK].getRGB());
 			else
 				buffer.background(buffer.color(255,0));
 
@@ -578,22 +570,22 @@ public class GSlider2D extends GValueControl2D {
 			// Draw thumb cursor lines
 			float tx = dragD + parametricPosX * dragWidth;
 			float ty = dragD + parametricPosY * dragHeight;
-			buffer.stroke(palette[TBORDER]);
+			buffer.stroke(palette[TBORDER].getRGB());
 			buffer.strokeWeight(1);
 			buffer.line(0, ty, width, ty);
 			buffer.line(tx, 0, tx, height);
 			switch(status){
 			case OFF_CONTROL:
-				buffer.fill(palette[TOFF]);
+				buffer.fill(palette[TOFF].getRGB());
 				break;
 			case OVER_CONTROL:
-				buffer.fill(palette[TOVER]);
+				buffer.fill(palette[TOVER].getRGB());
 				break;
 			case PRESS_CONTROL:
-				buffer.fill(palette[TDOWN]);
+				buffer.fill(palette[TDOWN].getRGB());
 				break;
 			case DRAG_CONTROL:
-				buffer.fill(palette[TDRAG]);
+				buffer.fill(palette[TDRAG].getRGB());
 				break;
 			}
 			buffer.rect(tx, ty, THUMB_SIZE, THUMB_SIZE);
@@ -601,10 +593,10 @@ public class GSlider2D extends GValueControl2D {
 			// Draw control border
 			buffer.rectMode(PApplet.CORNERS);
 			buffer.noFill();
-			buffer.stroke(palette[LBORDER]);
+			buffer.stroke(palette[LBORDER].getRGB());
 			buffer.strokeWeight(2);
 			buffer.rect(0,0,width-1,height-1);
-			buffer.stroke(palette[DBORDER]);
+			buffer.stroke(palette[DBORDER].getRGB());
 			buffer.strokeWeight(1);
 			buffer.rect(1,1,width-1,height-1);
 			

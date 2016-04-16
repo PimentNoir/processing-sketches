@@ -1,17 +1,18 @@
-/**
-Simple sketch to experiment with the different dialogs
-available to you in the G4P library.
-
-The file diaologs will not work in an applet hosted on
-a website unless you digitally sign the jars.
-
-The file dialogs match the behaviour of those in Processing 
-V1.5.1 i.e. immediate mode rather than on a seperate thread
-as in 2.0
-
-created by Peter Lager
-
-*/
+/*
+ Simple sketch to experiment with the different dialogs
+ available to you in the G4P library.
+ 
+ The file diaologs will not work in an applet hosted on
+ a website unless you digitally sign the jars.
+ 
+ The file dialogs match the behaviour of those in Processing 
+ V1.5.1 i.e. immediate mode rather than on a seperate thread
+ as in V2 and V3
+ 
+ for Processing V2 and V3
+ (c) 2015 Peter Lager
+ 
+ */
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -170,10 +171,7 @@ public void handleColorChooser() {
 
 // Handles events from checkbox and option controls.
 public void handleToggleControlEvents(GToggleControl checkbox, GEvent event) {
-  if (checkbox == cbxUseNative) {
-    PApplet.useNativeSelect = cbxUseNative.isSelected();
-  }
-  else if (checkbox.tagNo >= 6000 ) {
+  if (checkbox.tagNo >= 6000 ) {
     switch(checkbox.tagNo / 1000) {
     case 6:
       od_mtype = checkbox.tagNo % 6000;
@@ -251,12 +249,12 @@ public void createMessageDialogGUI(int x, int y, int w, int h, int border) {
   GLabel dtitle = new GLabel(this, x+w-190, y+20, 190, 20);
   dtitle.setText("Dialog title", GAlign.LEFT, GAlign.MIDDLE);
   txfMdTitle = new GTextField(this, x+w-190, y+40, 190, 20);
-  txfMdTitle.setDefaultText("Enter dialog title");
+  txfMdTitle.setPromptText("Enter dialog title");
   GLabel dmess = new GLabel(this, x+w-190, y+60, 190, 20);
   dmess.setText("Dialog message", GAlign.LEFT, GAlign.MIDDLE);
   txfSMMessage = new GTextArea(this, x+w-193, y+75, 196, 100);
   txfSMMessage.setOpaque(false);
-  txfSMMessage.setDefaultText("Enter dialog message");
+  txfSMMessage.setPromptText("Enter dialog message");
 }
 
 public void createOptionDialogGUI(int x, int y, int w, int h, int border) {
@@ -305,12 +303,12 @@ public void createOptionDialogGUI(int x, int y, int w, int h, int border) {
   GLabel dtitle = new GLabel(this, x+w-190, y+20, 190, 20);
   dtitle.setText("Dialog title", GAlign.LEFT, GAlign.MIDDLE);
   txfOdTitle = new GTextField(this, x+w-190, y+40, 190, 20);
-  txfOdTitle.setDefaultText("Enter dialog title");
+  txfOdTitle.setPromptText("Enter dialog title");
   GLabel dmess = new GLabel(this, x+w-190, y+60, 190, 20);
   dmess.setText("Dialog message", GAlign.LEFT, GAlign.MIDDLE);
   txfOdMessage = new GTextArea(this, x+w-193, y+75, 196, 100);
   txfOdMessage.setOpaque(false);
-  txfOdMessage.setDefaultText("Enter dialog message");
+  txfOdMessage.setPromptText("Enter dialog message");
 }
 
 public void createFileSystemGUI(int x, int y, int w, int h, int border) {
@@ -332,20 +330,15 @@ public void createFileSystemGUI(int x, int y, int w, int h, int border) {
   btnFolder = new GButton(this, x, y+30, bw, 20, "Folder");
   btnInput = new GButton(this, x+bs, y+30, bw, 20, "Input");
   btnOutput = new GButton(this, x+2*bs, y+30, bw, 20, "Output");
-  lblFile = new GLabel(this, x, y+60, w, 44);
+  lblFile = new GLabel(this, x, y+60, w, 60);
   lblFile.setTextAlign(GAlign.LEFT, GAlign.MIDDLE);
   lblFile.setOpaque(true);
   lblFile.setLocalColorScheme(G4P.GREEN_SCHEME);
-  // Use native or Java Swing dialogs
-  cbxUseNative = new GCheckbox(this, x, y + h - 14, w, 20, "Use native controls");
-  cbxUseNative.setSelected(true);
-  cbxUseNative.setTextItalic();
 }
 
 // Controls used for file dialog GUI 
 GButton btnFolder, btnInput, btnOutput;
 GLabel lblFile;
-GCheckbox cbxUseNative;
 
 // Controls used for message dialog GUI 
 GButton btnMdialog;
@@ -372,5 +365,3 @@ int sel_col = -1;
 
 // Graphic frames used to group controls
 ArrayList<Rectangle> rects ;
-
-

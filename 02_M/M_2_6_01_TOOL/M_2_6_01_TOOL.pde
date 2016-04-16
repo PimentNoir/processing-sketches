@@ -72,9 +72,6 @@ float saturationValue = 0;
 float brightnessValue = 0;
 boolean invertHue = false;
 
-// listen to window events
-FrameListener myFrameListener = new FrameListener();
-
 
 // ------ mouse interaction ------
 
@@ -106,7 +103,10 @@ void setup() {
   size(800, 800);
 
   // make window resizable
-  frame.setResizable(true);
+  // Attention: with Processing 3.0 windows resizing behaves differently than before.
+  // You might uncomment the folling line, but the screen will not be updated
+  // automativally, when resizing the window.
+  //surface.setResizable(true);
 
   smooth();
 
@@ -283,7 +283,7 @@ void draw() {
 
   // image output
   if (saveOneFrame) {
-    if (controlP5.group("menu").isOpen()) {
+    if (controlP5.getGroup("menu").isOpen()) {
       saveFrame(timestamp()+"_menu.png");
     }
     saveOneFrame = false;
@@ -318,31 +318,31 @@ void reset() {
   // reset controllers
   Range r;
   Toggle t;
-  controlP5.controller("imageAlpha").setValue(30.0);
-  controlP5.controller("eraserRadius").setValue(20.0);
-  controlP5.controller("zoom").setValue(1.0);
+  controlP5.getController("imageAlpha").setValue(30.0);
+  controlP5.getController("eraserRadius").setValue(20.0);
+  controlP5.getController("zoom").setValue(1.0);
 
   if (invertBackground == true) {
-    t = (Toggle) controlP5.controller("invertBackground");
+    t = (Toggle) controlP5.getController("invertBackground");
     t.setState(false);
   }  
-  controlP5.controller("lineWeight").setValue(1.0);
-  controlP5.controller("lineAlpha").setValue(50.0);
+  controlP5.getController("lineWeight").setValue(1.0);
+  controlP5.getController("lineAlpha").setValue(50.0);
 
-  r = (Range) controlP5.controller("hueRange");
+  r = (Range) controlP5.getController("hueRange");
   r.setLowValue(0);
   r.setHighValue(100);
-  controlP5.controller("saturationValue").setValue(0.0);
-  controlP5.controller("brightnessValue").setValue(0.0);
+  controlP5.getController("saturationValue").setValue(0.0);
+  controlP5.getController("brightnessValue").setValue(0.0);
   if (invertHue == true) {
-    t = (Toggle) controlP5.controller("invertHue");
+    t = (Toggle) controlP5.getController("invertHue");
     t.setState(false);
   }
 
-  controlP5.controller("connectionRadius").setValue(150.0);
+  controlP5.getController("connectionRadius").setValue(150.0);
 
   if (connectAllPoints == false) {
-    t = (Toggle) controlP5.controller("connectAllPoints");
+    t = (Toggle) controlP5.getController("connectAllPoints");
     t.setState(true);
   }
 }
@@ -424,12 +424,12 @@ void savePointPathSelected(File selection) {
 void keyPressed() {
 
   if (key=='m' || key=='M') {
-    GUI = controlP5.group("menu").isOpen();
+    GUI = controlP5.getGroup("menu").isOpen();
     GUI = !GUI;
     guiEvent = true;
   }
-  if (GUI) controlP5.group("menu").open();
-  else controlP5.group("menu").close();
+  if (GUI) controlP5.getGroup("menu").open();
+  else controlP5.getGroup("menu").close();
 
   if (key=='s' || key=='S') {
     saveOneFrame = true;
@@ -491,35 +491,7 @@ void mouseReleased() {
 }
 
 
-void windowResized() {
-  // Intercept resize event, set flag to
-  // recalculate positions and call redraw()
-  i1 = 0;
-} 
-
 
 String timestamp() {
   return String.format("%1$ty%1$tm%1$td_%1$tH%1$tM%1$tS", Calendar.getInstance());
 }
-
-
-
-// we need to redraw, if the window had been resized 
-class FrameListener implements ComponentListener {
-  FrameListener() {
-    addComponentListener( this );
-  } 
-
-  public void componentResized( ComponentEvent e ) {
-    i1 = 0;
-  }
-  public void componentHidden( ComponentEvent e ) {
-  }
-  public void componentMoved( ComponentEvent e ) {
-  }
-  public void componentShown( ComponentEvent e ) {
-  }
-} 
-
-
-

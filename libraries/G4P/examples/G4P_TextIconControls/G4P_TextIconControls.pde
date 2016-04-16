@@ -1,12 +1,14 @@
-/**
- This sketch is used show controls that uae a mixture of
+/*
+ This sketch is used show controls that use a mixture of
  text and icons and allows you to experiment with text 
  and icon alignment options.
  
  It also uses the droplist control extensively.
  controls available in the G4P library.
  
- created by Peter Lager
+ for Processing V3
+ (c) 2015 Peter Lager
+ 
  */
 
 import g4p_controls.*;
@@ -27,7 +29,7 @@ int bgcol = 240;
 
 public void setup() {
   size(560, 380);
-  G4P.setCursorOff(CROSS);
+  G4P.setCursor(CROSS);
 
   // Get some sample text for later
   String[] lines = loadStrings("tisample.txt");
@@ -68,10 +70,10 @@ public void setup() {
   opt2 = new GOption(this, 200, 54, 100, 18, "Option 2");
   tg.addControl(opt2);
   controls.add(opt2);
-  
+
   opt0.setSelected(true);
   tg.addControls(opt0, opt1, opt2);
-  
+
   cbx0 = new GCheckbox(this, 200, 76, 100, 20, "Tick box");
   controls.add(cbx0);
   makeTextIconConfigControls();
@@ -111,23 +113,19 @@ public void handleToggleControlEvents(GToggleControl option, GEvent event) {
     for (GTextIconAlignBase control : controls) {
       control.setTextPlain();
       control.setTextBold();
-    }
-  else if (option == optItalic)
+    } else if (option == optItalic)
     for (GTextIconAlignBase control : controls) {
       control.setTextPlain();
       control.setTextItalic();
-    }
-  else if (option == optItalic)
+    } else if (option == optItalic)
     for (GTextIconAlignBase control : controls) {
       control.setTextPlain();
       control.setTextItalic();
-    }
-  else if (option == optBoldItalic)
+    } else if (option == optBoldItalic)
     for (GTextIconAlignBase control : controls) {
       control.setTextBold();
       control.setTextItalic();
-    }
-  else if (option == cbxOpaque)
+    } else if (option == cbxOpaque)
     for (GTextIconAlignBase control : controls)
       control.setOpaque(cbxOpaque.isSelected());
 }

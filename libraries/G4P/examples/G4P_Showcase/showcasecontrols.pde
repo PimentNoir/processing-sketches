@@ -22,11 +22,11 @@ public void makeDemoControls() {
   // when not needed.
   txaDemo = new GTextArea(this, 4, 24, 220, 96, G4P.SCROLLBARS_BOTH | G4P.SCROLLBARS_AUTOHIDE);
   txaDemo.setText(startText, 250);
-  txaDemo.setDefaultText("Please enter some text");
+  txaDemo.setPromptText("Please enter some text");
   pnlControls.addControl(txaDemo);
   // Create a text field with horizontal scrollbar
-  txfDemo = new GTextField(this, 4, 126, 220, 30, G4P.SCROLLBAR_HORIZONTAL | G4P.SCROLLBARS_AUTOHIDE);
-  txfDemo.setDefaultText("This is default text");
+  txfDemo = new GTextField(this, 4, 126, 220, 30, G4P.SCROLLBARS_HORIZONTAL_ONLY | G4P.SCROLLBARS_AUTOHIDE);
+  txfDemo.setPromptText("This is prompt text");
   pnlControls.addControl(txfDemo);
   // Add tab controls
   tt = new GTabManager();

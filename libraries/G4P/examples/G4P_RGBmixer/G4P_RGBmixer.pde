@@ -6,7 +6,9 @@
  of each one. They are used to control the RGB balance for 
  the rectangle fill.
  
- (c)2012 Peter Lager
+ for Processing V2 and V3
+ (c) 2015 Peter Lager
+ 
  */
 
 import g4p_controls.*;
@@ -24,10 +26,10 @@ void setup() {
   ky = 20;
 
   label = new GLabel(this, 0, height - 26, width, 26, 
-        "Drag mouse in a circular movement around the knobs centre");
+    "Drag mouse in a circular movement around the knobs centre");
   label.setOpaque(true);
   label.setLocalColorScheme(G4P.CYAN_SCHEME);
-  
+
   knbRed = new GKnob(this, kx, ky, 150, 150, 0.8);
   knbRed.setTurnRange(150, 270);
   knbRed.setTurnMode(G4P.CTRL_ANGULAR);

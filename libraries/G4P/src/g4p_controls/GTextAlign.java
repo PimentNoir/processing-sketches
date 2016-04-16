@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -82,20 +82,20 @@ public abstract class GTextAlign extends GTextBase {
 	protected void calcAlignment(){
 		switch(textAlignH){
 		case RIGHT:
-			stX = width - stext.getWrapWidth() - TPAD;
+			stX = width - stext.getWrapWidth() - TPAD2;
 			break;
 		case LEFT:
 		case CENTER:
 		case JUSTIFY:
 		default:
-			stX = TPAD;	
+			stX = TPAD2;	
 		}
 		switch(textAlignV){
 		case TOP:
-			stY = TPAD;
+			stY = TPAD2;
 			break;
 		case BOTTOM:
-			stY = height - stext.getTextAreaHeight() - TPAD;
+			stY = height - stext.getTextAreaHeight() - TPAD2;
 			break;
 		case MIDDLE:
 		default:

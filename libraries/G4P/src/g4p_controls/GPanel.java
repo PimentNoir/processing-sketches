@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -31,7 +31,6 @@ import java.awt.font.TextLayout;
 import java.util.LinkedList;
 
 import processing.core.PApplet;
-import processing.core.PGraphicsJava2D;
 import processing.event.MouseEvent;
 
 
@@ -90,7 +89,7 @@ public class GPanel extends GTextBase {
 	 * @param p3 height of the panel (excl. tab)
 	 */
 	public GPanel(PApplet theApplet, float p0, float p1, float p2, float p3) {
-		this(theApplet, p0, p1, 2, p3, "Panel");
+		this(theApplet, p0, p1, p2, p3, "Panel        ");
 	}
 	
 	/**
@@ -117,10 +116,6 @@ public class GPanel extends GTextBase {
 			setDragArea();
 		// Create the list of children
 		children = new LinkedList<GAbstractControl>();
-		// The image buffer is just for the tab area
-		buffer = (PGraphicsJava2D) winApp.createGraphics((int)width, (int)height, PApplet.JAVA2D);
-		buffer.rectMode(PApplet.CORNER);
-		buffer.g2.setFont(localFont);
 		setText(text);
 		calcHotSpots();
 		constrainPanelPosition();
@@ -129,13 +124,13 @@ public class GPanel extends GTextBase {
 		dockY = y;
 		z = Z_PANEL;
 
-		createEventHandler(G4P.sketchApplet, "handlePanelEvents", 
+		createEventHandler(G4P.sketchWindow, "handlePanelEvents", 
 				new Class<?>[]{ GPanel.class, GEvent.class },
 				new String[]{ "panel", "event" } 
 		);
 		registeredMethods = DRAW_METHOD | MOUSE_METHOD;
 		cursorOver = HAND;
-		G4P.addControl(this);
+		G4P.registerControl(this);
 	}
 
 	/**
@@ -172,7 +167,9 @@ public class GPanel extends GTextBase {
 	
 	public void setText(String text){
 		super.setText(text);
+		buffer.beginDraw();
 		stext.getLines(buffer.g2);
+		buffer.endDraw();
 		tabHeight = (int) (stext.getMaxLineHeight() + 4);
 		tabWidth = (int) (stext.getMaxLineLength() + 8);
 		calcHotSpots();
@@ -206,9 +203,9 @@ public class GPanel extends GTextBase {
 	 */
 	public void draw(){
 		if(!visible) return;
+		winApp.pushStyle();
 		// Update buffer if invalid
 		updateBuffer();
-		winApp.pushStyle();
 
 		winApp.pushMatrix();
 		// Perform the rotation
@@ -224,7 +221,6 @@ public class GPanel extends GTextBase {
 			if(alphaLevel < 255)
 				winApp.tint(TINT_FOR_ALPHA, alphaLevel);
 			winApp.image(buffer, 0, 0);	
-
 			winApp.popMatrix();
 		}
 		// Draw the children
@@ -240,26 +236,29 @@ public class GPanel extends GTextBase {
 
 	protected void updateBuffer(){
 		if(bufferInvalid) {
-			Graphics2D g2d = buffer.g2;
+			bufferInvalid = false;
 			buffer.beginDraw();
-
-			buffer.background(buffer.color(255,0));
+			Graphics2D g2d = buffer.g2;
+			g2d.setFont(localFont);
+			buffer.clear();
+			// Draw tab
 			buffer.noStroke();
-			buffer.fill(palette[4]);
+			buffer.fill(palette[4].getRGB());
 			if(tabOnly){
 				buffer.rect(0, 0, tabWidth, tabHeight);	
 			}
 			else {
 				buffer.rect(0, 0, width, tabHeight);
 			}
+			// Draw tab text (panel name)
 			stext.getLines(g2d);
-			g2d.setColor(jpalette[12]);
+			g2d.setColor(palette[2]);
 			TextLayout tl = stext.getTLIforLineNo(0).layout;
 			tl.draw(g2d, 4, 2 + tl.getAscent());
-
+			// Draw extended panel background
 			if(!tabOnly){
 				buffer.noStroke();
-				buffer.fill(palette[5]);
+				buffer.fill(palette[5].getRGB());
 				buffer.rect(0, tabHeight, width, height - tabHeight);
 			}
 			buffer.endDraw();
@@ -313,10 +312,10 @@ public class GPanel extends GTextBase {
 					dockX = x;
 					dockY = y;
 					// Open panel move on screen if needed
-					if(y + height > winApp.getHeight())
-						y = winApp.getHeight() - height;
-					if(x + width > winApp.getWidth())
-						x = winApp.getWidth() - width;
+					if(y + height > winApp.height)
+						y = winApp.height - height;
+					if(x + width > winApp.width)
+						x = winApp.width - width;
 				}
 				// Maintain centre for drawing purposes
 				cx = x + width/2;
@@ -326,6 +325,7 @@ public class GPanel extends GTextBase {
 					fireEvent(this, GEvent.COLLAPSED);
 				else
 					fireEvent(this, GEvent.EXPANDED);
+				bufferInvalid = true;
 				beingDragged = false;
 				// This component does not keep the focus when clicked
 				loseFocus(null);

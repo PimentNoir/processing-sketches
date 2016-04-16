@@ -3,7 +3,8 @@
  Processing) library. The button face comes from user supplied
  image files.
  
- (c) 2012 Peter Lager
+ for Processing V2 and V3
+ (c) 2015 Peter Lager
  */
 
 import g4p_controls.*;

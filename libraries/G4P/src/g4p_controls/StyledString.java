@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-13 Peter Lager
+  Copyright (c) 2013 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -27,6 +27,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GraphicAttribute;
 import java.awt.font.ImageGraphicAttribute;
@@ -66,13 +67,15 @@ import processing.core.PApplet;
  */
 public final class StyledString implements GConstantsInternal, Serializable {
 
-	private static final long serialVersionUID = 8380395122026579368L;
+	private static final long serialVersionUID = -8272976313009558508L;
 
 	transient private AttributedString styledText = null;
 	transient private ImageGraphicAttribute spacer = null;
 	transient private LineBreakMeasurer lineMeasurer = null;
 	transient private LinkedList<TextLayoutInfo> linesInfo = new LinkedList<TextLayoutInfo>();
 	transient private Font font = null;
+
+	private static final char EOL = '\n';
 
 	// The plain text to be styled
 	private String plainText = "";
@@ -114,6 +117,7 @@ public final class StyledString implements GConstantsInternal, Serializable {
 		spacer = getParagraghSpacer(1); //  safety
 		// Get rid of any EOLs
 		styledText = new AttributedString(plainText);
+		clearAttributes();
 		applyAttributes();
 		invalidText = true;
 		invalidLayout = true;
@@ -122,8 +126,8 @@ public final class StyledString implements GConstantsInternal, Serializable {
 	/**
 	 * Supports multiple lines of text wrapped on word boundaries. <br>
 	 * 
-	 * @param startText
-	 * @param wrapWidth
+	 * @param startText the text to use
+	 * @param wrapWidth the wrap width
 	 */
 	public StyledString(String startText, int wrapWidth){
 		if(wrapWidth > 0 && wrapWidth < Integer.MAX_VALUE)
@@ -132,9 +136,45 @@ public final class StyledString implements GConstantsInternal, Serializable {
 		spacer = getParagraghSpacer(this.wrapWidth);
 		styledText = new AttributedString(plainText);
 		styledText = insertParagraphMarkers(plainText, styledText);
+		clearAttributes();
 		applyAttributes();
 		invalidText = true;
 		invalidLayout = true;
+	}
+
+	/**
+	 * Change the text for single line styled string
+	 * @param text the text to use
+	 */
+	public void setText(String text){
+		setText(text, Integer.MAX_VALUE);
+	}
+
+	/**
+	 * Change the text for single line styled string
+	 * @param text the text to use
+	 * @param wrapWidth the wrap width
+	 */
+	public void setText(String text, int wrapWidth){
+		setWrapWidth(wrapWidth);
+		if(text != null && !text.equals(plainText)){
+			plainText = text;
+			if(this.wrapWidth == Integer.MAX_VALUE){
+				removeSingleSpacingFromPlainText(plainText);
+				spacer = getParagraghSpacer(1);
+				styledText = new AttributedString(plainText);
+			}
+			else {
+				removeDoubleSpacingFromPlainText(plainText);
+				spacer = getParagraghSpacer(this.wrapWidth);
+				styledText = new AttributedString(plainText);
+				styledText = insertParagraphMarkers(plainText, styledText);				
+			}
+			clearAttributes();
+			applyAttributes();
+			invalidText = true;
+			invalidLayout = true;
+		}
 	}
 
 	/**
@@ -180,6 +220,58 @@ public final class StyledString implements GConstantsInternal, Serializable {
 	 */
 	public String getPlainText(){
 		return plainText;
+	}
+
+	/**
+	 * Get the plain text as a String. Any line breaks will kept and will
+	 * be represented by the character 'backslash n' <br>
+	 * 
+	 * @param beginIdx the beginning index inclusive
+	 * @param endIdx the ending index exclusive
+	 * @return the substring starting at beginIdx to endIdx-1
+	 */
+	public String getPlainText(int beginIdx, int endIdx){
+		if(beginIdx < 0) beginIdx = 0;
+		if(endIdx > plainText.length()) endIdx = plainText.length();
+		return plainText.substring(beginIdx, endIdx);
+	}
+
+	/**
+	 * Get a line of text from the plain text. Lines are separated by 
+	 * End-of-line (EOL) characters.
+	 * 
+	 * @param lineNo the line number we want the text for
+	 * @return the line of text or an empty string if the line number is invalid.
+	 */
+	public String getPlainText(int lineNo){
+		Point loc = getPlainTextLinePosImpl(lineNo, null);
+		return (loc == null) ? "" : plainText.substring(loc.x, loc.y);
+	}
+
+
+	private Point getPlainTextLinePosImpl(int lineNo, Point loc){
+		if(lineNo < 0)
+			return null;
+		int pos = 0, p0 = 0, count = lineNo;
+		// Find start of line
+		while(count > 0 && pos < plainText.length()){
+			if(plainText.charAt(pos) == EOL)
+				count--;
+			pos++;
+		}
+		// If we haven't found start of line then return empty string
+		if(count > 0)
+			return null;
+		p0 = pos;
+		while(pos < plainText.length() && plainText.charAt(pos) != EOL)
+			pos++;
+		if(loc == null)
+			loc = new Point();
+		else {
+			loc.x = p0;
+			loc.y = pos;
+		}
+		return loc;		
 	}
 
 	/**
@@ -257,7 +349,7 @@ public final class StyledString implements GConstantsInternal, Serializable {
 		else
 			return value;
 	}
-	
+
 	/**
 	 * Add an attribute that affects the whole length of the string.
 	 * 
@@ -278,26 +370,40 @@ public final class StyledString implements GConstantsInternal, Serializable {
 	 * @param charEnd the character position after the last character affected.
 	 */
 	public void addAttribute(Attribute type, Object value, int lineNo, int charStart, int charEnd){
-		if(lineNo < linesInfo.size()){
+		if(lineNo >= 0 && lineNo < linesInfo.size()){
 			TextLayoutInfo tli = linesInfo.get(lineNo);
 			int lineStartsAt = tli.startCharIndex;
 			charEnd = Math.min(charEnd,  tli.nbrChars);
 			addAttribute(type, value, lineStartsAt + charStart, lineStartsAt + charEnd);
 		}
 	}
-	
+
 	/**
-	 * Set the attribute to be applied to a range of characters starting at
-	 * charStart and ending with charEnd-1.
+	 * Add a text attribute (style) to an entire display line
 	 * 
 	 * @param type attribute type
 	 * @param value attribute value
-	 * @param charStart the first character affected
-	 * @param charEnd the character position after the last character affected.
+	 * @param lineNo the line of test affected
 	 */
-	public void addAttribute(Attribute type, Object value, int charStart, int charEnd){
+	public void addAttribute(Attribute type, Object value, int lineNo){
+		if(lineNo >= 0 && lineNo < linesInfo.size()){
+			TextLayoutInfo tli = linesInfo.get(lineNo);
+			addAttribute(type, value, tli.startCharIndex, tli.startCharIndex + tli.nbrChars);
+		}
+	}
+
+	/**
+	 * Set the attribute to be applied to a range of characters starting at
+	 * beginIdx and ending with endIdx-1.
+	 * 
+	 * @param type attribute type
+	 * @param value attribute value
+	 * @param beginIdx the index of the first character (inclusive)
+	 * @param endIdx the index of the last character (exclusive)
+	 */
+	public void addAttribute(Attribute type, Object value, int beginIdx, int endIdx){
 		value = validateTextAttributeColor((TextAttribute) type, value);
-		AttributeRun ar = new AttributeRun(type, value, charStart, charEnd);
+		AttributeRun ar = new AttributeRun(type, value, beginIdx, endIdx);
 		// If we already have attributes try and rationalize the number by merging
 		// runs if possible and removing runs that no longer have a visible effect.
 		if(atrun.size() > 0){
@@ -349,37 +455,48 @@ public final class StyledString implements GConstantsInternal, Serializable {
 	}
 
 	/**
-	 * Remove text attributes (style) to the specified line and range of characters
+	 * Remove text attributes (style) to the specified line and range of characters.
 	 * 
 	 * @param lineNo the line of test affected
-	 * @param charStart the first character affected
-	 * @param charEnd the character position after the last character affected.
+	 * @param beginIdx the index of the first character (inclusive)
+	 * @param endIdx the index of the last character (exclusive)
 	 */
-	public void clearAttributes(int lineNo, int charStart, int charEnd){
-		if(lineNo < linesInfo.size()){
+	public void clearAttributes(int lineNo, int beginIdx, int endIdx){
+		if(lineNo >= 0 && lineNo < linesInfo.size()){
 			TextLayoutInfo tli = linesInfo.get(lineNo);
 			int lineStartsAt = tli.startCharIndex;
-			charEnd = Math.min(charEnd,  tli.nbrChars);
-			clearAttributes(lineStartsAt + charStart, lineStartsAt + charEnd);
+			endIdx = Math.min(endIdx,  tli.nbrChars);
+			clearAttributes(lineStartsAt + beginIdx, lineStartsAt + endIdx);
 		}
 	}
 
 	/**
-	 * Remove text attributes (style) to the specified range of characters
 	 * 
-	 * @param charStart the first character affected
-	 * @param charEnd the character position after the last character affected.
+	 * @param lineNo
 	 */
-	public void clearAttributes(int charStart, int charEnd){
+	public void clearAttributes(int lineNo){
+		if(lineNo >= 0 && lineNo < linesInfo.size()){
+			TextLayoutInfo tli = linesInfo.get(lineNo);
+			clearAttributes(tli.startCharIndex, tli.startCharIndex + tli.nbrChars);
+		}
+	}
+
+	/**
+	 * Remove text attributes (style) to the specified range of characters.
+	 * 
+	 * @param beginIdx the index of the first character (inclusive)
+	 * @param endIdx the index of the last character (exclusive)
+	 */
+	public void clearAttributes(int beginIdx, int endIdx){
 		ListIterator<AttributeRun> iter = atrun.listIterator();
 		AttributeRun ar;
 		while(iter.hasNext()){
 			ar = iter.next();
 			// Make sure we have intersection
-			if( !(charStart >= ar.end && charEnd >= ar.start )){
+			if( !(beginIdx >= ar.end && endIdx >= ar.start )){
 				// Find the limits to clear
-				int s = Math.max(charStart, ar.start);
-				int e = Math.min(charEnd, ar.end);
+				int s = Math.max(beginIdx, ar.start);
+				int e = Math.min(endIdx, ar.end);
 				if(ar.start == s && ar.end == e)
 					iter.remove();
 				else if(ar.start == s) // clear style from beginning
@@ -406,17 +523,6 @@ public final class StyledString implements GConstantsInternal, Serializable {
 	}
 
 	/**
-	 * <b>Do not use this method use clearAttributes() instead.</b> <br>It has been left in
-	 * to avoid having to release a new GUI Builder version just for this change.
-	 * Be warned - it will be removed on next release of GUI Builder. 
-	 * @deprecated will be removed on next GUI Builder update
-	 */
-//	public void clearAllAttributes(){
-//		atrun.clear();
-//		invalidText = true;
-//	}
-
-	/**
 	 * Must call this method to apply
 	 */
 	private void applyAttributes(){
@@ -425,6 +531,7 @@ public final class StyledString implements GConstantsInternal, Serializable {
 				styledText.addAttribute(bsar.atype, bsar.value);
 			Iterator<AttributeRun> iter = atrun.iterator();
 			AttributeRun ar;
+
 			while(iter.hasNext()){
 				ar = iter.next();
 				if(ar.end == Integer.MAX_VALUE)
@@ -446,6 +553,25 @@ public final class StyledString implements GConstantsInternal, Serializable {
 	}
 
 	/**
+	 * Insert some text into the position indicated. <br>
+	 * 
+	 * @param lineNo a valid line number
+	 * @param charStart the position in the line >= 0
+	 * @param chars the characters to insert
+	 * @param startNewLine prefix the chars with a EOL
+	 * @param endNewLine postfix the chars with a EOL
+	 * @return the number of characters inserted
+	 */
+	public int insertCharacters(String chars, int lineNo, int charStart, boolean startNewLine, boolean endNewLine){
+		if(lineNo >= 0 && lineNo < linesInfo.size()){
+			TextLayoutInfo tli = linesInfo.get(lineNo);
+			int insertPos = tli.startCharIndex + Math.min(charStart,  tli.nbrChars);
+			return insertCharactersImpl(insertPos, chars, startNewLine, endNewLine);
+		}
+		return 0;
+	}
+
+	/**
 	 * Insert 1 or more characters into the string. The inserted text will first be made
 	 * safe by removing any inappropriate EOL characters. <br>
 	 * Do not use this method to insert EOL characters, use the <pre>insertEOL(int)</pre>
@@ -455,10 +581,8 @@ public final class StyledString implements GConstantsInternal, Serializable {
 	 * @param chars the characters to insert
 	 * @return the number of characters inserted
 	 */
-	public int insertCharacters(int insertPos, String chars){
-		if(chars.length() > 0)
-			chars = makeStringSafeForInsert(chars);
-		return insertCharactersImpl(insertPos, chars, false);
+	public int insertCharacters(String chars, int insertPos){
+		return insertCharactersImpl(insertPos, chars, false, false);
 	}
 
 	/**
@@ -472,21 +596,29 @@ public final class StyledString implements GConstantsInternal, Serializable {
 	 * @param startNewLine if true insert onto a new line
 	 * @return the number of characters inserted
 	 */
-	public int insertCharacters(int insertPos, String chars, boolean startNewLine){
-		if(chars.length() > 0)
-			chars = makeStringSafeForInsert(chars);
-		return insertCharactersImpl(insertPos, chars, startNewLine);
+	public int insertCharacters(String chars, int insertPos, boolean startNewLine, boolean endNewLine){
+		return insertCharactersImpl(insertPos, chars, startNewLine, endNewLine);
 	}
 
-	private int insertCharactersImpl(int insertPos, String chars, boolean startNewLine){
-		if(chars.length() > 0){
-			if(startNewLine)
-				chars = "\n" + chars;
-			int nbrChars = chars.length();
-			if(plainText.equals(" "))
-				plainText = chars;
-			else
-				plainText = plainText.substring(0, insertPos) + chars + plainText.substring(insertPos);
+	/**
+	 * Implementation for inserting characters into the plain text.
+	 * 
+	 * @param insertPos the position to insert the text
+	 * @param chars the characters to insert
+	 * @param startNewLine inserted text to start on new line
+	 * @param endNewLine text after inserted text to start on new line
+	 * @return the number of characters inserted including EOLs
+	 */
+	private int insertCharactersImpl(int insertPos, String chars, boolean startNewLine, boolean endNewLine){
+		chars = makeStringSafeForInsert(chars);
+		int nbrChars = chars.length();
+		int nbrCharsInserted = nbrChars;
+		if(nbrChars > 0){
+			plainText = plainText.substring(0, insertPos) + chars + plainText.substring(insertPos);
+			if(endNewLine && plainText.charAt(insertPos + nbrChars) != '\n')
+				nbrCharsInserted += insertEOL(insertPos + nbrChars) ? 1 : 0;
+			if(startNewLine && insertPos > 0)
+				nbrCharsInserted += insertEOL(insertPos) ? 1 : 0;
 			insertParagraphMarkers(plainText, styledText);
 			for(AttributeRun ar : atrun){
 				if(ar.end < Integer.MAX_VALUE){
@@ -499,7 +631,7 @@ public final class StyledString implements GConstantsInternal, Serializable {
 			}
 			invalidText = true;
 		}
-		return chars.length();		
+		return nbrCharsInserted;		
 	}
 
 	/**
@@ -535,6 +667,8 @@ public final class StyledString implements GConstantsInternal, Serializable {
 	 */
 	public boolean insertEOL(int insertPos){
 		if(wrapWidth != Integer.MAX_VALUE){
+			if(insertPos == 0)
+				return false;
 			if(insertPos > 0 && plainText.charAt(insertPos-1) == '\n')
 				return false;
 			if(insertPos < plainText.length()-1 && plainText.charAt(insertPos+1) == '\n'){
@@ -630,18 +764,27 @@ public final class StyledString implements GConstantsInternal, Serializable {
 		return true;
 	}
 
-	public void setFont(Font a_font){
-		if(a_font != null){
+	private void setFont(Font a_font){
+		if(a_font != null && a_font != font){
 			font = a_font;
 			baseStyle.clear();
 			baseStyle.add(new AttributeRun(TextAttribute.FAMILY, font.getFamily()));
 			baseStyle.add(new AttributeRun(TextAttribute.SIZE, font.getSize()));
+			baseStyle.add(new AttributeRun(TextAttribute.WIDTH, TextAttribute.WIDTH_REGULAR));
 			if(font.isBold())
-				baseStyle.add(new AttributeRun(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD));
+				baseStyle.add(new AttributeRun(TextAttribute.WEIGHT, TextAttribute.WEIGHT_REGULAR));
+			else
+				baseStyle.add(new AttributeRun(TextAttribute.WEIGHT, TextAttribute.WEIGHT_REGULAR));	
 			if(font.isItalic())
 				baseStyle.add(new AttributeRun(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE));	
+			else
+				baseStyle.add(new AttributeRun(TextAttribute.POSTURE, TextAttribute.POSTURE_REGULAR));	
 			invalidText = true;
 		}
+	}
+
+	public void invalidateText(){
+		invalidText = true;
 	}
 
 	/**
@@ -659,6 +802,7 @@ public final class StyledString implements GConstantsInternal, Serializable {
 		if(invalidText){
 			styledText = new AttributedString(plainText);
 			styledText = insertParagraphMarkers(plainText, styledText);
+			setFont(font);
 			applyAttributes();
 			invalidText = false;
 			invalidLayout = true;
@@ -680,7 +824,6 @@ public final class StyledString implements GConstantsInternal, Serializable {
 					float advance = layout.getVisibleAdvance();
 					if(justify){
 						if(justify && advance > justifyRatio * wrapWidth){
-							//System.out.println(layout.getVisibleAdvance() + "  " + breakWidth + "  "+ layout.get);
 							// If advance > breakWidth then we have a line break
 							float jw = (advance > wrapWidth) ? advance - wrapWidth : wrapWidth;
 							layout = layout.getJustifiedLayout(jw);
@@ -761,6 +904,13 @@ public final class StyledString implements GConstantsInternal, Serializable {
 		}
 	}
 
+	/**
+	 * Calculate the TLHI for a given pixel position
+	 * @param g2d
+	 * @param px
+	 * @param py
+	 * @return
+	 */
 	TextLayoutHitInfo calculateFromXY(Graphics2D g2d, float px, float py){
 		TextHitInfo thi = null;
 		TextLayoutInfo tli = null;
@@ -829,10 +979,11 @@ public final class StyledString implements GConstantsInternal, Serializable {
 	}
 
 	/**
-	 * 
-	 * @param lineNo
-	 * @param charNo
-	 * @return
+	 * For a given line number and character position get the 
+	 * corresponding TextLayoutHitInfo object 
+	 * @param lineNo line number
+	 * @param charNo position in line
+	 * @return the corresponding TextLayoutHitInfo object
 	 */
 	TextLayoutHitInfo getTLHIforCharPosition(int lineNo, int charNo){
 		TextLayoutHitInfo tlhi = null;
@@ -845,6 +996,42 @@ public final class StyledString implements GConstantsInternal, Serializable {
 				tlhi = new TextLayoutHitInfo(tli, thi);
 		}
 		return tlhi;
+	} 
+
+	/**
+	 * For a given position in the plain text get the 
+	 * corresponding TextLayoutHitInfo object.
+	 *  
+	 * @param pos position in the plaintext
+	 * @return the corresponding TextLayoutHitInfo object
+	 */
+	TextLayoutHitInfo getTLHIforCharPosition(int pos){
+		if(pos < 0 || pos >= plainText.length())
+			return null;
+		int lineNo = 0, posInLine = pos;
+		for(lineNo = linesInfo.size()-1; lineNo >= 0; lineNo--){
+			TextLayoutInfo tli = getTLIforLineNo(lineNo);
+			posInLine = pos - tli.startCharIndex;
+			if(tli.startCharIndex <= pos)
+				break;
+		}
+		return getTLHIforCharPosition(lineNo, posInLine);
+	}
+
+	/**
+	 * Get the character position in the plain text that is associated
+	 * with the given line and character number.
+	 * 
+	 * @param lineNo the line number (starts with 0)
+	 * @param charNo the character position in the line (starts with 0)
+	 * @return the position in plain text or -1 if an invalid lineNo
+	 */
+	int getPos(int lineNo, int charNo){
+		TextLayoutInfo tli = getTLIforLineNo(lineNo);
+		if(tli != null)
+			return tli.startCharIndex + charNo;
+		else
+			return -1;
 	}
 
 	/** 
@@ -1008,19 +1195,24 @@ public final class StyledString implements GConstantsInternal, Serializable {
 		}
 
 		public int compareTo(TextLayoutHitInfo other) {
+			if(tli == null || other.tli == null)
+				return 0;
 			int layoutComparison = tli.compareTo(other.tli);
 			if(layoutComparison != 0)
 				return layoutComparison; // Different layouts so return comparison
+
 			// Same layout SO test hit info
-			if(thi.equals(other.thi))
+			if(thi == null || other.thi == null || thi.equals(other.thi))
 				return 0;
+			//			if(thi.equals(other.thi))
+			//				return 0;
 			// Same layout different hit info SO test char index
 			if(thi.getCharIndex() != other.thi.getCharIndex()){
 				// Different current chars so order on position
 				return (thi.getCharIndex() < other.thi.getCharIndex() ? -1 : 1);
 			}
 			// Same layout same char different edge hit SO test on edge hit
-			return (thi.isLeadingEdge() ? -1 : 1);			
+			return (thi.isLeadingEdge() ? -1 : 1);	
 		}
 
 		public String toString(){

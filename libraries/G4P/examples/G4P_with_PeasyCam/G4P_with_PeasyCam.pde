@@ -48,12 +48,6 @@ public void setup() {
   // control. PeasyCam is just such an object, but if it is 
   // created after one of the G4P controls then you would not 
   // this statement.
-  G4P.registerSketch(this);
-
-  // Create a PeasyCam object
-  cam = new PeasyCam(this, 100);
-  cam.setMinimumDistance(50);
-  cam.setMaximumDistance(500);
 
   // Sets the colour scheme for the GUI components 
   // The 8 schemes available are 
@@ -65,7 +59,7 @@ public void setup() {
   // Create a collapsible panel
   // (this, tab title, x, y, width, height)
   pnl = new GPanel(this, 10, 300, 300, 88, "Rotate Cube");
-  pnl.setCollapsed(false);
+  pnl.setCollapsed(true);
   // Create a horizontal slider
   // (this, x, y, width, height)
   // default value limits 0-100 and initial value 50
@@ -103,15 +97,20 @@ public void setup() {
   label.setOpaque(true);
   // Align the text both horizontally and vertically
   label.setTextAlign(GAlign.CENTER, GAlign.MIDDLE);
+
+    // Create a PeasyCam object
+  cam = new PeasyCam(this, 100);
+  cam.setMinimumDistance(50);
+  cam.setMaximumDistance(500);
 }
 
 public void draw() {
   // Switch off PeasyCam mouse control if the panel is being
   // dragged else turn it on
   if (pnl.isCollapsed()) // Panel is collapsed
-      cam.setMouseControlled(!pnl.isDragging());
+      cam.setActive(!pnl.isDragging());
   else // panel open must be using sliders
-  cam.setMouseControlled(false);  
+  cam.setActive(false);  
   rotateX(-.5f);
   rotateY(-.5f);
   background(0);
@@ -175,11 +174,9 @@ void handlePanelEvents(GPanel panel, GEvent event) {
   // needing it. Left the following code as an example
   switch(event) {
   case COLLAPSED:
-    pnl.setAvailableChildren(false);
     println("Panel has collapsed");
     break;
   case EXPANDED:
-    pnl.setAvailableChildren(true);
     println("Panel has expanded");
     break;
   case DRAGGED:

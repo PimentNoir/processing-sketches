@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
-
-  Copyright (c) 2008-12 Peter Lager
+	http://sourceforge.net/projects/g4p/files/?source=navbar
+	
+  Copyright (c) 2008 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -67,13 +67,13 @@ public class GCheckbox extends GToggleControl {
 		setTextAlign(GAlign.LEFT, null);
 		z = Z_SLIPPY;
 		// Now register control with applet
-		createEventHandler(G4P.sketchApplet, "handleToggleControlEvents", 
+		createEventHandler(G4P.sketchWindow, "handleToggleControlEvents", 
 				new Class<?>[]{ GToggleControl.class, GEvent.class }, 
 				new String[]{ "checkbox", "event" } 
 		);
 		registeredMethods = DRAW_METHOD | MOUSE_METHOD;
 		cursorOver = HAND;
-		G4P.addControl(this);
+		G4P.registerControl(this);
 	}
 
 	/**

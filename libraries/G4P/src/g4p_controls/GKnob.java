@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -25,9 +25,7 @@ package g4p_controls;
 
 import g4p_controls.HotSpot.HSarc;
 import g4p_controls.HotSpot.HScircle;
-
 import processing.core.PApplet;
-import processing.core.PGraphicsJava2D;
 import processing.event.MouseEvent;
 
 
@@ -108,7 +106,6 @@ public class GKnob extends GValueControl {
 		super(theApplet, p0, p1, p2, p3);
 		bezelRadius = Math.min(width, height) / 2 - 2;
 		setGripAmount(gripAmount);
-		buffer = (PGraphicsJava2D) winApp.createGraphics((int)width, (int)height, PApplet.JAVA2D);
 		setTurnRange(startAng, endAng);
 		// valuePos and valueTarget will start at 0.5;
 		lastAngleTarget = angleTarget = scaleValueToAngle(parametricTarget);
@@ -121,13 +118,13 @@ public class GKnob extends GValueControl {
 		showTicks = true;
 		
 		// Now register control with applet
-		createEventHandler(G4P.sketchApplet, "handleKnobEvents",
+		createEventHandler(G4P.sketchWindow, "handleKnobEvents",
 				new Class<?>[]{ GValueControl.class, GEvent.class }, 
 				new String[]{ "knob", "event" } 
 		);
 		registeredMethods = PRE_METHOD | DRAW_METHOD | MOUSE_METHOD ;
 		cursorOver = HAND;
-		G4P.addControl(this);
+		G4P.registerControl(this);
 	}
 
 	/**
@@ -335,7 +332,6 @@ public class GKnob extends GValueControl {
 	}
 
 
-
 	public void draw(){
 		if(!visible) return;
 		// Update buffer if invalid
@@ -372,28 +368,27 @@ public class GKnob extends GValueControl {
 			bufferInvalid = false;
 			buffer.beginDraw();
 			buffer.ellipseMode(PApplet.CENTER);
-			// Back ground colour
-			// Back ground colour
+			// Background colour
 			if(opaque == true)
-				buffer.background(palette[6]);
+				buffer.background(palette[6].getRGB());
 			else
 				buffer.background(buffer.color(255,0));
 			buffer.translate(width/2, height/2);
 			buffer.noStroke();
 			float anglePos = scaleValueToAngle(parametricPos);
 			if(bezelWidth > 0){
-				// Draw bezel, track,  ticks etc
+				// Draw bezel
 				buffer.noStroke();
-				buffer.fill(palette[5]);
+				buffer.fill(palette[5].getRGB());
 				if(drawArcOnly)
 					buffer.arc(0,0,2*bezelRadius, 2*bezelRadius, PApplet.radians(startAng), PApplet.radians(endAng));
 				else
 					buffer.ellipse(0,0,2*bezelRadius, 2*bezelRadius);
-				// Since we have a bezel test for ticks
+				// Draw ticks?
 				if(showTicks){
 					buffer.noFill();
 					buffer.strokeWeight(1.6f);
-					buffer.stroke(palette[3]);
+					buffer.stroke(palette[3].getRGB());
 					float deltaA = (endAng - startAng)/(nbrTicks - 1);
 					for(int t = 0; t < nbrTicks; t++){
 						tickLength = gripRadius + ((t == 0 || t == nbrTicks - 1) ? bezelWidth : bezelWidth * 0.8f); 
@@ -403,18 +398,18 @@ public class GKnob extends GValueControl {
 						buffer.line((float)(gripRadius * cosa), (float)(gripRadius * sina), (float)(tickLength * cosa), (float)(tickLength * sina));
 					}
 				}
-				// draw track?
+				// Draw track?
 				if(showTrack){
 					buffer.noStroke();
-					buffer.fill(palette[14]);
+					buffer.fill(palette[14].getRGB());
 					buffer.arc(0,0, 2*(gripRadius + bezelWidth * 0.5f), 2*(gripRadius + bezelWidth * 0.5f), PApplet.radians(startAng), PApplet.radians(anglePos));					
 				}
 			}
 
 			// draw grip (inner) part of knob
 			buffer.strokeWeight(1.6f);
-			buffer.stroke(palette[2]); // was 14
-			buffer.fill(palette[2]);
+			buffer.stroke(palette[2].getRGB()); // was 14
+			buffer.fill(palette[2].getRGB());
 			if(drawArcOnly)
 				buffer.arc(0,0,2*gripRadius, 2*gripRadius, PApplet.radians(startAng), PApplet.radians(endAng));
 			else
@@ -422,7 +417,7 @@ public class GKnob extends GValueControl {
 
 			// Draw needle
 			buffer.noFill();
-			buffer.stroke(palette[14]);
+			buffer.stroke(palette[14].getRGB());
 			buffer.strokeWeight(3);
 			a = Math.toRadians(anglePos);
 			sina = Math.sin(a);

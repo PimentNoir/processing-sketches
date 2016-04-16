@@ -1,4 +1,3 @@
-
 package controlP5;
 
 /**
@@ -21,20 +20,18 @@ package controlP5;
  * Boston, MA 02111-1307 USA
  *
  * @author 		Andreas Schlegel (http://www.sojamo.de)
- * @modified	12/23/2012
- * @version		2.0.4
+ * @modified	07/30/2015
+ * @version		2.2.5
  *
  */
 
-import processing.core.PApplet;
+import processing.core.PGraphics;
 
 /**
  * The CDrawable interface is used to draw controllers, primarily for internal use.
  */
 public interface CDrawable {
 
-	/**
-	 * @param theApplet PApplet
-	 */
-	public void draw(PApplet theApplet);
+	public void draw( PGraphics theGraphics );
+	
 }

@@ -20,29 +20,28 @@ package controlP5;
  * Boston, MA 02111-1307 USA
  *
  * @author 		Andreas Schlegel (http://www.sojamo.de)
- * @modified	12/23/2012
- * @version		2.0.4
+ * @modified	07/30/2015
+ * @version		2.2.5
  *
  */
 
 /**
- * The abstract class control behavior allows you to add custom behavior to
- * controllers. Since it is an abstract class it must be extended and method
- * update() must be implemented in your custom control behavior. how to use
- * ControlBehavior please see the ControlP5behavior example in the examples
- * folder.
+ * The abstract class control behavior allows you to add custom behavior to controllers. Since it is
+ * an abstract class it must be extended and method update() must be implemented in your custom
+ * control behavior. how to use ControlBehavior please see the ControlP5behavior example in the
+ * examples folder.
  * 
  * @example use/ControlP5behavior
  */
 public abstract class ControlBehavior {
 
-	protected Controller<?> _myController;
+	protected Controller< ? > _myController;
 
 	protected float value;
 
 	protected boolean isActive = true;
 
-	protected void init(Controller<?> theController) {
+	protected void init( Controller< ? > theController ) {
 		_myController = theController;
 	}
 
@@ -51,32 +50,31 @@ public abstract class ControlBehavior {
 	 * 
 	 * @return Controller
 	 */
-	public Controller<?> getController() {
+	public Controller< ? > getController( ) {
 		return _myController;
 	}
 
-
-	
-	public float getValue() {
+	public float getValue( ) {
 		return value;
 	}
 
-	public void setValue(float theValue) {
+	public void setValue( float theValue ) {
 		value = theValue;
-		_myController.setValue(value);
+		_myController.setValue( value );
 	}
 
 	/**
 	 * When extending ControlBehavior, update() has to be overridden.
 	 */
-	public abstract void update();
+	public abstract void update( );
 
 	/**
 	 * (de)activate the behavior.
 	 * 
-	 * @param theFlag boolean
+	 * @param theFlag
+	 *            boolean
 	 */
-	public void setActive(boolean theFlag) {
+	public void setActive( boolean theFlag ) {
 		isActive = theFlag;
 	}
 
@@ -85,7 +83,7 @@ public abstract class ControlBehavior {
 	 * 
 	 * @return boolean
 	 */
-	public boolean isActive() {
+	public boolean isActive( ) {
 		return isActive;
 	}
 
@@ -94,14 +92,15 @@ public abstract class ControlBehavior {
 	 * @return
 	 */
 	@Deprecated
-	public float value() {
+	public float value( ) {
 		return value;
 	}
-	
+
 	/**
 	 * @exclude
 	 */
 	@Deprecated
-	public Controller<?> controller() {
+	public Controller< ? > controller( ) {
 		return _myController;
-	}}
+	}
+}

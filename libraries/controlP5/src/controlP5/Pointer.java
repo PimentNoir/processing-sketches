@@ -10,4 +10,13 @@ public interface Pointer {
 	
 	public int py();
 	
+	public int dx();
+	
+	public int dy();
+	
+	public long pt();
+	
+	public long dt();
+	
+	public long t();
 }

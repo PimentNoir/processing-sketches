@@ -1,12 +1,13 @@
-/**
- * This program demonstrates how to create image toggle buttons.
- * 
- * If G4P is unable to create the button using the information
- * i.e. images then it will create the default two state switch
- * button.
- * 
- * (c) 2013 Peter Lager
- *
+/*
+ This program demonstrates how to create image toggle buttons.
+ 
+ If G4P is unable to create the button using the information
+ i.e. images then it will create the default two state switch
+ button.
+ 
+ for Processing V3
+ (c) 2015 Peter Lager
+ 
  */
 
 import g4p_controls.*;
@@ -18,8 +19,6 @@ public void setup() {
   size(480, 220, JAVA2D);
   G4P.setGlobalColorScheme(GCScheme.ORANGE_SCHEME);
   G4P.setCursor(ARROW);
-  if (frame != null)
-    frame.setTitle("Sketch Window");
   // Create image toggle buttons
   btnToggle0 = new GImageToggleButton(this, 10, 10);
   btnToggle0.tag = "Library default button ";
@@ -39,7 +38,7 @@ public void draw() {
 
 // Event handler for image toggle buttons
 public void handleToggleButtonEvents(GImageToggleButton button, GEvent event) { 
-  println(button + "   State: " + button.stateValue());
+  println(button + "   State: " + button.getState());
 }
 
 // Create the labels syaing what-is-what
@@ -65,4 +64,3 @@ public void createLabels() {
   label5.setTextBold();
   label5.setOpaque(true);
 }
-

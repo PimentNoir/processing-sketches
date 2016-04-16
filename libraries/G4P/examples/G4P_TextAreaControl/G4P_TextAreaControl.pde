@@ -1,23 +1,24 @@
-/**
- * Sketch to demonstrate the GTextArea class. 
- * 
- * This component allows the user to enter and edit text.
- * 
- * In this demonstration the text width > the display width
- * so it can show off its' horizontal scrollbar.
- * 
- * The control has been setup with some default text and 
- * this becomes visible when the control is empty.
- * 
- * The buttons on the side will change the font style
- * for the selected text. If no text has been selected
- * then the buttons are ignored.
+/*
+  Sketch to demonstrate the GTextArea class. 
  
- * Note that super/sub script may not be available on your
- * system.
- * 
- * @author Peter Lager
- *
+ This component allows the user to enter and edit text.
+ 
+ In this demonstration the text width > the display width
+ so it can show off its' horizontal scrollbar.
+ 
+ The control has been setup with some default text and 
+ this becomes visible when the control is empty.
+ 
+ The buttons on the side will change the font style
+ for the selected text. If no text has been selected
+ then the buttons are ignored.
+ 
+ Note that super/sub script may not be available on your
+ system.
+ 
+ for Processing V2 and V3
+ (c) 2015 Peter Lager
+ 
  */
 
 import g4p_controls.*;
@@ -40,7 +41,7 @@ public void setup() {
   txaSample = new GTextArea(this, 80, 20, 290, 300, G4P.SCROLLBARS_BOTH | G4P.SCROLLBARS_AUTOHIDE);
   txaSample.setText(startText, 310);
   // Set some default text
-  txaSample.setDefaultText("Please enter some text");
+  txaSample.setPromptText("Please enter some text");
 
   createConfigControls();
 }

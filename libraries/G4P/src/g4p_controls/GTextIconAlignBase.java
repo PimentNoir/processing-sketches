@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -31,7 +31,7 @@ import processing.core.PImage;
  * 
  * This class forms the basis for any control that has text and/or an icon. <br>
  * Use the setIcon, setIconAlign, setText and setTextAlign to control 
- * horizontal and vertical alignment of the icon and text withing the control face.
+ * horizontal and vertical alignment of the icon and text within the control face.
  * 
  * @author Peter Lager
  *
@@ -58,9 +58,9 @@ public abstract class GTextIconAlignBase extends GTextAlign {
 		if(text == null || text.length() == 0 )
 			text = " ";
 		if(iconW == 0)
-			stext = new StyledString(text, (int) width - TPAD2);
+			stext.setText(text, (int) width - TPAD4);
 		else
-			stext = new StyledString(text, (int) width - iconW - TPAD4);
+			stext.setText(text, (int) width - iconW - TPAD8);
 		bufferInvalid = true;
 	}
 
@@ -98,7 +98,7 @@ public abstract class GTextIconAlignBase extends GTextAlign {
 				PImage[] temp = ImageManager.makeTiles1D(winApp, icon, nbrImages, 1);
 				System.arraycopy(temp, 0, bicon, 0, temp.length);
 				for(int i = temp.length; i < 3; i++){
-						bicon[i] = bicon[i-1];
+					bicon[i] = bicon[i-1];
 				}
 			}
 
@@ -111,7 +111,7 @@ public abstract class GTextIconAlignBase extends GTextAlign {
 			}
 			iconW = bicon[0].width;
 			iconH = bicon[0].height;
-			stext.setWrapWidth((int) width - iconW - TPAD4);
+			stext.setWrapWidth((int) width - iconW - TPAD8);
 			bufferInvalid = true;
 		}
 	}
@@ -134,6 +134,22 @@ public abstract class GTextIconAlignBase extends GTextAlign {
 	}
 
 	/**
+	 * This will change the controls height without changing the width so that it just
+	 * fits round the text and icon (if any).
+	 */
+	public void setHeightToFit(){
+		if(stext != null && buffer != null){
+			stext.getLines(buffer.g2);
+			int high = Math.round(stext.getTextAreaHeight());
+			high = Math.max(high, iconH);
+			int wide = Math.round(width);
+			resize(wide, high); // resize this control
+			calcAlignment();
+			bufferInvalid = true;	
+		}
+	}
+
+	/**
 	 * Calculate various values based on alignment of text and icon
 	 */
 	protected void calcAlignment(){
@@ -141,23 +157,23 @@ public abstract class GTextIconAlignBase extends GTextAlign {
 		if(iconW != 0){
 			switch(iconAlignH){
 			case LEFT:
-				siX = TPAD;
+				siX = TPAD2;
 				if(textAlignH != GAlign.RIGHT)
-					stX += (iconW + TPAD2); // Image on left so adjust text start x position
+					stX += (iconW + TPAD4); // Image on left so adjust text start x position
 				break;
 			case RIGHT:
 			default:
-				siX = (int)width - iconW - TPAD2;
+				siX = (int)width - iconW - TPAD4;
 				if(textAlignH == GAlign.RIGHT)
-					stX -= (iconW + TPAD2);
+					stX -= (iconW + TPAD4);
 				break;
 			}
 			switch(iconAlignV){
 			case TOP:
-				siY = TPAD;
+				siY = TPAD2;
 				break;
 			case BOTTOM:
-				siY =(int) height - iconH - TPAD2;
+				siY = (int) height - iconH - TPAD4;
 				break;
 			case MIDDLE:
 			default:
@@ -165,7 +181,7 @@ public abstract class GTextIconAlignBase extends GTextAlign {
 			}
 		}
 	}
-	
+
 	public String toString(){
 		return tag;
 	}

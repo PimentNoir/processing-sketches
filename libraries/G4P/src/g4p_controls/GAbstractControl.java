@@ -1,7 +1,7 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
   Copyright (c) 2008-12 Peter Lager
 
@@ -25,6 +25,8 @@ package g4p_controls;
 
 
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.lang.reflect.Method;
@@ -32,11 +34,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 
+import processing.awt.PGraphicsJava2D;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PGraphics;
-import processing.core.PGraphicsJava2D;
-import processing.core.PImage;
 import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 
@@ -72,17 +73,6 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 */
 	static GAbstractControl cursorIsOver;
 
-	// Increment to be used if on a GPanel
-	final static int Z_PANEL = 1024;
-
-	// Components that don't release focus automatically
-	// i.e. GTextField
-	final static int Z_STICKY = 0;
-
-	// Components that automatically releases focus when appropriate
-	// e.g. GButton
-	final static int Z_SLIPPY = 24;
-	
 	// Reference to the PApplet object that owns this control
 	protected PApplet winApp;
 
@@ -99,13 +89,12 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 
 	/*
 	 * A list of child GComponents added to this component
-	 * Created and used by GPanel and GCombo classes
+	 * Created and used by GPanel and GDropList classes
 	 */
 	protected LinkedList<GAbstractControl> children = null;
 
 	protected int localColorScheme = G4P.globalColorScheme;
-	protected int[] palette = null;
-	protected Color[] jpalette = null;
+	protected Color[] palette = null;
 	protected int alphaLevel = G4P.globalAlpha;
 
 	/** Top left position of component in pixels (relative to parent or absolute if parent is null) 
@@ -142,10 +131,10 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 */
 	protected float ox, oy;
 
-	/* Simple tag that can be used by the user */
+	/** Simple tag that can be used by the user */
 	public String tag;
 
-	/* Allows user to specify a number for this component */
+	/** Allows user to specify a number for this component */
 	public int tagNo;
 
 	/* Is the component visible or not */
@@ -169,7 +158,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	/* the name of the method to handle the event */ 
 	protected String eventHandlerMethodName;
 
-	int registeredMethods = 0;
+	protected int registeredMethods = 0;
 
 	/*
 	 * Specify the PImage that contains the image{s} to be used for the button's state. <br>
@@ -177,51 +166,100 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 * @param img
 	 * @param nbrImages in the range 1 - 3
 	 */
-//	static PImage[] loadImages(PImage img, int nbrImages){
-//		if(img == null || nbrImages <= 0 || nbrImages > 3)
-//			return null;
-//		PImage[] bimage = new PImage[3];
-//		int iw = img.width / nbrImages;
-//		for(int i = 0; i < nbrImages;  i++){
-//			bimage[i] = new PImage(iw, img.height, ARGB);
-//			bimage[i].copy(img, 
-//					i * iw, 0, iw, img.height,
-//					0, 0, iw, img.height);
-//		}
-//		// If less than 3 images reuse last image in set
-//		for(int i = nbrImages; i < 3; i++)
-//			bimage[i] = bimage[nbrImages - 1];
-//		return bimage;
-//	}
+	//	static PImage[] loadImages(PImage img, int nbrImages){
+	//		if(img == null || nbrImages <= 0 || nbrImages > 3)
+	//			return null;
+	//		PImage[] bimage = new PImage[3];
+	//		int iw = img.width / nbrImages;
+	//		for(int i = 0; i < nbrImages;  i++){
+	//			bimage[i] = new PImage(iw, img.height, ARGB);
+	//			bimage[i].copy(img, 
+	//					i * iw, 0, iw, img.height,
+	//					0, 0, iw, img.height);
+	//		}
+	//		// If less than 3 images reuse last image in set
+	//		for(int i = nbrImages; i < 3; i++)
+	//			bimage[i] = bimage[nbrImages - 1];
+	//		return bimage;
+	//	}
 
-//	public static String getFocusName(){
-//		if(focusIsWith == null)
-//			return "null";
-//		else
-//			return focusIsWith.toString();
-//	}
-	
-	/*
-	 * Base constructor for ALL control ctors. It will set the position and size of the
-	 * control based on controlMode. <br>
-	 * Since this is an abstract class it is not possible to use it directly
+	//	public static String getFocusName(){
+	//		if(focusIsWith == null)
+	//			return "null";
+	//		else
+	//			return focusIsWith.toString();
+	//	}
+
+	/**
+	 * Base constructor for ALL control ctors that do not have a visible UI but require 
+	 * access to a PApplet object. <br>
+	 * As of V3.5 the only class using this constructor is GGroup
+	 * 
+	 * @param theApplet
+	 */
+	public GAbstractControl(PApplet theApplet) {
+		G4P.registerSketch(theApplet);;
+		winApp = theApplet;		
+		GCScheme.makeColorSchemes(winApp);
+		rotAngle = 0;
+		z = 0;
+		palette = GCScheme.getJavaColor(localColorScheme);
+	}
+
+	/**
+	 * Base constructor for ALL control ctors that have a visible UI but whose width and height 
+	 * are determined elsewhere e.g. the size of an image. It will set the 
+	 * position of the control based on controlMode. <br>
+	 * 
+	 */
+	public GAbstractControl(PApplet theApplet, float p0, float p1) {
+		this(theApplet);
+		switch(G4P.control_mode){
+		case CORNER:	// (x,y,w,h)
+		case CORNERS:	// (x0,y0,x1,y1)
+			x = p0; y = p1;
+			break;			
+		case CENTER:	// (cx,cy,w,h)
+			cx = p0; cy = p1;
+			break;
+		}
+	}
+
+
+	/**
+	 * Base constructor for ALL control ctors that have a visible UI. It will set the 
+	 * position and size of the control based on controlMode. <br>
 	 * 
 	 */
 	public GAbstractControl(PApplet theApplet, float p0, float p1, float p2, float p3) {
-		// If this is the first control to be created then theAapplet must be the sketchApplet
-		if(G4P.sketchApplet == null)
-			G4P.sketchApplet = theApplet;
-		winApp = theApplet;
-		GCScheme.makeColorSchemes(winApp);
+		this(theApplet);
 		setPositionAndSize(p0, p1, p2, p3);
-		rotAngle = 0;
-		z = 0;
-		palette = GCScheme.getColor(localColorScheme);
-		jpalette = GCScheme.getJavaColor(localColorScheme);
-		tag = this.getClass().getSimpleName();
+		// Create the buffer (only created with this ctor)
+		buffer = (PGraphicsJava2D) winApp.createGraphics((int)width, (int)height, PApplet.JAVA2D);
+		buffer.rectMode(PApplet.CORNER);
+		buffer.beginDraw();
+		buffer.endDraw();
 	}
 
-	/*
+	// May not need this method needs to be caled in updateBuffer
+	protected void setTextRenderingHints(Graphics2D g2d){
+		// Attempt to fix antialiasing
+
+		// MIGHT NEED THESE
+		// If so they have to be done in update method
+		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+				RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+
+
+		//				buffer.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+		//						RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+		//				buffer.g2.setRenderingHint(
+		//				        RenderingHints.KEY_TEXT_ANTIALIASING,
+		//				        RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+
+	}
+
+	/**
 	 * Calculate all the variables that determine the position and size of the
 	 * control. This depends on <pre>control_mode</pre>
 	 * 
@@ -252,7 +290,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 * @param w the new width
 	 * @param h the new height
 	 */
-	protected void resize(float w, float h){
+	protected void resize(int w, int h){
 		width = w; 
 		height = h;
 		halfWidth = width/2; 
@@ -260,22 +298,27 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 		switch(G4P.control_mode){
 		case CORNER:	// (x,y,w,h)
 		case CORNERS:	// (x0,y0,x1,y1)
-//			width = w; 
-//			height = h;
-//			halfWidth = width/2; 
-//			halfHeight = height/2;
 			cx = x + halfWidth; cy = y + halfHeight;
 			break;			
 		case CENTER:	// (cx,cy,w,h)
-//			width = w; 
-//			height = h;
-//			halfWidth = width/2; 
-//			halfHeight = height/2;
 			x = cx - halfWidth; y = cy - halfHeight;
 			break;
 		}
+		buffer = (PGraphicsJava2D) winApp.createGraphics(w, h, PApplet.JAVA2D);
+		buffer.rectMode(PApplet.CORNER);
 	}
-	
+
+	/**
+	 * If the component responds to key or mouse input or has a visual representation
+	 * this it can be part of a group controller.
+	 * @param control the G4P control we are interested in
+	 * @return true if it can be added to a group controller
+	 */
+	protected boolean isSuitableForGroupControl(GAbstractControl control){
+		return (GROUP_CONTROL_METHOD & registeredMethods) != 0;
+	}
+
+
 	/*
 	 * These are empty methods to enable polymorphism
 	 */
@@ -297,7 +340,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	public void dispose(){
 		G4P.removeControl(this);
 	}
-	
+
 	/**
 	 * <b>This is for emergency use only!!!! </b><br>
 	 * In this version of the library a visual controls is drawn to off-screen buffer
@@ -314,7 +357,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	public void forceBufferUpdate(){
 		bufferInvalid = true;
 	}
-	
+
 	protected HotSpot[] hotspots = null;
 	protected int currSpot = -1;
 
@@ -354,33 +397,48 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * Set the local colour scheme for this control. Children are ignored.
+	 * Change a specific colour within the scheme. <br>
+	 * Most controls used a shared colour palette but calling this method
+	 * will create a new palette specific for this control.
 	 * 
-	 * @param cs the colour scheme to use
+	 * @param colorNo the colour index value (0-15 inlc)
+	 * @param color ARGB color value
 	 */
-	public void setLocalColorScheme(int cs){
-		cs = Math.abs(cs) % 16; // Force into valid range
-		if(localColorScheme != cs || palette == null){
-			localColorScheme = cs;
-			palette = GCScheme.getColor(localColorScheme);
-			jpalette = GCScheme.getJavaColor(localColorScheme);
-			bufferInvalid = true;
+	public void setLocalColor(int colorNo, int color){
+		//If necessary make a duplicate of the current color scheme
+		if(localColorScheme >= 0){
+			int[] colors = GCScheme.getPalette(localColorScheme);
+			palette = new Color[16];
+			for(int i = 0; i < 16; i++)
+				palette[i] = new Color(colors[i], true); // keep alpha
+			localColorScheme = -1;
 		}
+		colorNo = Math.abs(colorNo) % 16;
+		palette[colorNo] = new Color(color, true); // keep alpha;
+		bufferInvalid = true;
 	}
 
 	/**
 	 * Set the local colour scheme for this control. Children are ignored.
+	 * 
+	 * @param cs the colour scheme to use (0-15 incl.)
+	 */
+	public void setLocalColorScheme(int cs){
+		setLocalColorScheme(cs, false);
+	}
+
+	/**
+	 * Set the local colour scheme for this control.
 	 * If required include the children and their children.
 	 * 
-	 * @param cs the colour scheme to use
+	 * @param cs the colour scheme to use (0-15 incl.)
 	 * @param includeChildren if do do the same for all descendants 
 	 */
 	public void setLocalColorScheme(int cs, boolean includeChildren){
 		cs = Math.abs(cs) % 16; // Force into valid range
 		if(localColorScheme != cs || palette == null){
 			localColorScheme = cs;
-			palette = GCScheme.getColor(localColorScheme);
-			jpalette = GCScheme.getJavaColor(localColorScheme);
+			palette = GCScheme.getJavaColor(localColorScheme);
 			bufferInvalid = true;
 			if(includeChildren && children != null){
 				for(GAbstractControl c : children)
@@ -390,13 +448,14 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * Get the local color scheme ID number.
+	 * Get the local color scheme ID number. If it returns a value <0 then
+	 * it is using a control specific palette.
 	 * 
 	 */
 	public int getLocalColorScheme(){
 		return localColorScheme;
 	}
-	
+
 	/**
 	 * Set the transparency of the component and make it unavailable to
 	 * mouse and keyboard events if below the threshold. Child controls 
@@ -412,7 +471,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 			bufferInvalid = true;
 		}
 	}
-	
+
 	/**
 	 * Set the transparency of the component and make it unavailable to
 	 * mouse and keyboard events if below the threshold. Child controls 
@@ -424,15 +483,12 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 */
 	public void setAlpha(int alpha, boolean includeChildren){
 		setAlpha(alpha);
-//		alpha = Math.abs(alpha) % 256;
-//		alphaLevel = alpha;
-//		available = (alphaLevel >= ALPHA_BLOCK);
 		if(includeChildren && children != null){
 			for(GAbstractControl c : children)
 				c.setAlpha(alpha, true);
 		}		
 	}
-	
+
 	/**
 	 * Get the parent control. If null then this is a top-level component
 	 */
@@ -447,8 +503,19 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 		return winApp;
 	}
 
+	// Used by composite control i.e. ones that have scrollbars, buttons etc. but not
+	// GWindow and GPanel
 	protected PGraphics getBuffer(){
 		return buffer;
+	}
+
+	/**
+	 * Support UTF8 encoding
+	 * @param ascii UTF8 code
+	 * @return true if the character can be displayed
+	 */
+	protected boolean isDisplayable(int ascii){
+		return !(ascii < 32 || ascii == 127);
 	}
 
 	/**
@@ -459,20 +526,43 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	public PGraphics getSnapshot(){
 		if(buffer != null){
 			updateBuffer();
-			PGraphicsJava2D snap = (PGraphicsJava2D) winApp.createGraphics(buffer.width, buffer.height, PApplet.JAVA2D);
+			PGraphics snap = winApp.createGraphics(buffer.width, buffer.height, PApplet.JAVA2D);
 			snap.beginDraw();
 			snap.image(buffer,0,0);
+			snap.endDraw();
 			return snap;
 		}
 		return null;
 	}
 
+	/**
+	 * Save a snapshot of the control using class name and sketch runtime as the filename
+	 * @return true if the snapshot was saved else return false
+	 */
+	public boolean saveSnapshot(){
+		String filename = getClass().getSimpleName().toLowerCase() + "_" + System.currentTimeMillis() + ".png";
+		return saveSnapshot(filename);
+	}
+	
+	/**
+	 * Save a snapshot of the control using the specified filename 
+	 * @return true if the snapshot was saved else return false
+	 */
+	public boolean saveSnapshot(String filename){
+		PGraphics snapshot = getSnapshot();
+		if(snapshot != null){
+			snapshot.save(filename);
+			return true;
+		}
+		return false;
+	}
+	
 	/*
 	 * Empty method at the moment make abstract
 	 * in final version
 	 */
 	protected void updateBuffer() {}
-	
+
 
 	/**
 	 * Attempt to create the default event handler for the component class. 
@@ -547,7 +637,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	public void setRotation(float angle){
 		setRotation(angle, G4P.control_mode);
 	}
-	
+
 	/**
 	 * Set the rotation to apply when displaying this control. The center of 
 	 * rotation is determined by the mode parameter parameter.
@@ -612,26 +702,26 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	public void moveTo(float px, float py, GControlMode mode){
 		GAbstractControl p = parent;
 		if(p != null){
-			px -= p.width/2;
-			py -= p.height/2;
+			px -= p.width/2.0f;
+			py -= p.height/2.0f;
 		}
 		switch(mode){
 		case CORNER:
 		case CORNERS:
 			cx += (px - x);
 			cy += (py - y);
-			x = cx - width/2;
-			y = cy - height/2;
+			x = cx - width/2.0f;
+			y = cy - height/2.0f;
 			break;
 		case CENTER:
 			cx = px;
 			cy = py;
-			x = cx - width/2;
-			y = cy - height/2;
+			x = cx - width/2.0f;
+			y = cy - height/2.0f;
 			break;
 		}
 	}
-	
+
 	/**
 	 * Get the left position of the control. <br>
 	 * If the control is on a panel then the value returned is relative to the 
@@ -641,7 +731,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 */
 	public float getX() {
 		if(parent != null)
-			return x + parent.width/2;
+			return x + parent.width/2.0f;
 		else
 			return x;
 	}
@@ -655,7 +745,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 */
 	public float getY() {
 		if(parent != null)
-			return y + parent.height/2;
+			return y + parent.height/2.0f;
 		else
 			return y;
 	}
@@ -668,7 +758,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 */
 	public float getCX() {
 		if(parent != null)
-			return x + (parent.width + width)/2;
+			return x + (parent.width + width)/2.0f;
 		else
 			return cx;
 	}
@@ -682,7 +772,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 */
 	public float getCY() {
 		if(parent != null)
-			return x + (parent.width + width)/2;
+			return x + (parent.width + width)/2.0f;
 		else
 			return cy;
 	}
@@ -710,8 +800,11 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 		if(!visible && focusIsWith == this)
 			loseFocus(null);
 		this.visible = visible;
-		// Only available if 
-		available = visible;
+		// Only available if alpha level is high enough
+		if(visible)
+			available = (alphaLevel > ALPHA_BLOCK);
+		else
+			available = false;
 		// If this control has children than make them available if this control
 		// is visible and unavailable if invisible
 		if(children != null){
@@ -753,7 +846,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	protected boolean isAvailable(){
 		return available;
 	}
-	
+
 	/**
 	 * Determines whether to show the back colour or not.
 	 * Only applies to some components
@@ -777,7 +870,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	public boolean isDragging(){
 		return dragging;
 	}
-	
+
 	/**
 	 * Enable or disable the ability of the component to generate mouse events.<br>
 	 * GTextField - it also controls key press events <br>
@@ -799,7 +892,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	public boolean isEnabled(){
 		return enabled;
 	}
-	
+
 	/**
 	 * Give the focus to this component but only after allowing the 
 	 * current component with focus to release it gracefully. <br>
@@ -822,6 +915,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 		if(cursorIsOver == this)
 			cursorIsOver = null;
 		focusIsWith = grabber;
+		bufferInvalid = true;
 	}
 
 	/**
@@ -926,6 +1020,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 * @param y the topmost or centre position depending on controlMode
 	 */
 	public void addControl(GAbstractControl c, float x, float y){
+		// Ignore if children are not allowed.
 		if(children == null) return;
 		addControl(c, x, y, 0);
 	}
@@ -936,6 +1031,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 * @param c the control to add
 	 */
 	public void addControl(GAbstractControl c){
+		// Ignore if children are not allowed.
 		if(children == null) return;
 		switch(G4P.control_mode){
 		case CORNER:
@@ -947,8 +1043,14 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 			break;
 		}		
 	}
-	
+
+	/**
+	 * Add several control at the position and rotation specified in each control.
+	 * 
+	 * @param controls comma separated list of controls
+	 */
 	public void addControls(GAbstractControl... controls){
+		// Ignore if children are not allowed.
 		if(children == null) return;
 		for(GAbstractControl c : controls){
 			switch(G4P.control_mode){
@@ -964,13 +1066,14 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * Changes that need to be made to child when added
+	 * Changes that need to be made to child when added.
+	 * Override where needed e.g. GPanel
 	 * 
 	 * @param p the parent
 	 */
 	protected void addToParent(GAbstractControl p){
 	}
-	
+
 	/**
 	 * Get the shape type when the cursor is over a control
 	 * @return shape type
@@ -1018,8 +1121,8 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 		} catch (NoninvertibleTransformException e) {
 		}
 	}
-	
-	
+
+
 	/**
 	 * Recursive function to set the priority of a component. This
 	 * is used to determine who gets focus when components overlap
@@ -1061,7 +1164,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 		else
 			return tag;
 	}
-	
+
 	/**
 	 * Comparator used for controlling the order components are drawn
 	 * @author Peter Lager

@@ -1,15 +1,16 @@
-/**
- * This program demonstrates the various configuration options 
- * available for the slider control (GSlider).
- * 
- * The only thing not set is the range limits. By default the 
- * slider returns values in the range 0.0 to 1.0 inclusive. 
- * Use setLimits() to set your own range.
- * 
- * @author Peter Lager
- *
- */
+/*
+ This program demonstrates the various configuration options 
+ available for the slider control (GSlider).
  
+ The only thing not set is the range limits. By default the 
+ slider returns values in the range 0.0 to 1.0 inclusive. 
+ Use setLimits() to set your own range.
+ 
+ for Processing V2 and V3
+ (c) 2015 Peter Lager
+ 
+ */
+
 import g4p_controls.*;
 
 GSlider sdr;
@@ -17,7 +18,7 @@ int bgcol = 128;
 
 public void setup() {
   size(500, 360);
-  G4P.setCursorOff(CROSS);
+  G4P.setCursor(CROSS);
   sdr = new GSlider(this, 55, 80, 200, 100, 15);
   makeSliderConfigControls();
 }
@@ -103,4 +104,3 @@ private void placeCodeOnClipboard() {
   else
     System.err.println("UNABLE TO ACCESS CLIPBOARD");
 }
-

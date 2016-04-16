@@ -10,8 +10,8 @@ GLabel lblAlpha1, lblAlpha2;
 GSlider2D sdrPanelPos;
 
 public void createControlWindow() {
-  windControl = new GWindow(this, "Controls", 600, 400, 400, 300, false, JAVA2D);
-  PApplet app = windControl.papplet; // save some typing
+  windControl = GWindow.getWindow(this, "Controls", 600, 400, 400, 300, JAVA2D);
+  PApplet app = windControl; // save some typing
   // Create colour scheme selectors
   int x = 8;
   int y = 50; // app.height - 24;
@@ -56,6 +56,6 @@ public void createControlWindow() {
 /*
    * The draw handler for the control window
  */
-public void drawController(GWinApplet appc, GWinData data) {
+public void drawController(PApplet appc, GWinData data) {
   appc.background(227, 230, 255);
 }

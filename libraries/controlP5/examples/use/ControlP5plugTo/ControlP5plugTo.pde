@@ -27,7 +27,7 @@ Button b;
 int cnt;
 
 void setup() {
-  size(600,400,OPENGL);
+  size(600,400);
   smooth();
   test = new Test(50);
   testarray = new Test[10];
@@ -40,7 +40,7 @@ void setup() {
   controlP5.begin(100,20);
   
   b = controlP5.addButton("trigger",1);
-  b.setColorBackground(color(255,0,0));
+  b.setColorBackground(ControlP5.RED);
   
   controlP5.addButton("plug",2);
   controlP5.addButton("unplug",3);
@@ -56,7 +56,7 @@ void setup() {
 // inside arrat testarray
 void plug(int theValue) {
    b.plugTo(testarray);
-   b.setColorBackground(color(0,128,0));
+   b.setColorBackground(ControlP5.GREEN);
    println("plugging controller b1 to array 'testarray' and variable 'test'.");
 }
 
@@ -64,7 +64,7 @@ void plug(int theValue) {
 // inside array testarray
 void unplug(int theValue) {
   b.unplugFrom(testarray);
-  b.setColorBackground(color(255,0,0));
+  b.setColorBackground(ControlP5.RED);
   println("removing array 'testarray' and variable 'test' from controller b1.");
 }
 

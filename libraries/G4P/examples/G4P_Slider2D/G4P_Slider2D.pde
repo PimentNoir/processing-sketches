@@ -1,10 +1,12 @@
-/**
+/*
  Demonstration of the GSlider2D control to position a
  gun-sight over a street scene.
  
- created by Peter Lager
+ for Processing V2 and V3
+ (c) 2015 Peter Lager
  
  */
+ 
 import g4p_controls.*;
 
 

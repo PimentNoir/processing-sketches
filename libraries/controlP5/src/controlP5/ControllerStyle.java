@@ -20,8 +20,8 @@ import java.io.Serializable;
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  * 
  * @author Andreas Schlegel (http://www.sojamo.de)
- * @modified 12/23/2012
- * @version 2.0.4
+ * @modified 07/30/2015
+ * @version 2.2.5
  * 
  */
 
@@ -49,7 +49,7 @@ public class ControllerStyle implements Serializable {
 	public int backgroundHeight = -1;
 	public int color;
 
-	public ControllerStyle margin(int theValue) {
+	public ControllerStyle margin( int theValue ) {
 		marginTop = theValue;
 		marginRight = theValue;
 		marginBottom = theValue;
@@ -57,7 +57,7 @@ public class ControllerStyle implements Serializable {
 		return this;
 	}
 
-	public ControllerStyle padding(int theValue) {
+	public ControllerStyle padding( int theValue ) {
 		paddingTop = theValue;
 		paddingRight = theValue;
 		paddingBottom = theValue;
@@ -65,32 +65,32 @@ public class ControllerStyle implements Serializable {
 		return this;
 	}
 
-	public ControllerStyle setPadding(int theTop, int theRight, int theBottom, int theLeft) {
-		padding(theTop, theRight, theBottom, theLeft);
+	public ControllerStyle setPadding( int theTop , int theRight , int theBottom , int theLeft ) {
+		padding( theTop , theRight , theBottom , theLeft );
 		return this;
 	}
 
-	public ControllerStyle setPaddingTop(int theValue) {
+	public ControllerStyle setPaddingTop( int theValue ) {
 		paddingTop = theValue;
 		return this;
 	}
 
-	public ControllerStyle setPaddingBottom(int theValue) {
+	public ControllerStyle setPaddingBottom( int theValue ) {
 		paddingBottom = theValue;
 		return this;
 	}
 
-	public ControllerStyle setPaddingRight(int theValue) {
+	public ControllerStyle setPaddingRight( int theValue ) {
 		paddingRight = theValue;
 		return this;
 	}
 
-	public ControllerStyle setPaddingLeft(int theValue) {
+	public ControllerStyle setPaddingLeft( int theValue ) {
 		paddingLeft = theValue;
 		return this;
 	}
 
-	public ControllerStyle margin(int theTop, int theRight, int theBottom, int theLeft) {
+	public ControllerStyle margin( int theTop , int theRight , int theBottom , int theLeft ) {
 		marginTop = theTop;
 		marginRight = theRight;
 		marginBottom = theBottom;
@@ -98,32 +98,32 @@ public class ControllerStyle implements Serializable {
 		return this;
 	}
 
-	public ControllerStyle setMargin(int theTop, int theRight, int theBottom, int theLeft) {
-		margin(theTop, theRight, theBottom, theLeft);
+	public ControllerStyle setMargin( int theTop , int theRight , int theBottom , int theLeft ) {
+		margin( theTop , theRight , theBottom , theLeft );
 		return this;
 	}
 
-	public ControllerStyle setMarginTop(int theValue) {
+	public ControllerStyle setMarginTop( int theValue ) {
 		marginTop = theValue;
 		return this;
 	}
 
-	public ControllerStyle setMarginBottom(int theValue) {
+	public ControllerStyle setMarginBottom( int theValue ) {
 		marginBottom = theValue;
 		return this;
 	}
 
-	public ControllerStyle setMarginRight(int theValue) {
+	public ControllerStyle setMarginRight( int theValue ) {
 		marginRight = theValue;
 		return this;
 	}
 
-	public ControllerStyle setMarginLeft(int theValue) {
+	public ControllerStyle setMarginLeft( int theValue ) {
 		marginLeft = theValue;
 		return this;
 	}
 
-	public ControllerStyle padding(int theTop, int theRight, int theBottom, int theLeft) {
+	public ControllerStyle padding( int theTop , int theRight , int theBottom , int theLeft ) {
 		paddingTop = theTop;
 		paddingRight = theRight;
 		paddingBottom = theBottom;
@@ -131,7 +131,7 @@ public class ControllerStyle implements Serializable {
 		return this;
 	}
 
-	public ControllerStyle moveMargin(int theTop, int theRight, int theBottom, int theLeft) {
+	public ControllerStyle moveMargin( int theTop , int theRight , int theBottom , int theLeft ) {
 		marginTop += theTop;
 		marginRight += theRight;
 		marginBottom += theBottom;
@@ -139,12 +139,12 @@ public class ControllerStyle implements Serializable {
 		return this;
 	}
 
-	public ControllerStyle movePadding(int theTop, int theRight, int theBottom, int theLeft) {
+	public ControllerStyle movePadding( int theTop , int theRight , int theBottom , int theLeft ) {
 		paddingTop += theTop;
 		paddingRight += theRight;
 		paddingBottom += theBottom;
 		paddingLeft += theLeft;
 		return this;
 	}
-	
+
 }

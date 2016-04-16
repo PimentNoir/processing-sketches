@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -27,12 +27,10 @@ import g4p_controls.HotSpot.HSalpha;
 import g4p_controls.HotSpot.HSrect;
 
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.io.File;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import processing.core.PGraphicsJava2D;
 import processing.core.PImage;
 
 /**
@@ -115,12 +113,10 @@ public class GCustomSlider extends GLinearTrackControl {
 		super(theApplet, p0, p1, p2, p3);
 		skin = (skin == null) ? "grey_blue" : skin.trim();
 		setStyle(skin);
-
-		buffer = (PGraphicsJava2D) winApp.createGraphics((int)width, (int)height, PApplet.JAVA2D);
-		buffer.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-				RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-		buffer.g2.setFont(G4P.numericLabelFont);
+		
+		// Customise buffer for this control
 		buffer.imageMode(PApplet.CENTER);
+		
 		hotspots = new HotSpot[]{
 				new HSalpha(THUMB_SPOT, width/2 + (parametricPos - 0.5f) * trackLength, height/2, thumb, PApplet.CENTER),  // thumb
 				new HSrect(TRACK_SPOT, (width-trackLength)/2, (height-trackWidth)/2, trackLength, trackWidth),		// track
@@ -134,13 +130,13 @@ public class GCustomSlider extends GLinearTrackControl {
 		ssValue = new StyledString("0.50");
 
 		// Now register control with applet
-		createEventHandler(G4P.sketchApplet, "handleSliderEvents", 
+		createEventHandler(G4P.sketchWindow, "handleSliderEvents", 
 				new Class<?>[]{ GValueControl.class, GEvent.class },
 				new String[]{ "slider", "event" }
 		);
 		registeredMethods = PRE_METHOD | DRAW_METHOD | MOUSE_METHOD;
 		cursorOver = HAND;
-		G4P.addControl(this);
+		G4P.registerControl(this);
 	}
 
 	/**
@@ -178,16 +174,13 @@ public class GCustomSlider extends GLinearTrackControl {
 
 	protected void updateBuffer(){
 		if(bufferInvalid) {
-			Graphics2D g2d = buffer.g2;
 			bufferInvalid = false;
 			buffer.beginDraw();
+			Graphics2D g2d = buffer.g2;
+			g2d.setFont(localFont);
 
 			// Back ground colour
-			if(opaque == true)
-				buffer.background(palette[6]);
-			else
-				buffer.background(buffer.color(255,0));
-
+			buffer.background(opaque ? palette[6].getRGB() : palette[2].getRGB() & 0xFFFFFF);
 			// Draw track, thumb, ticks etc.
 			buffer.pushMatrix();
 			buffer.translate(width/2, height/2);
@@ -218,16 +211,16 @@ public class GCustomSlider extends GLinearTrackControl {
 				break;
 			}		
 			// Display slider values
-			g2d.setColor(jpalette[2]);
+			g2d.setColor(palette[2]);
 			if(labels != null){
-				drawLabels();
+				drawLabels(g2d);
 			}
 			else {
 
 				if(showLimits)
-					drawLimits();
+					drawLimits(g2d);
 				if(showValue)
-					drawValue();
+					drawValue(g2d);
 			}
 			buffer.popMatrix();
 			buffer.endDraw();

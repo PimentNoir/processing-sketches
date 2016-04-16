@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-	 Copyright (c) 2008-12 Peter Lager
+	 Copyright (c) 2008 Peter Lager
 
   The actual code to create the clipbaord, copy and paste were 
   taken taken from a similar GUI library Interfascia ALPHA 002 -- 

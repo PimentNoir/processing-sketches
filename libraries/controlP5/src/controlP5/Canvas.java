@@ -1,13 +1,15 @@
-
 package controlP5;
 
 import processing.core.PApplet;
+import processing.core.PGraphics;
 
 /**
- * Use a Canvas to draw custom graphics into a control window or the default sketch window.
+ * Use a Canvas to draw custom graphics into a control
+ * window or the default sketch window.
  * 
- * The Canvas is an abstract class and must be extended by your custom Canvas class, see the
- * ControlP5canvas example for details.
+ * The Canvas is an abstract class and must be extended by
+ * your custom Canvas class, see the ControlP5canvas example
+ * for details.
  * 
  * @example controllers/ControlP5canvas
  * 
@@ -23,77 +25,75 @@ public abstract class Canvas {
 
 	protected int _myMode = PRE;
 
-
-	public void setup(PApplet theApplet) {
+	public void setup( PGraphics theGraphics ) {
 	}
 
+	// TODO should be called from within ControlWindow when
+	// calling draw(PGraphics)
+	public void update( PApplet theApplet ) {
+	}
 
 	/**
-	 * controlWindowCanvas is an abstract class and therefore needs to be extended by your class.
-	 * draw(PApplet theApplet) is the only method that needs to be overwritten.
+	 * controlWindowCanvas is an abstract class and
+	 * therefore needs to be extended by your class.
+	 * draw(PApplet theApplet) is the only method that needs
+	 * to be overwritten.
 	 */
-	public abstract void draw(PApplet theApplet);
-
+	public abstract void draw( PGraphics theGraphics );
 
 	/**
 	 * move a canvas to another controlWindow
 	 * 
 	 * @param theControlWindow
 	 */
-	public void moveTo(ControlWindow theControlWindow) {
-		if (_myControlWindow != null) {
-			_myControlWindow.removeCanvas(this);
+	public void moveTo( ControlWindow theControlWindow ) {
+		if ( _myControlWindow != null ) {
+			_myControlWindow.removeCanvas( this );
 		}
-		theControlWindow.addCanvas(this);
+		theControlWindow.addCanvas( this );
 	}
 
-
 	/**
-	 * get the drawing mode of a Canvas. this can be PRE or POST.
+	 * get the drawing mode of a Canvas. this can be PRE or
+	 * POST.
 	 * 
 	 * @return
 	 */
-	public final int mode() {
+	public final int mode( ) {
 		return _myMode;
 	}
-
 
 	/**
 	 * set the drawing mode to PRE. PRE is the default.
 	 */
-	public final void pre() {
-		setMode(PRE);
+	public final void pre( ) {
+		setMode( PRE );
 	}
-
 
 	/**
 	 * set the drawing mode to POST.
 	 */
-	public final void post() {
-		setMode(POST);
+	public final void post( ) {
+		setMode( POST );
 	}
-
 
 	/**
 	 * 
 	 * @param theMode
 	 */
-	public final void setMode(int theMode) {
-		if (theMode == PRE) {
+	public final void setMode( int theMode ) {
+		if ( theMode == PRE ) {
 			_myMode = PRE;
-		}
-		else {
+		} else {
 			_myMode = POST;
 		}
 	}
 
-
-	protected final void setControlWindow(ControlWindow theControlWindow) {
+	protected final void setControlWindow( ControlWindow theControlWindow ) {
 		_myControlWindow = theControlWindow;
 	}
 
-
-	public final ControlWindow window() {
+	public final ControlWindow window( ) {
 		return _myControlWindow;
 	}
 }

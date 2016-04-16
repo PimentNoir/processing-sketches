@@ -30,10 +30,9 @@ import processing.pdf.*;
 import java.util.Calendar;
 
 boolean savePDF = false;
-int node_number = 200;
 
 // an array for the nodes
-Node[] nodes = new Node[node_number];
+Node[] nodes = new Node[100];
 // an array for the springs
 Spring[] springs = new Spring[0];
 

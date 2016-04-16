@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -102,7 +102,6 @@ public class GImageToggleButton extends GAbstractControl {
 	 * @param p1 vertical position of the control
 	 * @param offPicture the filename of bitmap containing toggle state pictures
 	 * @param nbrCols number of tiles horizontally
-	 * @param nbrRows number of tiles vertically
 	 */
 	public GImageToggleButton(PApplet theApplet, float p0, float p1, String offPicture, int nbrCols){
 		this(theApplet, p0, p1, offPicture, null, nbrCols, 1);
@@ -149,7 +148,7 @@ public class GImageToggleButton extends GAbstractControl {
 	 * @param nbrRows number of tiles vertically
 	 */
 	public GImageToggleButton(PApplet theApplet, float p0, float p1, String offPicture, String overPicture, int nbrCols, int nbrRows){
-		super(theApplet, p0, p1, 0, 0);
+		super(theApplet, p0, p1);
 		// Attempt to get off-control image data
 		PImage temp = null;
 		if(nbrCols < 1 || nbrRows < 1 || offPicture == null || null == (temp = ImageManager.loadImage(winApp, offPicture))){
@@ -181,22 +180,19 @@ public class GImageToggleButton extends GAbstractControl {
 
 		z = Z_SLIPPY;
 		// Now register control with applet
-		createEventHandler(G4P.sketchApplet, "handleToggleButtonEvents",
+		createEventHandler(G4P.sketchWindow, "handleToggleButtonEvents",
 				new Class<?>[]{ GImageToggleButton.class, GEvent.class }, 
 				new String[]{ "button", "event" } 
 		);
 		registeredMethods = DRAW_METHOD | MOUSE_METHOD;
 		cursorOver = HAND;
-		G4P.addControl(this);
+		G4P.registerControl(this);
 	}
 
 	public void draw(){
 		if(!visible) return;
 
-		// Update buffer if invalid
-		updateBuffer();
 		winApp.pushStyle();
-
 		winApp.pushMatrix();
 		// Perform the rotation
 		winApp.translate(cx, cy);
@@ -306,10 +302,34 @@ public class GImageToggleButton extends GAbstractControl {
 
 	/**
 	 * Get the current state value of the button.
-	 * @return
+	 * @deprecated use getState()
 	 */
+	@Deprecated
 	public int stateValue(){
 		return stateValue;
+	}
+	
+	/**
+	 * Get the current state value of the button.
+	 */
+	public int getState(){
+		return stateValue;
+	}
+	
+	/**
+	 * Change the current toggle state. <br>
+	 * If the parameter is not a valid toggle state value then it
+	 * is ignored and the button's state value is unchanged.
+	 * @deprecated use setState(int)
+	 * @param newState
+	 */
+	@Deprecated
+	public void stateValue(int newState){
+		if(newState >= 0 && newState < nbrStates && newState != stateValue){
+			stateValue = newState;
+			hotspots[0].adjust(0,0,offImage[stateValue]);
+			bufferInvalid = true;
+		}
 	}
 	
 	/**
@@ -318,7 +338,7 @@ public class GImageToggleButton extends GAbstractControl {
 	 * is ignored and the button's state value is unchanged.
 	 * @param newState
 	 */
-	public void stateValue(int newState){
+	public void setState(int newState){
 		if(newState >= 0 && newState < nbrStates && newState != stateValue){
 			stateValue = newState;
 			hotspots[0].adjust(0,0,offImage[stateValue]);

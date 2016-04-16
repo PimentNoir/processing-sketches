@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2008 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,7 @@
 
 package g4p_controls;
 
-import g4p_controls.HotSpot.HSrect;
+import g4p_controls.HotSpot.HSmask;
 import g4p_controls.StyledString.TextLayoutInfo;
 
 import java.awt.Graphics2D;
@@ -31,7 +31,7 @@ import java.awt.font.TextLayout;
 import java.util.LinkedList;
 
 import processing.core.PApplet;
-import processing.core.PGraphicsJava2D;
+import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
 /**
@@ -66,37 +66,54 @@ import processing.event.MouseEvent;
  */
 public class GButton extends GTextIconAlignBase {
 
+	private static boolean roundCorners = true;
+	private static float CORNER_RADIUS = 6;
+
+	public static void useRoundCorners(boolean useRoundCorners){
+		roundCorners = useRoundCorners;
+	}
+	
 	// Mouse over status
 	protected int status = 0;
 
 	// Only report CLICKED events
 	protected boolean reportAllButtonEvents = false;
-	
+
 	public GButton(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		this(theApplet, p0, p1, p2, p3, "");
 	}
-	
+
 	public GButton(PApplet theApplet, float p0, float p1, float p2, float p3, String text) {
 		super(theApplet, p0, p1, p2, p3);
-		// The image buffer is just for the button surface
-		buffer = (PGraphicsJava2D) winApp.createGraphics((int)width, (int)height, PApplet.JAVA2D);
-		buffer.rectMode(PApplet.CORNER);
-		buffer.g2.setFont(localFont);
+		PGraphics mask = winApp.createGraphics((int) width, (int) height, JAVA2D);
+		mask.beginDraw();
+		mask.background(255);
+		mask.fill(0);
+		mask.stroke(0);
+		mask.strokeWeight(1);
+		if(roundCorners)
+			mask.rect(0, 0, width-2, height-2, CORNER_RADIUS);
+		else
+			mask.rect(0, 0, width-2, height-2);	
+		mask.endDraw();
+
 		hotspots = new HotSpot[]{
-				new HSrect(1, 0, 0, width, height)		// control surface
+				new HSmask(1, mask)		// control surface
 		};
+
 		setText(text);
 		z = Z_SLIPPY;
 		// Now register control with applet
-		createEventHandler(G4P.sketchApplet, "handleButtonEvents", 
+		createEventHandler(G4P.sketchWindow, "handleButtonEvents", 
 				new Class<?>[]{ GButton.class, GEvent.class }, 
 				new String[]{ "button", "event" } 
-		);
+				);
 		registeredMethods = DRAW_METHOD | MOUSE_METHOD;
 		cursorOver = HAND;
-		G4P.addControl(this);
+		// Must register control
+		G4P.registerControl(this);
 	}
-	
+
 	/**
 	 * If the parameter is true all 3 event types are generated, if false
 	 * only CLICKED events are generated (default behaviour).
@@ -117,7 +134,7 @@ public class GButton extends GTextIconAlignBase {
 		if(!enable)
 			status = OFF_CONTROL;
 	}
-	
+
 	/**
 	 * 
 	 * When a mouse button is clicked on a GButton it generates the GEvent.CLICKED event. If
@@ -195,7 +212,7 @@ public class GButton extends GTextIconAlignBase {
 			break;
 		}
 	}
-	
+
 	public void draw(){
 		if(!visible) return;
 
@@ -217,28 +234,34 @@ public class GButton extends GTextIconAlignBase {
 		winApp.popMatrix();		
 		winApp.popStyle();
 	}
-	
+
 	protected void updateBuffer(){
 		if(bufferInvalid) {
-			Graphics2D g2d = buffer.g2;
-			// Get the latest lines of text
-			LinkedList<TextLayoutInfo> lines = stext.getLines(g2d);	
 			bufferInvalid = false;
 			buffer.beginDraw();
-			// Back ground colour
+			// Set the font and read the latest test
+			Graphics2D g2d = (Graphics2D) buffer.g2;
+			g2d.setFont(localFont);
+			LinkedList<TextLayoutInfo> lines = stext.getLines(g2d);
+			// Draw the button head
+			buffer.clear();
+			buffer.stroke(palette[3].getRGB());
+			buffer.strokeWeight(1);
 			switch(status){
 			case OVER_CONTROL:
-				buffer.background(palette[6]);
+				buffer.fill(palette[6].getRGB());
 				break;
 			case PRESS_CONTROL:
-				buffer.background(palette[14]);
+				buffer.fill(palette[14].getRGB());
 				break;
 			default:
-				buffer.background(palette[4]);
+				buffer.fill(palette[4].getRGB());
 			}
-			g2d.setColor(jpalette[3]);
-			g2d.setStroke(pen_1_0);
-			g2d.drawRect(0, 0, (int)width-1, (int)height-1);
+			if(roundCorners)
+				buffer.rect(0, 0, width-2, height-2, CORNER_RADIUS);
+			else
+				buffer.rect(0, 0, width-2, height-2);
+			
 			// Calculate text and icon placement
 			calcAlignment();
 			// If there is an icon draw it
@@ -250,6 +273,7 @@ public class GButton extends GTextIconAlignBase {
 			for(TextLayoutInfo lineInfo : lines){
 				TextLayout layout = lineInfo.layout;
 				buffer.translate(0, layout.getAscent());
+				//System.out.println(layout.toString());
 				switch(textAlignH){
 				case CENTER:
 					tw = layout.getVisibleAdvance();
@@ -267,8 +291,8 @@ public class GButton extends GTextIconAlignBase {
 					sx = 0;		
 				}
 				// display text
-				g2d.setColor(jpalette[2]);
-				lineInfo.layout.draw(g2d, sx, 0);
+				g2d.setColor(palette[2]);
+				layout.draw(g2d, sx, 0);
 				buffer.translate(0, layout.getDescent() + layout.getLeading());
 			}
 			buffer.endDraw();

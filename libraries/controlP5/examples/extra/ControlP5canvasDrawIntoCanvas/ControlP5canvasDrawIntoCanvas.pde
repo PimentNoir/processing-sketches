@@ -16,9 +16,17 @@ ControlP5 cp5;
 Canvas cc;
 
 // your controlWindowCanvas class
-class MyCanvas extends ControlWindowCanvas {
+class MyCanvas extends Canvas {
   
-  public void draw(PApplet theApplet) {
+  boolean mousePressed;
+  int mouseX, mouseY;
+  public void update(PApplet theApplet) {
+    mousePressed = theApplet.mousePressed;
+    mouseX = theApplet.mouseX;
+    mouseY = theApplet.mouseY;
+  }
+  
+  public void draw(PGraphics theApplet) {
     theApplet.background(255);
      // a rectangle will be drawn if the mouse has been
     // pressed inside the main sketch window.
@@ -34,11 +42,11 @@ class MyCanvas extends ControlWindowCanvas {
     // if the mouse has been pressed inside the controlWindow itself.
     // theApplet.mousePressed here refers to the
     // mousePressed variable of the controlWindow.
-    if(theApplet.mousePressed) {
+    if(mousePressed) {
       theApplet.fill(0);
       theApplet.rect(10,10,100,100);
       theApplet.fill(255,0,0);
-      theApplet.ellipse(theApplet.mouseX,theApplet.mouseY,20,20);
+      theApplet.ellipse(mouseX,mouseY,20,20);
     }
     
   }

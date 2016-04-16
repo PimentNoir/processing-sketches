@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 	
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -79,23 +79,25 @@ public class GTimer implements GConstantsInternal {
 	 * @param delay the initial delay and the time (in millisecs) between function calls
 	 */
 	public GTimer(PApplet theApplet, Object obj, String methodName, int delay){
-		app = theApplet;
-		createEventHandler(obj, methodName);
-		// If we have something to handle the event then create the Timer
-		if(eventHandlerObject != null){
-			timer = new Timer(delay, new ActionListener(){
-
-				public void actionPerformed(ActionEvent e) {
-					fireEvent();
-				}
-
-			});	
-			timer.setInitialDelay(delay);
-			timer.setDelay(delay);
-			timer.stop();
-		}
+		this(theApplet, obj, methodName, delay, delay);
 	}
 
+	/**
+	 * Create the GTimer object with this ctor.
+	 * 
+	 * 'methodName' is the method/function to be called every 'interval' 
+	 * milliseconds. 'obj' is the object that contains the method/function
+	 * 'methodName'
+	 * 
+	 * For most users 'methodName' will be in their main sketch so this
+	 * parameter has the same value as 'theApplet'
+	 * 
+	 * @param theApplet a reference to the PApplet object (invariably <b>this</b>)
+	 * @param obj the object that has the method to be executed (likely to be <b>this</b>)
+	 * @param methodName the name of the method to be called by the timer
+	 * @param delay the time (in millisecs) between function calls
+	 * @param initDelay the initial delay (in millisecs)
+	 */
 	public GTimer(PApplet theApplet, Object obj, String methodName, int delay, int initDelay){
 		app = theApplet;
 		createEventHandler(obj, methodName);

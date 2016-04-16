@@ -70,7 +70,7 @@ public interface GConstants {
 	int KEEP_OPEN 			= 0x00000f03;
 
 	// ### GUI build constants ###
-	int USER_COL_SCHEME = 	0x00010102;
+	int USER_COL_SCHEME 	= 0x00010102;
 
 	// The min alpha level for a control to respond to mouse and keyboard
 	int ALPHA_BLOCK					= 128;
@@ -88,13 +88,6 @@ public interface GConstants {
 	int SCROLLBARS_BOTH 			= 0x0003;
 	/** whether to hide when not required */
 	int SCROLLBARS_AUTOHIDE 		= 0x1000;
-
-	// ### Scroll bar type constants ###
-	/** Create and display vertical scrollbar only. */
-	int SCROLLBAR_VERTICAL 			= 1;
-	/** Create and display horizontal scrollbar only. */
-	int SCROLLBAR_HORIZONTAL 		= 2;
-
 
 	// Slider / numeric display types
 	int INTEGER 		= 0;

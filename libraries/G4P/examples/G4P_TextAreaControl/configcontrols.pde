@@ -79,4 +79,3 @@ public void createConfigControls() {
   knbAngle.setNbrTicks(13);
   knbAngle.setStickToTicks(true);
 }
-

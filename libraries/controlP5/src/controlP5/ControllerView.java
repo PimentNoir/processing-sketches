@@ -20,32 +20,31 @@ package controlP5;
  * Boston, MA 02111-1307 USA
  *
  * @author 		Andreas Schlegel (http://www.sojamo.de)
- * @modified	12/23/2012
- * @version		2.0.4
+ * @modified	07/30/2015
+ * @version		2.2.5
  *
  */
 
-import processing.core.PApplet;
+import processing.core.PGraphics;
 
 /**
- * The interface ControllerView can be used to define custom displays for
- * controllers.
+ * The interface ControllerView can be used to define custom displays for controllers.
  * 
  * @see controlP5.draw(processing.core.PApplet)
  * @see controlP5.setView(ControlleView)
  * 
  * @example use/ControlP5customDisplay
  */
-public interface ControllerView<T> {
+public interface ControllerView< T > {
 
 	/**
-	 * draws your custom controllers. display() will be called by a controller's
-	 * draw() function and will pass a reference of PApplet as well as the
-	 * Controller itself to your custom display class.
+	 * draws your custom controllers. display() will be called by a controller's draw() function and
+	 * will pass a reference of PApplet as well as the Controller itself to your custom display
+	 * class.
 	 * 
 	 * @param theApplet
 	 * @param theController
 	 */
-	public void display(PApplet theApplet, T theController);
+	public void display( PGraphics theGraphics , T theController );
 
 }

@@ -1,7 +1,7 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
   Copyright (c) 2013 Peter Lager
 
@@ -36,13 +36,8 @@ import processing.core.PApplet;
  */
 public abstract class GTextBase extends GAbstractControl {
 
-	protected static final int TPAD = 2;
-	protected static final int TPAD2 = TPAD * 2;
-	protected static final int TPAD4 = TPAD * 4;
-	
-
 	/** The styled text used by this control */
-	public StyledString stext = null;
+	protected StyledString stext = new StyledString("");
 	
 	protected Font localFont = G4P.globalFont;
 	
@@ -57,6 +52,20 @@ public abstract class GTextBase extends GAbstractControl {
 	 */
 	public GTextBase(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		super(theApplet, p0, p1, p2, p3);
+		setFont(localFont);
+	}
+
+	/**
+	 * Used internally to enforce minimum size constraints and to enable 
+	 * minimising the height used by text icon controls (labels, buttons, 
+	 * radio button and checkboxes)
+	 * 
+	 * @param w the new width
+	 * @param h the new height
+	 */
+	protected void resize(int w, int h){
+		super.resize(w, h);
+		setFont(localFont);
 	}
 
 	/**
@@ -67,7 +76,7 @@ public abstract class GTextBase extends GAbstractControl {
 	public void setText(String text){
 		if(text == null || text.length() == 0 )
 			text = " ";
-		stext = new StyledString(text, Integer.MAX_VALUE);
+		stext.setText(text, Integer.MAX_VALUE);
 		bufferInvalid = true;
 	}
 	
@@ -95,12 +104,9 @@ public abstract class GTextBase extends GAbstractControl {
 	 * @return true if saved successfully else false
 	 */
 	public boolean saveText(String fname){
-		if(stext != null){
-			stext.startIdx = stext.endIdx = -1;
-			StyledString.save(winApp, stext, fname);
-			return true;
-		}
-		return false;
+		stext.startIdx = stext.endIdx = -1;
+		StyledString.save(winApp, stext, fname);
+		return true;
 	}
 
 	/** 
@@ -109,9 +115,8 @@ public abstract class GTextBase extends GAbstractControl {
 	 * @param font AWT font to use
 	 */
 	public void setFont(Font font) {
-		if(font != null && font != localFont && buffer != null){
+		if(font != null && font != localFont) {// && buffer != null){
 			localFont = font;
-			buffer.g2.setFont(localFont);
 			bufferInvalid = true;
 		}
 	}
@@ -123,11 +128,17 @@ public abstract class GTextBase extends GAbstractControl {
 	public void setStyledText(StyledString ss){
 		if(ss != null) {
 			stext = ss;
-			stext.setWrapWidth((int)width - TPAD2);
+			stext.setWrapWidth((int)width - TPAD4);
 			bufferInvalid = true;
 		}
 	}
 	
+	public void forceBufferUpdate(){
+		if(stext != null)
+			stext.invalidateText();
+		bufferInvalid = true;
+	}
+
 	/**
 	 * Clear <b>all</b> applied styles from the whole text.
 	 */
@@ -174,7 +185,7 @@ public abstract class GTextBase extends GAbstractControl {
 
 	/**
 	 * Get the text used for this control.
-	 * @return the displayed text without styling
+	 * @return the displayed text with styling
 	 */
 	public StyledString getStyledText(){
 		return stext;
@@ -200,12 +211,12 @@ public abstract class GTextBase extends GAbstractControl {
 	}
 	
 	/**
-	 * Apply the style to a portion of the strin
+	 * Apply the style to a portion of the string
 	 * 
 	 * @param style the style attribute
 	 * @param value 'amount' to apply
 	 * @param s first character to be included for styling
-	 * @param e the first character not to be included for stylin
+	 * @param e the first character not to be included for styling
 	 */
 	protected void addAttributeImpl(TextAttribute style, Object value, int s, int e){
 		if(s >= e) return;

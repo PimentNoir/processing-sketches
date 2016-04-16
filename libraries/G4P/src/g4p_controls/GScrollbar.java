@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -24,12 +24,7 @@
 package g4p_controls;
 
 import g4p_controls.HotSpot.HSrect;
-
-import java.awt.Graphics2D;
-import java.awt.geom.RoundRectangle2D;
-
 import processing.core.PApplet;
-import processing.core.PGraphicsJava2D;
 import processing.event.MouseEvent;
 
 /**
@@ -41,13 +36,8 @@ import processing.event.MouseEvent;
  */
 class GScrollbar extends GAbstractControl {
 
-	private static final int OFF_FILL = 3;
-	private static final int OFF_STROKE = 0;
-	private static final int OVER_FILL = 1;
-	private static final int OVER_STROKE = 3;
+	private static float CORNER_RADIUS = 6;
 	private static final int TRACK = 5;
-
-	protected RoundRectangle2D lowCap, highCap;
 
 	protected float value = 0.2f;
 	protected float filler = .5f;
@@ -67,23 +57,18 @@ class GScrollbar extends GAbstractControl {
 	 */
 	public GScrollbar(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		super(theApplet, p0, p1, p2, p3);
-		buffer = (PGraphicsJava2D) winApp.createGraphics((int)width, (int)height, PApplet.JAVA2D);
-		buffer.rectMode(PApplet.CORNER);
 		hotspots = new HotSpot[]{
 				new HSrect(1, 0, 0, 16, height),			// low cap
 				new HSrect(2, width - 16, 0, 16, height),	// high cap
 				new HSrect(9, 17, 0, width - 17, height)	// thumb track
 		};
 
-		lowCap = new RoundRectangle2D.Float(1, 1, 15, height-2, 6, 6);
-		highCap = new RoundRectangle2D.Float(width - 15, 1, 14.5f, height-2, 6, 6);
-
 		opaque = false;
-
 		z = Z_SLIPPY;
 		registeredMethods = DRAW_METHOD | MOUSE_METHOD;
 		cursorOver = HAND;
-		G4P.addControl(this);
+		// Must register control
+		G4P.registerControl(this);
 	}
 
 	/**
@@ -233,65 +218,47 @@ class GScrollbar extends GAbstractControl {
 	protected void updateBuffer(){
 		if(bufferInvalid) {
 			bufferInvalid = false;
-			Graphics2D g2d = buffer.g2;
 			buffer.beginDraw();
 			if(opaque) {
 				buffer.background(buffer.color(255,0));
-				buffer.fill(palette[6]);
+				buffer.fill(palette[6].getRGB());
 				buffer.noStroke();
 				buffer.rect(8,0,width-16,height);
 			}
 			else
 				buffer.background(buffer.color(255,0));
 			// Draw the track
-			buffer.fill(palette[TRACK]);
+			buffer.fill(palette[TRACK].getRGB());
 			buffer.noStroke();
 			buffer.rect(8,3,width-8,height-5);
-			g2d.setStroke(pen_1_0);
+
+			// ****************************************
+			buffer.strokeWeight(1);
+			buffer.stroke(3);
 
 			// Draw the low cap
-			buffer.strokeWeight(1.2f);
-			if(currSpot == 1){
-				g2d.setColor(jpalette[OVER_FILL]);
-				g2d.fill(lowCap);
-				g2d.setColor(jpalette[OVER_STROKE]);
-				g2d.draw(lowCap);
-			}
-			else {
-				g2d.setColor(jpalette[OFF_FILL]);
-				g2d.fill(lowCap);
-				g2d.setColor(jpalette[OFF_STROKE]);
-				g2d.draw(lowCap);
-			}
+			if(currSpot == 1)
+				buffer.fill(palette[6].getRGB());
+			else
+				buffer.fill(palette[4].getRGB());
+			buffer.rect(1, 1, 15, height-2, CORNER_RADIUS, CORNER_RADIUS, CORNER_RADIUS, CORNER_RADIUS);
+			
 			// Draw the high cap
-			if(currSpot == 2){
-				g2d.setColor(jpalette[OVER_FILL]);
-				g2d.fill(highCap);
-				g2d.setColor(jpalette[OVER_STROKE]);
-				g2d.draw(highCap);
-			}
-			else {
-				g2d.setColor(jpalette[OFF_FILL]);
-				g2d.fill(highCap);
-				g2d.setColor(jpalette[OFF_STROKE]);
-				g2d.draw(highCap);
-			}
+			if(currSpot == 2)
+				buffer.fill(palette[6].getRGB());
+			else
+				buffer.fill(palette[4].getRGB());
+			buffer.rect(width - 15, 1, 14.5f, height-2, CORNER_RADIUS, CORNER_RADIUS, CORNER_RADIUS, CORNER_RADIUS);
+			
 			// draw thumb
 			float thumbWidth = (width - 32) * filler;
-			RoundRectangle2D thumb = new RoundRectangle2D.Float(1,1,thumbWidth-1, height-2,6,6);
 			buffer.translate((width - 32) * value + 16, 0);
-			if(currSpot == 10 || isValueChanging){
-				g2d.setColor(jpalette[OVER_FILL]);
-				g2d.fill(thumb);
-				g2d.setColor(jpalette[OVER_STROKE]);
-				g2d.draw(thumb);
-			}
-			else {
-				g2d.setColor(jpalette[OFF_FILL]);
-				g2d.fill(thumb);
-				g2d.setColor(jpalette[OFF_STROKE]);
-				g2d.draw(thumb);
-			}
+			if(currSpot == 10)
+				buffer.fill(palette[6].getRGB());
+			else
+				buffer.fill(palette[4].getRGB());
+			buffer.rect(1,1,thumbWidth-1, height-2, CORNER_RADIUS, CORNER_RADIUS, CORNER_RADIUS, CORNER_RADIUS);
+			
 			buffer.endDraw();
 		}
 	}

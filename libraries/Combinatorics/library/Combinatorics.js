@@ -3,8 +3,8 @@ Array.prototype.map || (Array.prototype.map = function(a, c) {
   if("function" !== typeof a) {
     throw new TypeError;
   }
-  for(var d = Array(b), g = 0;g < b;g++) {
-    g in this && (d[g] = a.call(c, this[g], g, this))
+  for(var d = Array(b), e = 0;e < b;e++) {
+    e in this && (d[e] = a.call(c, this[e], e, this))
   }
   return d
 });
@@ -27,7 +27,7 @@ BigInteger._0 = BigInteger.ZERO;
 BigInteger._1 = BigInteger.ONE;
 BigInteger.small = [BigInteger.ZERO, BigInteger.ONE, new BigInteger([2], 1), new BigInteger([3], 1), new BigInteger([4], 1), new BigInteger([5], 1), new BigInteger([6], 1), new BigInteger([7], 1), new BigInteger([8], 1), new BigInteger([9], 1), new BigInteger([10], 1), new BigInteger([11], 1), new BigInteger([12], 1), new BigInteger([13], 1), new BigInteger([14], 1), new BigInteger([15], 1), new BigInteger([16], 1), new BigInteger([17], 1), new BigInteger([18], 1), new BigInteger([19], 1), new BigInteger([20], 
 1), new BigInteger([21], 1), new BigInteger([22], 1), new BigInteger([23], 1), new BigInteger([24], 1), new BigInteger([25], 1), new BigInteger([26], 1), new BigInteger([27], 1), new BigInteger([28], 1), new BigInteger([29], 1), new BigInteger([30], 1), new BigInteger([31], 1), new BigInteger([32], 1), new BigInteger([33], 1), new BigInteger([34], 1), new BigInteger([35], 1), new BigInteger([36], 1)];
-BigInteger.digits = "0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z".split(",");
+BigInteger.digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 BigInteger.prototype.toString = function(a) {
   a = +a || 10;
   if(a < 2 || a > 36) {
@@ -45,31 +45,30 @@ BigInteger.prototype.toString = function(a) {
     }
     return a
   }
-  for(var c = BigInteger.digits, a = BigInteger.small[a], b = this._s, d = this.abs(), g = [], e;d._s !== 0;) {
-    e = d.divRem(a);
-    d = e[0];
-    e = e[1];
-    g.push(c[e.valueOf()])
+  for(var c = BigInteger.digits, a = BigInteger.small[a], b = this._s, d = this.abs(), e = [], g;d._s !== 0;) {
+    g = d.divRem(a);
+    d = g[0];
+    g = g[1];
+    e.push(c[g.valueOf()])
   }
-  return(b < 0 ? "-" : "") + g.reverse().join("")
+  return(b < 0 ? "-" : "") + e.reverse().join("")
 };
 BigInteger.radixRegex = [/^$/, /^$/, /^[01]*$/, /^[012]*$/, /^[0-3]*$/, /^[0-4]*$/, /^[0-5]*$/, /^[0-6]*$/, /^[0-7]*$/, /^[0-8]*$/, /^[0-9]*$/, /^[0-9aA]*$/, /^[0-9abAB]*$/, /^[0-9abcABC]*$/, /^[0-9a-dA-D]*$/, /^[0-9a-eA-E]*$/, /^[0-9a-fA-F]*$/, /^[0-9a-gA-G]*$/, /^[0-9a-hA-H]*$/, /^[0-9a-iA-I]*$/, /^[0-9a-jA-J]*$/, /^[0-9a-kA-K]*$/, /^[0-9a-lA-L]*$/, /^[0-9a-mA-M]*$/, /^[0-9a-nA-N]*$/, /^[0-9a-oA-O]*$/, /^[0-9a-pA-P]*$/, /^[0-9a-qA-Q]*$/, /^[0-9a-rA-R]*$/, /^[0-9a-sA-S]*$/, /^[0-9a-tA-T]*$/, /^[0-9a-uA-U]*$/, 
 /^[0-9a-vA-V]*$/, /^[0-9a-wA-W]*$/, /^[0-9a-xA-X]*$/, /^[0-9a-yA-Y]*$/, /^[0-9a-zA-Z]*$/];
 BigInteger.parse = function(a, c) {
-  function b(a) {
-    a = a.replace(/\s*[*xX]\s*10\s*(\^|\*\*)\s*/, "e");
-    return a.replace(/^([+\-])?(\d+)\.?(\d*)[eE]([+\-]?\d+)$/, function(a, c, b, d, e) {
-      var e = +e, g = e < 0, f = b.length + e, a = (g ? b : d).length, e = (e = Math.abs(e)) >= a ? e - a + g : 0, a = Array(e + 1).join("0"), b = b + d;
-      return(c || "") + (g ? b = a + b : b = b + a).substr(0, f = f + (g ? a.length : 0)) + (f < b.length ? "." + b.substr(f) : "")
-    })
-  }
   a = a.toString();
   if(typeof c === "undefined" || +c === 10) {
-    a = b(a)
+    var b;
+    b = a.replace(/\s*[*xX]\s*10\s*(\^|\*\*)\s*/, "e");
+    a = b.replace(/^([+\-])?(\d+)\.?(\d*)[eE]([+\-]?\d+)$/, function(a, c, b, d, e) {
+      var e = +e, f = e < 0, g = b.length + e, a = (f ? b : d).length, e = (e = Math.abs(e)) >= a ? e - a + f : 0, a = Array(e + 1).join("0"), b = b + d;
+      return(c || "") + (f ? b = a + b : b = b + a).substr(0, g = g + (f ? a.length : 0)) + (g < b.length ? "." + b.substr(g) : "")
+    })
   }
   var d = /^([+\-]?)(0[xXcCbB])?([0-9A-Za-z]*)(?:\.\d*)?$/.exec(a);
   if(d) {
-    var g = d[1] || "+", e = d[2] || "", d = d[3] || "";
+    b = d[1] || "+";
+    var e = d[2] || "", d = d[3] || "";
     if(typeof c === "undefined") {
       c = e === "0x" || e === "0X" ? 16 : e === "0c" || e === "0C" ? 8 : e === "0b" || e === "0B" ? 2 : 10
     }else {
@@ -85,21 +84,21 @@ BigInteger.parse = function(a, c) {
     if(d.length === 0) {
       return BigInteger.ZERO
     }
-    g = g === "-" ? -1 : 1;
+    b = b === "-" ? -1 : 1;
     if(c == 10) {
       for(e = [];d.length >= BigInteger.base_log10;) {
         e.push(parseInt(d.splice(-BigInteger.base_log10).join(""), 10))
       }
       e.push(parseInt(d.join(""), 10));
-      return new BigInteger(e, g)
+      return new BigInteger(e, b)
     }
     if(c === BigInteger.base) {
-      return new BigInteger(d.map(Number).reverse(), g)
+      return new BigInteger(d.map(Number).reverse(), b)
     }
-    for(var e = BigInteger.ZERO, c = BigInteger.small[c], f = BigInteger.small, h = 0;h < d.length;h++) {
-      e = e.multiply(c).add(f[parseInt(d[h], 36)])
+    for(var e = BigInteger.ZERO, c = BigInteger.small[c], g = BigInteger.small, f = 0;f < d.length;f++) {
+      e = e.multiply(c).add(g[parseInt(d[f], 36)])
     }
-    return new BigInteger(e._d, g)
+    return new BigInteger(e._d, b)
   }
   throw Error("Invalid BigInteger format: " + a);
 };
@@ -115,24 +114,24 @@ BigInteger.prototype.add = function(a) {
     a = a.negate();
     return this.subtract(a)
   }
-  for(var c = this._d, a = a._d, b = c.length, d = a.length, g = Array(Math.max(b, d) + 1), e = Math.min(b, d), f = 0, h = 0;h < e;h++) {
+  for(var c = this._d, a = a._d, b = c.length, d = a.length, e = Array(Math.max(b, d) + 1), g = Math.min(b, d), f = 0, h = 0;h < g;h++) {
     f = c[h] + a[h] + f;
-    g[h] = f % BigInteger.base;
+    e[h] = f % BigInteger.base;
     f = f / BigInteger.base | 0
   }
   if(d > b) {
     c = a;
     b = d
   }
-  for(h = e;f && h < b;h++) {
+  for(h = g;f && h < b;h++) {
     f = c[h] + f;
-    g[h] = f % BigInteger.base;
+    e[h] = f % BigInteger.base;
     f = f / BigInteger.base | 0
   }
-  for(f && (g[h] = f);h < b;h++) {
-    g[h] = c[h]
+  for(f && (e[h] = f);h < b;h++) {
+    e[h] = c[h]
   }
-  return new BigInteger(g, this._s)
+  return new BigInteger(e, this._s)
 };
 BigInteger.prototype.negate = function() {
   return new BigInteger(this._d, -this._s)
@@ -170,8 +169,8 @@ BigInteger.prototype.subtract = function(a) {
   c = c._d;
   a = a._d;
   b = c.length;
-  var g = a.length, e = Array(b), f = 0, h, i;
-  for(h = 0;h < g;h++) {
+  var e = a.length, g = Array(b), f = 0, h, i;
+  for(h = 0;h < e;h++) {
     i = c[h] - f - a[h];
     if(i < 0) {
       i = i + BigInteger.base;
@@ -179,47 +178,47 @@ BigInteger.prototype.subtract = function(a) {
     }else {
       f = 0
     }
-    e[h] = i
+    g[h] = i
   }
-  for(h = g;h < b;h++) {
+  for(h = e;h < b;h++) {
     i = c[h] - f;
     if(i < 0) {
       i = i + BigInteger.base
     }else {
-      e[h++] = i;
+      g[h++] = i;
       break
     }
-    e[h] = i
+    g[h] = i
   }
   for(;h < b;h++) {
-    e[h] = c[h]
+    g[h] = c[h]
   }
-  return new BigInteger(e, d)
+  return new BigInteger(g, d)
 };
 (function() {
   function a(a, c) {
-    for(var g = a._d, e = g.slice(), f = 0;;) {
-      var h = (g[f] || 0) + 1;
-      e[f] = h % BigInteger.base;
+    for(var e = a._d, g = e.slice(), f = 0;;) {
+      var h = (e[f] || 0) + 1;
+      g[f] = h % BigInteger.base;
       if(h <= BigInteger.base - 1) {
         break
       }
       ++f
     }
-    return new BigInteger(e, c)
+    return new BigInteger(g, c)
   }
   function c(a, c) {
-    for(var g = a._d, e = g.slice(), f = 0;;) {
-      var h = (g[f] || 0) - 1;
+    for(var e = a._d, g = e.slice(), f = 0;;) {
+      var h = (e[f] || 0) - 1;
       if(h < 0) {
-        e[f] = h + BigInteger.base
+        g[f] = h + BigInteger.base
       }else {
-        e[f] = h;
+        g[f] = h;
         break
       }
       ++f
     }
-    return new BigInteger(e, c)
+    return new BigInteger(g, c)
   }
   BigInteger.prototype.next = function() {
     switch(this._s) {
@@ -301,18 +300,18 @@ BigInteger.prototype.multiply = function(a) {
   if(this === a) {
     return this.square()
   }
-  var c = this._d.length >= a._d.length, b = (c ? this : a)._d, c = (c ? a : this)._d, d = b.length, g = c.length, e = d + g, f = Array(e), h;
-  for(h = 0;h < e;h++) {
+  var c = this._d.length >= a._d.length, b = (c ? this : a)._d, c = (c ? a : this)._d, d = b.length, e = c.length, g = d + e, f = Array(g), h;
+  for(h = 0;h < g;h++) {
     f[h] = 0
   }
-  for(h = 0;h < g;h++) {
-    for(var e = 0, i = c[h], l = d + h, k, j = h;j < l;j++) {
-      k = f[j] + i * b[j - h] + e;
-      e = k / BigInteger.base | 0;
+  for(h = 0;h < e;h++) {
+    for(var g = 0, i = c[h], l = d + h, k, j = h;j < l;j++) {
+      k = f[j] + i * b[j - h] + g;
+      g = k / BigInteger.base | 0;
       f[j] = k % BigInteger.base | 0
     }
-    if(e) {
-      k = f[j] + e;
+    if(g) {
+      k = f[j] + g;
       f[j] = k % BigInteger.base
     }
   }
@@ -338,16 +337,16 @@ BigInteger.prototype.multiplySingleDigit = function(a) {
   }
   var b = this._d, d = b.length;
   c = d + 1;
-  for(var g = Array(c), e = 0;e < c;e++) {
-    g[e] = 0
+  for(var e = Array(c), g = 0;g < c;g++) {
+    e[g] = 0
   }
-  for(var f = e = 0;f < d;f++) {
-    c = a * b[f] + e;
-    e = c / BigInteger.base | 0;
-    g[f] = c % BigInteger.base | 0
+  for(var f = g = 0;f < d;f++) {
+    c = a * b[f] + g;
+    g = c / BigInteger.base | 0;
+    e[f] = c % BigInteger.base | 0
   }
-  e && (g[f] = e % BigInteger.base);
-  return new BigInteger(g, 1)
+  g && (e[f] = g % BigInteger.base);
+  return new BigInteger(e, 1)
 };
 BigInteger.prototype.square = function() {
   if(this._s === 0) {
@@ -356,27 +355,27 @@ BigInteger.prototype.square = function() {
   if(this.isUnit()) {
     return BigInteger.ONE
   }
-  var a = this._d, c = a.length, b = Array(c + c + 1), d, g, e, f;
+  var a = this._d, c = a.length, b = Array(c + c + 1), d, e, g, f;
   for(f = 0;f < c;f++) {
-    e = f * 2;
+    g = f * 2;
     d = a[f] * a[f];
-    g = d / BigInteger.base | 0;
-    b[e] = d % BigInteger.base;
-    b[e + 1] = g
+    e = d / BigInteger.base | 0;
+    b[g] = d % BigInteger.base;
+    b[g + 1] = e
   }
   for(f = 0;f < c;f++) {
-    g = 0;
-    e = f * 2 + 1;
-    for(var h = f + 1;h < c;h++, e++) {
-      d = a[h] * a[f] * 2 + b[e] + g;
-      g = d / BigInteger.base | 0;
-      b[e] = d % BigInteger.base
+    e = 0;
+    g = f * 2 + 1;
+    for(var h = f + 1;h < c;h++, g++) {
+      d = a[h] * a[f] * 2 + b[g] + e;
+      e = d / BigInteger.base | 0;
+      b[g] = d % BigInteger.base
     }
-    e = c + f;
-    d = g + b[e];
-    g = d / BigInteger.base | 0;
-    b[e] = d % BigInteger.base;
-    b[e + 1] = b[e + 1] + g
+    g = c + f;
+    d = e + b[g];
+    e = d / BigInteger.base | 0;
+    b[g] = d % BigInteger.base;
+    b[g + 1] = b[g + 1] + e
   }
   return new BigInteger(b, 1)
 };
@@ -404,38 +403,38 @@ BigInteger.prototype.divRem = function(a) {
     case -1:
       return[BigInteger.ZERO, this]
   }
-  var c = this._s * a._s, b = a.abs(), d = this._d.slice(), g = [], e, f = new BigInteger([], 1);
+  var c = this._s * a._s, b = a.abs(), d = this._d.slice(), e = [], g, f = new BigInteger([], 1);
   for(f._s = 1;d.length;) {
     f._d.unshift(d.pop());
     f = new BigInteger(f._d, 1);
     if(f.compareAbs(a) < 0) {
-      g.push(0)
+      e.push(0)
     }else {
       if(f._s === 0) {
-        e = 0
+        g = 0
       }else {
         var h = f._d.length;
-        e = b._d.length;
+        g = b._d.length;
         h = f._d[h - 1] * BigInteger.base + f._d[h - 2];
-        e = b._d[e - 1] * BigInteger.base + b._d[e - 2];
+        g = b._d[g - 1] * BigInteger.base + b._d[g - 2];
         f._d.length > b._d.length && (h = (h + 1) * BigInteger.base);
-        e = Math.ceil(h / e)
+        g = Math.ceil(h / g)
       }
       do {
-        h = b.multiplySingleDigit(e);
+        h = b.multiplySingleDigit(g);
         if(h.compareAbs(f) <= 0) {
           break
         }
-        e--
-      }while(e);
-      g.push(e);
-      if(e) {
-        e = f.subtract(h);
-        f._d = e._d.slice()
+        g--
+      }while(g);
+      e.push(g);
+      if(g) {
+        g = f.subtract(h);
+        f._d = g._d.slice()
       }
     }
   }
-  return[new BigInteger(g.reverse(), c), new BigInteger(f._d, this._s)]
+  return[new BigInteger(e.reverse(), c), new BigInteger(f._d, this._s)]
 };
 BigInteger.prototype.divRemSmall = function(a) {
   a = +a;
@@ -458,24 +457,24 @@ BigInteger.prototype.divRemSmall = function(a) {
     this._s < 0 && (a = a.negate());
     return[b, a]
   }
-  for(var d = this._d.slice(), b = Array(d.length), g = 0, e = 0, f = 0, h;d.length;) {
-    g = g * BigInteger.base + d[d.length - 1];
-    if(g < a) {
+  for(var d = this._d.slice(), b = Array(d.length), e = 0, g = 0, f = 0, h;d.length;) {
+    e = e * BigInteger.base + d[d.length - 1];
+    if(e < a) {
       b[f++] = 0;
       d.pop();
-      e = BigInteger.base * e + g
+      g = BigInteger.base * g + e
     }else {
-      h = g === 0 ? 0 : g / a | 0;
-      e = g - a * h;
+      h = e === 0 ? 0 : e / a | 0;
+      g = e - a * h;
       if(b[f++] = h) {
         d.pop();
-        g = e
+        e = g
       }else {
         d.pop()
       }
     }
   }
-  a = new BigInteger([e], 1);
+  a = new BigInteger([g], 1);
   this._s < 0 && (a = a.negate());
   return[new BigInteger(b.reverse(), c), a]
 };
@@ -602,28 +601,26 @@ BigInteger.MAX_EXP = BigInteger(2147483647);
     }
   }
   function b(a) {
-    return function(c, b, f) {
-      return a.call(BigInteger(c), BigInteger(b), BigInteger(f))
+    return function(c, b, d) {
+      return a.call(BigInteger(c), BigInteger(b), BigInteger(d))
     }
   }
-  (function() {
-    var d, g, e = ["toJSValue", "isEven", "isOdd", "sign", "isZero", "isNegative", "abs", "isUnit", "square", "negate", "isPositive", "toString", "next", "prev", "log"], f = ["compare", "remainder", "divRem", "subtract", "add", "quotient", "divide", "multiply", "pow", "compareAbs"], h = ["modPow"];
-    for(d = 0;d < e.length;d++) {
-      g = e[d];
-      BigInteger[g] = a(BigInteger.prototype[g])
-    }
-    for(d = 0;d < f.length;d++) {
-      g = f[d];
-      BigInteger[g] = c(BigInteger.prototype[g])
-    }
-    for(d = 0;d < h.length;d++) {
-      g = h[d];
-      BigInteger[g] = b(BigInteger.prototype[g])
-    }
-    BigInteger.exp10 = function(a, c) {
-      return BigInteger(a).exp10(c)
-    }
-  })()
+  var d, e, g = ["toJSValue", "isEven", "isOdd", "sign", "isZero", "isNegative", "abs", "isUnit", "square", "negate", "isPositive", "toString", "next", "prev", "log"], f = ["compare", "remainder", "divRem", "subtract", "add", "quotient", "divide", "multiply", "pow", "compareAbs"], h = ["modPow"];
+  for(d = 0;d < g.length;d++) {
+    e = g[d];
+    BigInteger[e] = a(BigInteger.prototype[e])
+  }
+  for(d = 0;d < f.length;d++) {
+    e = f[d];
+    BigInteger[e] = c(BigInteger.prototype[e])
+  }
+  for(d = 0;d < h.length;d++) {
+    e = h[d];
+    BigInteger[e] = b(BigInteger.prototype[e])
+  }
+  BigInteger.exp10 = function(a, c) {
+    return BigInteger(a).exp10(c)
+  }
 })();
 "undefined" !== typeof exports && (exports.BigInteger = BigInteger);
 var CombinatoricsBase = function() {
@@ -671,7 +668,7 @@ var CombinatoricsBase = function() {
     this.current = this.current.subtract(BigInteger.ONE)
   };
   a.prototype.factorial = function(a) {
-    for(var b = BigInteger.ONE, d = BigInteger.ONE, g = 1;g <= a;g++) {
+    for(var b = BigInteger.ONE, d = BigInteger.ONE, e = 1;e <= a;e++) {
       b = b.multiply(d);
       d = d.add(BigInteger.ONE)
     }
@@ -716,7 +713,7 @@ var CombinatoricsBase = function() {
     this.totalResults = this.bigElements.pow(this.length);
     this.rewind();
     this.deviders = Array(this.length);
-    for(var d = 0, g = this.length;d < g;d++) {
+    for(var d = 0, e = this.length;d < e;d++) {
       this.deviders[this.length - 1 - d] = this.bigElements.pow(d + 1).divide(this.bigElements)
     }
   };
@@ -881,9 +878,9 @@ var CombinatoricsBase = function() {
   a.prototype.rewind = function() {
     this.current = BigInteger(BigInteger.ZERO);
     this.totalResults = BigInteger(BigInteger.ZERO);
-    for(var a = Array(this.to - this.from + 1), b = this.from, d = this.to;b <= d;b++) {
-      a[b] = new Combination(this.elements, b);
-      this.totalResults = this.totalResults.add(a[b].total())
+    for(var a = this.from, b = this.to;a <= b;a++) {
+      var d = new Combination(this.elements, a);
+      this.totalResults = this.totalResults.add(d.total())
     }
     this.generator = new Combination(this.elements, this.from);
     this.current = BigInteger(BigInteger.ZERO);

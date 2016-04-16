@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2012 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -28,10 +28,12 @@ import g4p_controls.HotSpot.HSrect;
 import java.awt.Graphics2D;
 import java.awt.font.TextLayout;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 import processing.core.PApplet;
-import processing.core.PGraphicsJava2D;
+import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
 /**
@@ -65,7 +67,7 @@ public class GDropList extends GTextBase {
 	private GScrollbar vsb;
 	private GButton showList;
 
-	protected String[] items;
+	protected LinkedList<String> itemlist = new LinkedList<String>();
 	protected StyledString[] sitems;
 	protected StyledString selText;
 
@@ -115,14 +117,10 @@ public class GDropList extends GTextBase {
 		this.dropListMaxSize = Math.max(dropListMaxSize, 3);
 		itemHeight = height / (dropListMaxSize + 1); // make allowance for selected text at top
 
-		// The image buffer is just for the typing area
-		buffer = (PGraphicsJava2D) winApp.createGraphics((int)width, (int)height, PApplet.JAVA2D);
-		buffer.rectMode(PApplet.CORNER);
-
 		G4P.pushStyle();
 		G4P.showMessages = false;
 
-		vsb = new GScrollbar(theApplet, 0, 0, height - itemHeight, 10);
+		vsb = new GScrollbar(theApplet, 0, 0, height - itemHeight-2, 10);
 		vsb.addEventHandler(this, "vsbEventHandler");
 		vsb.setAutoHide(true);
 		vsb.setVisible(false);
@@ -132,7 +130,8 @@ public class GDropList extends GTextBase {
 		showList.addEventHandler(this, "buttonShowListHandler");
 
 		// Do this before we add the button and scrollbar
-		z = Z_SLIPPY;
+		z = Z_SLIPPY_EXPANDS;
+
 		// Add the button and scrollbar
 		G4P.control_mode = GControlMode.CORNER;
 		addControl(vsb, width, itemHeight + 1, PI/2);
@@ -140,19 +139,18 @@ public class GDropList extends GTextBase {
 
 		G4P.popStyle();
 
-		buffer.g2.setFont(localFont);
 		hotspots = new HotSpot[]{
 				new HSrect(LIST_SURFACE, 0, itemHeight+1, width - 11, height - itemHeight - 1),	// text list area
 				new HSrect(CLOSED_SURFACE, 0, 0, width - buttonWidth, itemHeight)				// selected text display area
 		};
 
-		createEventHandler(G4P.sketchApplet, "handleDropListEvents",
+		createEventHandler(G4P.sketchWindow, "handleDropListEvents",
 				new Class<?>[]{ GDropList.class, GEvent.class }, 
 				new String[]{ "list", "event" } 
-		);
+				);
 		registeredMethods = DRAW_METHOD | MOUSE_METHOD;
 		cursorOver = HAND;
-		G4P.addControl(this);
+		G4P.registerControl(this);
 	}
 
 	/**
@@ -161,41 +159,130 @@ public class GDropList extends GTextBase {
 	 * the valid range. <br>
 	 * Null and empty values in the list will be ignored. <br>
 	 * If the list is null then or empty then then no changes are made. <br>
-	 * @param list
+	 * @param array
 	 * @param selected
 	 */
-	public void setItems(String[] list, int selected){
-		if(list == null)
+	public void setItems(String[] array, int selected){
+		if(array == null)
 			return;
 		// Get rid of null or empty strings
 		ArrayList<String> strings = new ArrayList<String>();
-		for(String s : list)
-			if(s != null && s.length() > 0)
-				strings.add(s);
-		list = strings.toArray(new String[strings.size()]);
-		if(list.length == 0)
+		for(String s : array)
+			strings.add(s);
+		if(cleanupList(strings))
+			setItemsImpl(selected);
+	}
+
+	public void setItems(List<String> list, int selected){
+		if(list == null)
 			return;
-		// We have at least one item for the droplist
-		items = list;
-		sitems = new StyledString[list.length];
+		if(cleanupList(list))
+			setItemsImpl(selected);
+	}
+
+	private boolean cleanupList(List<String> list){
+		// Get rid of null or empty strings
+		Iterator<String> iter = list.iterator();
+		while(iter.hasNext()){
+			String s = iter.next();
+			if(s == null || s.length() == 0)
+				iter.remove();
+		}
+		if(list.size() > 0){
+			// We have at least one item for the droplist
+			itemlist.clear();
+			itemlist.addAll(list);
+			return true;
+		}
+		return false;
+	}
+
+	private void setItemsImpl(int selected){
+		sitems = new StyledString[itemlist.size()];
 		// Create styled strings for display
-		for(int i = 0; i < list.length; i++)
-			sitems[i] = new StyledString(list[i]);
+		for(int i = 0; i < sitems.length; i++)
+			sitems[i] = new StyledString(itemlist.get(i));
 		// Force selected value into valid range
-		selItem = PApplet.constrain(selected, 0, list.length - 1);
+		selItem = PApplet.constrain(selected, 0, sitems.length - 1);
 		startItem = (selItem >= dropListMaxSize) ? selItem - dropListMaxSize + 1 : 0;
 		// Make selected item bold
 		sitems[selItem].addAttribute(WEIGHT, WEIGHT_BOLD);
 		// Create separate styled string for display area
-		selText = new StyledString(this.items[selItem]);
-		dropListActualSize = Math.min(list.length, dropListMaxSize);
-		if((list.length > dropListActualSize)){
-			float filler = ((float)dropListMaxSize)/list.length;
-			float value = ((float)startItem)/list.length;
+		selText = new StyledString(sitems[selItem].getPlainText());
+		dropListActualSize = Math.min(sitems.length, dropListMaxSize);
+		if((sitems.length > dropListActualSize)){
+			float filler = ((float)dropListMaxSize)/sitems.length;
+			float value = ((float)startItem)/sitems.length;
 			vsb.setValue(value, filler);
 			vsb.setVisible(false); //  make it false
 		}
 		bufferInvalid = true;
+	}
+
+	/**
+	 * Remove an item from the list. <br>
+	 * If idx is not a valid position in the list then the list is unchanged. 
+	 * If idx points to the selected item or an item below it then the 
+	 * selected index value is reduced by 1 but the selected text remains the 
+	 * same. <br>
+	 * If idx points to an item above the selected item then the selected 
+	 * item is unchanged. <br>
+	 * No event is fired even if the selected index changes. <br>
+	 * 
+	 * @param idx index of the item to remove
+	 * @return true if item is successfully removed else false
+	 */
+	public boolean removeItem(int idx){
+		if(itemlist.size() <= 1 || idx <  0 || idx >= itemlist.size() )
+			return false;
+		int sel = (idx > selItem) ? selItem : selItem - 1;
+		itemlist.remove(idx);
+		setItemsImpl(sel);
+		return true;
+	}
+
+	/**
+	 * Insert an item at the specified position in the list. <br>
+	 * If idx is <0 then the list is unchanged. <br> 
+	 * If idx is >= the number of items in the list, it is added to the end. <br> 
+	 * If idx points to the selected item or an item below it then the 
+	 * selected index value is incremented by 1 but the selected text remains  
+	 * the same. <br>
+	 * If idx points to an item above the selected item then the selected 
+	 * item is unchanged. <br>
+	 * No event is fired even if the selected index changes. <br>
+	 * 
+	 * @param idx index of the item to remove
+	 * @param name text of the item to insert (null values ignored)
+	 * @return true if item is successfully inserted else false
+	 */
+
+	public boolean insertItem(int idx, String name){
+		if(idx < 0 || name == null || name.length() > 0)
+			return false;
+		if(idx >= itemlist.size()){
+			itemlist.addLast(name);
+		}
+		else {
+			itemlist.add(idx, name);
+		}
+		int sel = (idx <= selItem) ? selItem + 1: selItem;
+		setItemsImpl(sel);
+		return true;
+	}
+
+	/**
+	 * Add an item to the end of the list. <br>
+	 * No event is fired. <br>
+	 * 
+	 * @param name text of the item to add (null values ignored)
+	 * @return true if add is successfully added else false
+	 */
+	public boolean addItem(String name){
+		if(name == null)
+			return false;
+		itemlist.addLast(name);
+		return true;
 	}
 
 	/**
@@ -211,10 +298,11 @@ public class GDropList extends GTextBase {
 			for(StyledString s : sitems)
 				s.clearAttributes();
 			sitems[selItem].addAttribute(WEIGHT, WEIGHT_BOLD);
-			selText = new StyledString(this.items[selItem]);			
+			selText = new StyledString(sitems[selItem].getPlainText());		
 			bufferInvalid = true;
 		}
 	}
+
 	/**
 	 * Get the index position of the selected item
 	 */
@@ -226,7 +314,7 @@ public class GDropList extends GTextBase {
 	 * Get the text for the selected item
 	 */
 	public String getSelectedText(){
-		return items[selItem];
+		return sitems[selItem].getPlainText();
 	}
 
 	/**
@@ -326,40 +414,56 @@ public class GDropList extends GTextBase {
 		winApp.popStyle();
 	}
 
+	public PGraphics getSnapshot(){
+		updateBuffer();
+		PGraphics snap = winApp.createGraphics(buffer.width, buffer.height, PApplet.JAVA2D);
+		snap.beginDraw();
+		snap.image(buffer,0,0);
+		snap.pushMatrix();
+		// showList
+		snap.image(showList.getBuffer(), width - showList.getWidth() - 1, 1);
+		snap.translate(width, itemHeight + 1);
+		snap.rotate(PApplet.PI/2);
+		snap.image(vsb.getBuffer(), 0, 0);
+		snap.popMatrix();
+		snap.endDraw();
+		return snap;
+	}
+
 	protected void updateBuffer(){
 		if(bufferInvalid) {
-			Graphics2D g2d = buffer.g2;
 			bufferInvalid = false;
-
 			buffer.beginDraw();
-			buffer.background(buffer.color(255,0));
+			Graphics2D g2d = buffer.g2;
+			g2d.setFont(localFont);
 
+			buffer.clear();
 			buffer.noStroke();
-			buffer.fill(palette[BACK_COLOR]);
+			buffer.fill(palette[BACK_COLOR].getRGB());
 			buffer.rect(0, 0, width, itemHeight);
 
 			if(expanded){
-				buffer.fill(palette[ITEM_BACK_COLOR]);
+				buffer.fill(palette[ITEM_BACK_COLOR].getRGB());
 				buffer.rect(0,itemHeight, width, itemHeight * dropListActualSize);
 			}
 
-			float px = TPAD, py;
+			float px = TPAD2, py;
 			TextLayout line;
 			// Get selected text for display
 			line = selText.getLines(g2d).getFirst().layout;
 			py = (itemHeight + line.getAscent() - line.getDescent())/2;
 
-			g2d.setColor(jpalette[FORE_COLOR]);
+			g2d.setColor(palette[FORE_COLOR]);
 			line.draw(g2d, px, py);
 
 			if(expanded){
-				g2d.setColor(jpalette[ITEM_FORE_COLOR]);
+				//				g2d.setColor(palette[ITEM_FORE_COLOR]);         // REDUNDANT CODE ????
 				for(int i = 0; i < dropListActualSize; i++){
 					py += itemHeight;
 					if(currOverItem == startItem + i)
-						g2d.setColor(jpalette[OVER_ITEM_FORE_COLOR]);
+						g2d.setColor(palette[OVER_ITEM_FORE_COLOR]);
 					else
-						g2d.setColor(jpalette[ITEM_FORE_COLOR]);
+						g2d.setColor(palette[ITEM_FORE_COLOR]);
 
 					line = sitems[startItem + i].getLines(g2d).getFirst().layout;				
 					line.draw(g2d, px, py);
@@ -391,7 +495,7 @@ public class GDropList extends GTextBase {
 	 * is for internal library use only.
 	 */
 	public void vsbEventHandler(GScrollbar scrollbar, GEvent event){
-		int newStartItem = Math.round(vsb.getValue() * items.length);
+		int newStartItem = Math.round(vsb.getValue() * sitems.length);
 		startItem = newStartItem;
 		bufferInvalid = true;
 	}
@@ -408,7 +512,7 @@ public class GDropList extends GTextBase {
 		}
 		else {
 			takeFocus();
-			vsb.setVisible(items.length > dropListActualSize);
+			vsb.setVisible(sitems.length > dropListActualSize);
 			expanded = true;
 		}
 		bufferInvalid = true;

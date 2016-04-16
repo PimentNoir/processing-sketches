@@ -1,9 +1,9 @@
 /*
-  Part of the GUI for Processing library 
+  Part of the G4P library for Processing 
   	http://www.lagers.org.uk/g4p/index.html
-	http://gui4processing.googlecode.com/svn/trunk/
+	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) 2015 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,195 +23,448 @@
 
 package g4p_controls;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.LinkedList;
 
 import processing.core.PApplet;
-import processing.core.PImage;
+import processing.core.PVector;
 import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 
 /**
- * Objects of this class are separate windows which can be used to hold
- * G4P GUI components or used for drawing or both combined.
+ * Base class for independent windows using JAVA2D, P2D or P3D renderers. These 
+ * can be used to hold G4P GUI components or used for drawing or both combined.
  * <br><br>
- * A number of examples are included in the library and can be found
+ * A number of examples are included in the library and more info can be found
  * at www.lagers.org.uk
  * 
+ * Updated for Processing V3
  * 
  * @author Peter Lager
  *
  */
-@SuppressWarnings("serial")
-public class GWindow extends Frame implements GConstants, GConstantsInternal {
-
-	protected PApplet app;
+public abstract class GWindow extends PApplet implements GConstants, GConstantsInternal {
 
 	/**
-	 * Gives direct access to the PApplet object inside the frame
+	 * Factory method to create and start a new window. The renderer
+	 * must be JAVA2D, P2D or P3D otherwise this method returns null.
 	 * 
+	 * @param title text to appear in frame title bar
+	 * @param px horizontal position of top-left corner
+	 * @param py vertical position of top-left corner
+	 * @param w width of drawing surface
+	 * @param h height of surface
+	 * @param r renderer must be JAVA2D, P3D or P3D
+	 * @return the window created (in case the user wants its.
 	 */
-	public GWinApplet papplet;
-
-	protected String winName;
-
-	public GWinData data;
-
-	protected WindowAdapter winAdapt = null;
+	public static GWindow getWindow(PApplet app, String title, int px, int py, int w, int h, String renderer){
+		G4P.registerSketch(app);
+		GWindow g3w = null;
+		if(renderer.equals(JAVA2D))
+			g3w = new GWindowAWT(title, w, h);
+		else if(renderer.equals(P2D))
+			g3w = new GWindowNEWT(title, w, h, false);
+		else if(renderer.equals(P3D)){
+			g3w = new GWindowNEWT(title, w, h, true);
+		}
+		if(g3w != null){
+			String spath = "--sketch-path=" + G4P.sketchWindow.sketchPath();
+			String loc = "--location=" + px + "," + py;
+			String className = g3w.getClass().getName();
+			String[] args = { spath, loc, className };
+			G4P.registerWindow(g3w);
+			PApplet.runSketch(args, g3w);
+		}
+		return g3w; 
+	}
 
 	protected int actionOnClose = KEEP_OPEN;
 
+	/** Used to associated data to a GWindow */
+	public GWinData data;
 
-	/** The object to handle the pre event */
-	protected Object preHandlerObject = null;
-	/** The method in preHandlerObject to execute */
-	protected Method preHandlerMethod = null;
-	/** the name of the method to handle the event */ 
-	protected String preHandlerMethodName;
+	/** Simple tag that can be used by the user */
+	public String tag;
 
-	/** The object to handle the draw event */
-	protected Object drawHandlerObject = null;
-	/** The method in drawHandlerObject to execute */
-	protected Method drawHandlerMethod = null;
-	/** the name of the method to handle the event */ 
-	protected String drawHandlerMethodName;
+	/** Allows user to specify a number for this component */
+	public int tagNo;
 
-	/** The object to handle the key event */
-	public Object keyHandlerObject = null;
-	/** The method in keyHandlerObject to execute */
-	public Method keyHandlerMethod = null;
-	/** the name of the method to handle the event */ 
-	protected String keyHandlerMethodName;
+	protected final int w, h;
+	protected final String title;
+	protected String renderer_type;
+	protected boolean preparedForClosure = false;
 
-	/** The object to handle the mouse event */
-	public Object mouseHandlerObject = null;
-	/** The method in mouseHandlerObject to execute */
-	public Method mouseHandlerMethod = null;
-	/** the name of the method to handle the event */ 
-	protected String mouseHandlerMethodName;
-
-	/** The object to handle the post event */
-	protected Object postHandlerObject = null;
-	/** The method in postHandlerObject to execute */
-	protected Method postHandlerMethod = null;
-	/** the name of the method to handle the event */ 
-	protected String postHandlerMethodName;
-
-	/** The object to handle the window closing event */
-	protected Object closeHandlerObject = null;
-	/** The method in closeHandlerObject to execute */
-	protected Method closetHandlerMethod = null;
-	/** the name of the method to handle the event */ 
-	protected String closetHandlerMethodName;
-
-	/**
-	 * Create a window that can be used to hold G4P components or used
-	 * for drawing or both together.
-	 * 
-	 * @param theApplet
-	 * @param name
-	 * @param x initial position on the screen
-	 * @param y initial position on the screen
-	 * @param w width of the drawing area (the frame will be bigger to accommodate border)
-	 * @param h height of the drawing area (the frame will be bigger to accommodate border and title bar)
-	 * @param noFrame if true then the frame has no border
-	 * @param mode JAVA2D / P2D / P3D / OPENGL
-	 */
-	public GWindow(PApplet theApplet, String name, int x, int y, int w, int h, boolean noFrame, String mode) {
-		super(name);
-		winName = name;
-		windowCtorCore(theApplet, x, y, w, h, null, noFrame, mode, name);
+	protected GWindow(String title, int w, int h) {
+		super();
+		this.title = title;
+		this.w = w;
+		this.h = h;
+		registerMethods();
 	}
 
 	/**
-	 * 
-	 * @param theApplet
-	 * @param name
-	 * @param x initial position on the screen
-	 * @param y initial position on the screen
-	 * @param image background image (used to size window)
-	 * @param noFrame if true then the frame has no border
-	 * @param mode JAVA2D / OPENGL
+	 * Register this window for pre, draw, post, mouseEvent and
+	 * keyEvent methods. 
 	 */
-	public GWindow(PApplet theApplet, String name, int x, int y, PImage image, boolean noFrame, String mode) {
-		super(name);
-		windowCtorCore(theApplet, x, y, image.width, image.height, image, noFrame, mode, name);
+	protected void registerMethods(){
+		registerMethod("pre", this);
+		registerMethod("draw", this);
+		registerMethod("post", this);
+		registerMethod("mouseEvent", this);
+		registerMethod("keyEvent", this);
 	}
 
 	/**
-	 * Core stuff for GWindows ctor
-	 * 
-	 * @param x
-	 * @param y
-	 * @param w
-	 * @param h
-	 * @param noFrame
-	 * @param mode
+	 * Unregister this window for pre, draw, post, mouseEvent and
+	 * keyEvent methods.
+	 * This method is called when the window closes.
 	 */
-	private void windowCtorCore(PApplet theApplet, int x, int y, int w, int h, PImage image,  boolean noFrame, String mode, String name){
-		// If this is the first control to be created then theAapplet must be the sketchApplet
-		if(G4P.sketchApplet == null)
-			G4P.sketchApplet = theApplet;
-		app = theApplet;
-		winName = name;
+	protected void unregisterMethods(){
+		unregisterMethod("pre", this);
+		unregisterMethod("draw", this);
+		unregisterMethod("post", this);
+		unregisterMethod("mouseEvent", this);
+		unregisterMethod("keyEvent", this);
+		// bely and braces
+		preHandlerObject = null;
+		drawHandlerObject = null;
+		postHandlerObject = null;
+		mouseHandlerObject = null;
+		keyHandlerObject = null;
+	}
 
-		if(mode == null || mode.equals(""))
-			mode = PApplet.JAVA2D;
+	/**
+	 * To provide a unique fields for this window create a class that inherits
+	 * from GWinData with public access fields. Then use this method to associate
+	 * the data with this window.
+	 * @param data
+	 */
+	public void addData(GWinData data){
+		this.data = data;
+	}
 
-		papplet = new GWinApplet(mode);
-		papplet.owner = this;
-		papplet.frame = this;
-		// So we can resize the frame to get the sketch canvas size reqd.
-		papplet.frame.setResizable(true);
-		// Now set the window width and height
-		if(image == null){
-			papplet.appWidth = w;
-			papplet.appHeight = h;
-		} else {
-			papplet.bkImage = image;
-			papplet.appWidth = image.width;
-			papplet.appHeight = image.height;
+	/**
+	 * Add a control to this window, ignoring duplicates.
+	 * 
+	 * @param control control to be added
+	 */
+	protected void addToWindow(GAbstractControl control){
+		// Avoid adding duplicates
+		if(!toAdd.contains(control) && !windowControls.contains(control))
+			toAdd.add(control);
+	}
+
+	/**
+	 * Remove a control to this window.
+	 * 
+	 * @param control control to be removed
+	 */
+	protected void removeFromWindow(GAbstractControl control){
+		toRemove.add(control);
+	}
+
+	/**
+	 * Set the colour scheme to be used by all controls on this window.
+	 * @param cs colour scheme e.g. G4P.GREEN_SCHEME
+	 */
+	void invalidateBuffers(){
+		for(GAbstractControl control : windowControls)
+			control.bufferInvalid = true;
+	}
+
+	/**
+	 * Set the colour scheme to be used by all controls on this window.
+	 * @param cs colour scheme e.g. G4P.GREEN_SCHEME
+	 */
+	void setColorScheme(int cs){
+		for(GAbstractControl control : windowControls)
+			control.setLocalColorScheme(cs);
+	}
+
+	/**
+	 * Set the alpha level for all controls on this window. <br>
+	 * 0 = fully transparent <br>
+	 * 255 = fully opaque <br>
+	 * Controls are disabled when alpha gets below G4P.ALPHA_BLOCK (128)
+	 * 
+	 * @param alpha 0-255 inclusive
+	 */
+	void setAlpha(int alpha){
+		for(GAbstractControl control : windowControls)
+			control.setAlpha(alpha);
+	}
+
+	/** Set the windows visibility */
+	public void setVisible(boolean visible){
+		surface.setVisible(visible);
+	}
+	
+	/** Returns the windows visibility */
+	public abstract boolean isVisible();
+
+	/** Set the window title */
+	public void setTitle(String title){
+		surface.setTitle(title);
+	}
+	/** Get the windowTitle */
+	public abstract String getTitle();
+	
+	/** Set the windows position */
+	public void setLocation(int x, int y){
+		surface.setLocation(x, y);
+	}
+	
+	/**
+	Returns a PVector with the windows top-left coordinates.
+	*/
+	public abstract PVector getPosition(PVector pos);
+	
+	/** 
+	 * Sets whether this window should always be above other windows. If there are 
+	 * multiple always-on-top windows, their relative order is unspecified and 
+	 * platform dependent. 
+	 */
+	public void setAlwaysOnTop(boolean ontop) {
+		surface.setAlwaysOnTop(ontop);
+	}
+	
+	/**
+	 * Execute any draw handler for this window.
+	 */
+	public void draw() {
+		pushMatrix();
+		if(drawHandlerObject != null){
+			try {
+				drawHandlerMethod.invoke(drawHandlerObject, new Object[] { this, data });
+			} catch (Exception e) {
+				GMessenger.message(EXCP_IN_HANDLER,  
+						new Object[] {drawHandlerObject, drawHandlerMethodName, e} );
+			}
+		}
+		popMatrix();
+	}
+
+	/**
+	 * Execute any pre handler associated with this window and its controls
+	 */
+	public void pre(){
+		if(preHandlerObject != null){
+			try {
+				preHandlerMethod.invoke(preHandlerObject, 
+						new Object[] { this, data });
+			} catch (Exception e) {
+				GMessenger.message(EXCP_IN_HANDLER, 
+						new Object[] {preHandlerObject, preHandlerMethodName, e} );
+			}
+		}
+		if(GAbstractControl.controlToTakeFocus != null && GAbstractControl.controlToTakeFocus.getPApplet() == this){
+			GAbstractControl.controlToTakeFocus.setFocus(true);
+			GAbstractControl.controlToTakeFocus = null;
+		}
+		for(GAbstractControl control : windowControls){
+			if( (control.registeredMethods & PRE_METHOD) == PRE_METHOD)
+				control.pre();
+		}
+	}
+
+	/**
+	 * Execute any post handler associated with this window and its controls. <br>
+	 * Add/remove any controls request by user, this is done here outside the drawing 
+	 * phase to prevent crashes.
+	 */
+	public void post() {
+		if(postHandlerObject != null){
+			try {
+				postHandlerMethod.invoke(postHandlerObject, 
+						new Object[] { this, data });
+			} catch (Exception e) {
+				GMessenger.message(EXCP_IN_HANDLER, 
+						new Object[] {postHandlerObject, postHandlerMethodName, e} );
+			}
+		}
+		if(G4P.cursorChangeEnabled){
+			if(GAbstractControl.cursorIsOver != null && GAbstractControl.cursorIsOver.getPApplet() == this)
+				cursor(GAbstractControl.cursorIsOver.cursorOver);			
+			else 
+				cursor(G4P.mouseOff);
+		}
+		for(GAbstractControl control : windowControls){
+			if( (control.registeredMethods & POST_METHOD) == POST_METHOD)
+				control.post();
+		}
+		// =====================================================================================================
+		// =====================================================================================================
+		//  This is where components are removed or added to the window to avoid concurrent access violations 
+		// =====================================================================================================
+		// =====================================================================================================
+		synchronized (this) {
+			// Dispose of any unwanted controls
+			if(!toRemove.isEmpty()){
+				for(GAbstractControl control : toRemove){
+					// If the control has focus then lose it
+					if(GAbstractControl.focusIsWith == control)
+						control.loseFocus(null);
+					// Clear control resources
+					control.buffer = null;
+					if(control.parent != null){
+						control.parent.children.remove(control);
+						control.parent = null;
+					}
+					if(control.children != null)
+						control.children.clear();
+					control.palette = null;
+					control.eventHandlerObject = null;
+					control.eventHandlerMethod = null;
+					control.winApp = null;
+					windowControls.remove(control);
+					System.gc();			
+				}
+				toRemove.clear();
+			}
+			if(!toAdd.isEmpty()){
+				for(GAbstractControl control : toAdd)
+					windowControls.add(control);
+				toAdd.clear();
+				Collections.sort(windowControls, G4P.zorder);
+			}
+		}
+	}
+
+	/**
+	 * Execute any mouse event handler associated with this window and its controls
+	 */
+	public void mouseEvent(MouseEvent event) {
+		if(mouseHandlerObject != null){
+			try {
+				mouseHandlerMethod.invoke(mouseHandlerObject, new Object[] { this, data, event });
+			} catch (Exception e) {
+				GMessenger.message(EXCP_IN_HANDLER,
+						new Object[] {mouseHandlerObject, mouseHandlerMethodName, e} );
+			}
+		}
+		for(GAbstractControl control : windowControls){
+			if((control.registeredMethods & MOUSE_METHOD) == MOUSE_METHOD)
+				control.mouseEvent(event);
+		}
+	}
+
+	/**
+	 * Execute any key event handler associated with this window and its controls
+	 */
+	public void keyEvent(KeyEvent event) {
+		if(keyHandlerObject != null){
+			try {
+				keyHandlerMethod.invoke(keyHandlerObject, new Object[] { this, data, event });
+			} catch (Exception e) {
+				GMessenger.message(EXCP_IN_HANDLER,
+						new Object[] {keyHandlerObject, keyHandlerMethodName, e} );
+			}
+		}
+		for(GAbstractControl control : windowControls){
+			if( (control.registeredMethods & KEY_METHOD) == KEY_METHOD)
+				control.keyEvent(event);
 		}			
-		papplet.bkColor = papplet.color(180);
+	}
 
-		// Set the papplet size preferences
-		papplet.resize(papplet.appWidth, papplet.appHeight);
-		papplet.setPreferredSize(new Dimension(papplet.appWidth, papplet.appHeight));
-		papplet.setMinimumSize(new Dimension(papplet.appWidth, papplet.appHeight));
+	/**
+	 * Attempt to add the 'draw' handler method. 
+	 * The default event handler is a method that returns void and has two
+	 * parameters PApplet and GWinData
+	 * 
+	 * @param obj the object to handle the event
+	 * @param methodName the method to execute in the object handler class
+	 */
+	public void addDrawHandler(Object obj, String methodName){
+		try{
+			drawHandlerMethod = obj.getClass().getMethod(methodName, new Class<?>[] {PApplet.class, GWinData.class } );
+			drawHandlerObject = obj;
+			drawHandlerMethodName = methodName;
+		} catch (Exception e) {
+			drawHandlerObject = null;
+			GMessenger.message(NONEXISTANT, new Object[] {this, methodName, new Class<?>[] { PApplet.class, GWinData.class } } );
+		}
+	}
 
-		// add the PApplet to the Frame
-		setLayout(new BorderLayout());
-		add(papplet, BorderLayout.CENTER);
+	/**
+	 * Attempt to add the 'pre' handler method. 
+	 * The default event handler is a method that returns void and has two
+	 * parameters GWinApplet and GWinData
+	 * 
+	 * @param obj the object to handle the event
+	 * @param methodName the method to execute in the object handler class
+	 */
+	public void addPreHandler(Object obj, String methodName){
+		try{
+			preHandlerMethod = obj.getClass().getMethod(methodName, new Class<?>[] {PApplet.class, GWinData.class } );
+			preHandlerObject = obj;
+			preHandlerMethodName = methodName;
+		} catch (Exception e) {
+			preHandlerMethod = null;
+			GMessenger.message(NONEXISTANT, new Object[] {this, methodName, new Class<?>[] { PApplet.class, GWinData.class } } );
+		}
+	}
 
-		// ensures that the animation thread is started and
-		// that other internal variables are properly set.
-		papplet.init();
+	/**
+	 * Attempt to add the 'mouse' handler method. 
+	 * The default event handler is a method that returns void and has three
+	 * parameters GWinApplet, GWinData and a MouseEvent
+	 * 
+	 * @param obj the object to handle the event
+	 * @param methodName the method to execute in the object handler class
+	 */
+	public void addMouseHandler(Object obj, String methodName){
+		try{
+			mouseHandlerMethod = obj.getClass().getMethod(methodName, 
+					new Class<?>[] {PApplet.class, GWinData.class, MouseEvent.class } );
+			mouseHandlerObject = obj;
+			mouseHandlerMethodName = methodName;
+		} catch (Exception e) {
+			mouseHandlerObject = null;
+			GMessenger.message(NONEXISTANT, new Object[] {this, methodName, new Class<?>[] { PApplet.class, GWinData.class, MouseEvent.class } } );
+		}
+	}
 
-		// Set the sketch path to the same as the main PApplet object
-		papplet.sketchPath = theApplet.sketchPath;
+	/**
+	 * Attempt to add the 'key' handler method. 
+	 * The default event handler is a method that returns void and has three
+	 * parameters GWinApplet, GWinData and a KeyEvent
+	 * 
+	 * @param obj the object to handle the event
+	 * @param methodName the method to execute in the object handler class
+	 */
+	public void addKeyHandler(Object obj, String methodName){
+		try{
+			keyHandlerMethod = obj.getClass().getMethod(methodName, 
+					new Class<?>[] {PApplet.class, GWinData.class, KeyEvent.class } );
+			keyHandlerObject = obj;
+			keyHandlerMethodName = methodName;
+		} catch (Exception e) {
+			keyHandlerObject = null;
+			GMessenger.message(NONEXISTANT, new Object[] {this, methodName, new Class<?>[] { PApplet.class, GWinData.class, KeyEvent.class } } );
+		}
+	}
 
-		// Pack the window, position it and make visible
-		setUndecorated(noFrame);
-		pack();
-		setLocation(x,y);
-		setVisible(true);
-
-		// Make the window always on top
-		setOnTop(true);
-
-		// Make sure we have some data even if not used
-		data = new GWinData();
-		data.owner = this;
-
-		// Not resizeable if we are using a back image
-		super.setResizable(image == null);
-
-		// Make sure G4P knows about this window
-		G4P.addWindow(this);
+	/**
+	 * Attempt to add the 'post' handler method. 
+	 * The default event handler is a method that returns void and has two
+	 * parameters GWinApplet and GWinData
+	 * 
+	 * @param obj the object to handle the event
+	 * @param methodName the method to execute in the object handler class
+	 */
+	public void addPostHandler(Object obj, String methodName){
+		try{
+			postHandlerMethod = obj.getClass().getMethod(methodName, 
+					new Class<?>[] {PApplet.class, GWinData.class } );
+			postHandlerObject = obj;
+			postHandlerMethodName = methodName;
+		} catch (Exception e) {
+			postHandlerObject = null;
+			GMessenger.message(NONEXISTANT, new Object[] {this, methodName, new Class<?>[] { PApplet.class, GWinData.class } } );
+		}
 	}
 
 	/**
@@ -236,305 +489,232 @@ public class GWindow extends Frame implements GConstants, GConstantsInternal {
 		try{
 			closeHandlerObject = obj;
 			closetHandlerMethodName = methodName;
-			closetHandlerMethod = obj.getClass().getMethod(methodName, new Class<?>[] {GWindow.class } );
+			closetHandlerMethod = obj.getClass().getMethod(methodName, new Class<?>[] { PApplet.class, GWinData.class } );
 		} catch (Exception e) {
-			GMessenger.message(NONEXISTANT, new Object[] {this, methodName, new Class<?>[] { GWindow.class } } );
+			GMessenger.message(NONEXISTANT, new Object[] {this, methodName, new Class<?>[] { PApplet.class, GWinData.class } } );
 			closeHandlerObject = null;
 			closetHandlerMethodName = "";
 		}
 	}
 
 	/**
-	 * This method will be called by this windows GWindowCloser object
+	 * This will close the window provided the action-on-close flag is CLOSE_WINDOW
+	 * otherwise the window remains open.
 	 */
-	void onClose(){
-		if(closeHandlerObject != null){
-			try {
-				closetHandlerMethod.invoke(closeHandlerObject, new Object[] { this } );
-			} catch (Exception e) {
-				GMessenger.message(EXCP_IN_HANDLER,  
-						new Object[] {closeHandlerObject, closetHandlerMethod, e } );
-			}
-		}		
+	public void close(){
+		if(actionOnClose == KEEP_OPEN || actionOnClose == EXIT_APP ) return;
+		prepareWindowForClosure();
+		//G4P.markForWindowClosure(this);
 	}
 
 	/**
-	 * Add an object that holds the data this window needs to use.
-	 * 
-	 * Note: the object can be of any class that extends GWinData.
-	 * 
-	 * @param data
+	 * This will close the window provided the action-on-close flag is CLOSE_WINDOW
+	 * or KEEP_OPEN otherwise the window remains open.
 	 */
-	public void addData(GWinData data){
-		this.data = data;
-		this.data.owner = this;
+	public void forceClose(){
+		if(actionOnClose == EXIT_APP) return;
+		if(actionOnClose == KEEP_OPEN)
+			setActionOnClose(CLOSE_WINDOW);
+		prepareWindowForClosure();
+		//G4P.markForWindowClosure(this);
 	}
+	
+	/**
+	 * Fire a window closing event
+	 */
+	protected abstract void fireCloseWindowEvent();
+	
 
 	/**
-	 * Always make this window appear on top of other windows (or not). <br>
-	 * This will not work when run from a remote server (ie Applet over the web)
-	 * for security reasons. In this situation a call to this method is ignored
-	 * and a warning is generated. 
-	 * 
-	 * @param onTop
+	 * Prepare the window for closure by stopping the animation loop, unregistering
+	 * the event handlers and firing a window close event using a new thread.
 	 */
-	public void setOnTop(boolean onTop){
-		try{
-			setAlwaysOnTop(onTop);
-		} catch (Exception e){
-			if(G4P.showMessages)
-				System.out.println("Warning: setOnTop() method will not work when the sketch is run from a remote location.");
-		}
-	}
-
-	/**
-	 * Sets the location of the window. <br>
-	 * (Already available from the Frame class - helps visibility 
-	 * of method in G4P reference)
-	 */
-	public void setLocation(int x, int y){
-		super.setLocation(x,y);
-	}
-
-	/**
-	 * Sets the visibility of the window <br>
-	 * (Already available from the Frame class - helps visibility 
-	 * of method in G4P reference)
-	 */
-	public void setVisible(boolean visible){
-		super.setVisible(visible);
-	}
-
-	/**
-	 * Determines whether the window is resizabale or not. <br>
-	 * This cannot be set to true if a background image is used.
-	 */
-	public void setResizable(boolean resizable){
-		if(resizable == false)
-			super.setResizable(false);
-		else {
-			if(papplet.bkImage == null)
-				super.setResizable(true);
-		}
-	}
-
-	/**
-	 * Set the background image to be used instead of a plain color background <br>
-	 * The window will resize to accommodate the image.
-	 * @param image
-	 */
-	public void setBackground(PImage image){
-		papplet.noLoop();
-		papplet.bkImage = null;
-		super.setResizable(true);
-		papplet.resize(image.width, image.height);
-		papplet.bkImage = image;
-		papplet.appWidth = image.width;
-		papplet.appHeight = image.height;
-		papplet.setPreferredSize(new Dimension(papplet.appWidth, papplet.appHeight));
-		papplet.setMinimumSize(new Dimension(papplet.appWidth, papplet.appHeight));
-		pack();
-		super.setResizable(false);
-		papplet.loop();
-	}
-
-	/**
-	 * Set the background color for the window.
-	 * 
-	 * @param col
-	 */
-	public void setBackground(int col){
-		papplet.bkColor = col;
-	}
-
-	/**
-	 * By default the background() method is called to set the background image/colour
-	 * every frame. You can switch this off by calling this method with a parameter 
-	 * value = false.
-	 * @param auto_clear whether to call the background() method or not
-	 */
-	public void setAutoClear(boolean auto_clear){
-		papplet.autoClear = auto_clear;
+	protected void prepareWindowForClosure(){
+		noLoop();
+		unregisterMethods();
+		G4P.deregisterWindow(this);
+		(new Thread(new GCloseNotifier(this))).start();
 	}
 
 	/**
 	 * This sets what happens when the users attempts to close the window. <br>
 	 * There are 3 possible actions depending on the value passed. <br>
-	 * GWindow.KEEP_OPEN - ignore attempt to close window (default action) <br>
-	 * GWindow.CLOSE_WINDOW - close this window, if it is the main window it causes the app to exit <br>
-	 * GWindow.EXIT_APP - exit the app, this will cause all windows to close. <br>
+	 * G4P.KEEP_OPEN - ignore attempt to close window (default action), <br>
+	 * G4P.CLOSE_WINDOW - close this window,<br>
+	 * G4P.EXIT_APP - exit the app, this will cause all windows to close. <br>
 	 * @param action the required close action
 	 */
-	public void setActionOnClose(int action){
-		switch(action){
-		case KEEP_OPEN:
-			removeWindowListener(winAdapt);
-			winAdapt = null;
-			actionOnClose = action;
-			break;
-		case CLOSE_WINDOW:
-		case EXIT_APP:
-			if(winAdapt == null){
-				winAdapt = new GWindowAdapter(this);
-				addWindowListener(winAdapt);
-			} // end if
-			actionOnClose = action;
-			break;
-		} // end switch
+	public abstract void setActionOnClose(int action);
+
+	public void settings() {
+		size(w, h, renderer_type);
 	}
 
 	/**
-	 * Get the action to be performed when the user attempts to close
-	 * the window.
-	 * @return actionOnClose
+	 * Set up the 'window' listeners
 	 */
-	public int getActionOnClose(){
-		return actionOnClose;
+	protected abstract void initListeners();
+
+	public void setup(){
+		surface.setTitle(title); // does not like this in settings	
+		initListeners();
 	}
 
 	/**
-	 * This method will fire a WindowClosing event to be captured by the 
-	 * GWindow$GWindowAdapter object. <br>
-	 * There are 3 possible actions depending on the value passed. <br>
-	 * GWindow.KEEP_OPEN - ignore attempt to close window (default action) <br>
-	 * GWindow.CLOSE_WINDOW - close this window <br>
-	 * GWindow.EXIT_APP - exit the app, this will cause all windows to close. <br>
+	 * This method is executed when the window closes. It will call the user defined
+	 * on-close-handler method set with 
 	 */
-	public void close(){
-		getToolkit().getSystemEventQueue().postEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
-	}
-
-	/**
-	 * This method guarantees that the window is closed by overriding the KEEP_OPEN action-on-close
-	 * and will fire a WindowClosing event to be captured by the GWindow$GWindowAdapter object. <br>
-	 * There are 2 possible actions depending on the currently specified action-on-close. <br>
-	 * GWindow.KEEP_OPEN - close this window <br>
-	 * GWindow.CLOSE_WINDOW - close this window <br>
-	 * GWindow.EXIT_APP - exit the app, this will cause all windows to close. <br>
-	 */
-	public void forceClose(){
-		if(actionOnClose == KEEP_OPEN)
-			setActionOnClose(CLOSE_WINDOW);
-		getToolkit().getSystemEventQueue().postEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
-	}
-
-	/**
-	 * Attempt to add the 'draw' handler method. 
-	 * The default event handler is a method that returns void and has two
-	 * parameters PApplet and GWinData
-	 * 
-	 * @param obj the object to handle the event
-	 * @param methodName the method to execute in the object handler class
-	 */
-	public void addDrawHandler(Object obj, String methodName){
-		try{
-			drawHandlerMethod = obj.getClass().getMethod(methodName, new Class<?>[] {GWinApplet.class, GWinData.class } );
-			drawHandlerObject = obj;
-			drawHandlerMethodName = methodName;
-		} catch (Exception e) {
-			GMessenger.message(NONEXISTANT, new Object[] {this, methodName, new Class<?>[] { GWinApplet.class, GWinData.class } } );
+	public void performCloseAction(){
+		if(closeHandlerObject != null){
+			try {
+				closetHandlerMethod.invoke(closeHandlerObject, 
+						new Object[] { this, data });
+			} catch (Exception e) {
+				GMessenger.message(EXCP_IN_HANDLER, 
+						new Object[] {preHandlerObject, preHandlerMethodName, e} );
+			}
 		}
 	}
 
 	/**
-	 * Attempt to add the 'pre' handler method. 
-	 * The default event handler is a method that returns void and has two
-	 * parameters GWinApplet and GWinData
-	 * 
-	 * @param obj the object to handle the event
-	 * @param methodName the method to execute in the object handler class
+	 * This class is used to call the fireCloseWindowEvent in the appropriate
+	 * GWindow sub-class.
+	 * @author Peter Lager
+	 *
 	 */
-	public void addPreHandler(Object obj, String methodName){
-		try{
-			preHandlerMethod = obj.getClass().getMethod(methodName, new Class<?>[] {GWinApplet.class, GWinData.class } );
-			preHandlerObject = obj;
-			preHandlerMethodName = methodName;
-		} catch (Exception e) {
-			GMessenger.message(NONEXISTANT, new Object[] {this, methodName, new Class<?>[] { GWinApplet.class, GWinData.class } } );
-		}
-	}
+	protected class GCloseNotifier implements Runnable {
+		
+		GWindow window = null;
 
-	/**
-	 * Attempt to add the 'mouse' handler method. 
-	 * The default event handler is a method that returns void and has three
-	 * parameters GWinApplet, GWinData and a MouseEvent
-	 * 
-	 * @param obj the object to handle the event
-	 * @param methodName the method to execute in the object handler class
-	 */
-	public void addMouseHandler(Object obj, String methodName){
-		try{
-			mouseHandlerMethod = obj.getClass().getMethod(methodName, 
-					new Class<?>[] {GWinApplet.class, GWinData.class, MouseEvent.class } );
-			mouseHandlerObject = obj;
-			mouseHandlerMethodName = methodName;
-		} catch (Exception e) {
-			GMessenger.message(NONEXISTANT, new Object[] {this, methodName, new Class<?>[] { GWinApplet.class, GWinData.class, MouseEvent.class } } );
+		public GCloseNotifier(GWindow window) {
+			super();
+			this.window = window;
 		}
-	}
 
-	/**
-	 * Attempt to add the 'key' handler method. 
-	 * The default event handler is a method that returns void and has three
-	 * parameters GWinApplet, GWinData and a KeyEvent
-	 * 
-	 * @param obj the object to handle the event
-	 * @param methodName the method to execute in the object handler class
-	 */
-	public void addKeyHandler(Object obj, String methodName){
-		try{
-			keyHandlerMethod = obj.getClass().getMethod(methodName, 
-					new Class<?>[] {GWinApplet.class, GWinData.class, KeyEvent.class } );
-			keyHandlerObject = obj;
-			keyHandlerMethodName = methodName;
-		} catch (Exception e) {
-			GMessenger.message(NONEXISTANT, new Object[] {this, methodName, new Class<?>[] { GWinApplet.class, GWinData.class, KeyEvent.class } } );
+		@Override
+		public void run() {
+			if(window != null){
+				window.fireCloseWindowEvent();
+			}
 		}
+		
 	}
-
+	
 	/**
-	 * Attempt to add the 'post' handler method. 
-	 * The default event handler is a method that returns void and has two
-	 * parameters GWinApplet and GWinData
-	 * 
-	 * @param obj the object to handle the event
-	 * @param methodName the method to execute in the object handler class
-	 */
-	public void addPostHandler(Object obj, String methodName){
-		try{
-			postHandlerMethod = obj.getClass().getMethod(methodName, 
-					new Class<?>[] {GWinApplet.class, GWinData.class } );
-			postHandlerObject = obj;
-			postHandlerMethodName = methodName;
-		} catch (Exception e) {
-			GMessenger.message(NONEXISTANT, new Object[] {this, methodName, new Class<?>[] { GWinApplet.class, GWinData.class } } );
-		}
-	}
-
-	/**
-	 * Window adapter class that remembers the window it belongs to so
-	 * it can be used to mark it for closure if required.
+	 * Window adapter class for the JAVA2D renderer
 	 * 
 	 * @author Peter Lager
 	 */
-	public class GWindowAdapter extends WindowAdapter {
-		GWindow window;
+	protected class WindowAdapterAWT extends WindowAdapter {
+		GWindow window = null;
 
-		public GWindowAdapter(GWindow window){
+		public WindowAdapterAWT(GWindow window){
 			this.window = window;
 		}
 
 		public void windowClosing(WindowEvent evt) {
 			switch(actionOnClose){
-			case CLOSE_WINDOW:
-				window.papplet.noLoop();
-				G4P.markWindowForClosure(window);
-				break;
 			case EXIT_APP:
 				System.exit(0);
+				break;
+			case CLOSE_WINDOW:
+				performCloseAction();
+				G4P.deregisterWindow(window);
+				dispose();
 				break;
 			}
 		}
 	}
 
+	/**
+	 * Window adapter class for the P2D and P3D renderers
+	 * 
+	 * @author Peter Lager
+	 */
+	protected class WindowAdapterNEWT extends com.jogamp.newt.event.WindowAdapter {
+
+		GWindow window = null;
+
+		public WindowAdapterNEWT(GWindow window){
+			this.window = window;
+		}
+		public void windowGainedFocus(com.jogamp.newt.event.WindowEvent arg0) {
+			focused = true;
+			focusGained();
+		}
+
+		public void windowLostFocus(com.jogamp.newt.event.WindowEvent arg0) {
+			focused = false;
+			focusLost();
+		}
+
+		public void windowDestroyNotify(com.jogamp.newt.event.WindowEvent arg0) {
+			switch(actionOnClose){
+			case EXIT_APP:
+				// Next two come from processing.opengl PSurfaceJOGL.java
+				// performCloseAction();
+				//dispose();
+				exitActual();
+				break;
+			case CLOSE_WINDOW:
+				performCloseAction();
+				G4P.deregisterWindow(window);
+				// Next one comes from processing.opengl PSurfaceJOGL.java
+				dispose();
+				break;
+			}
+		}
+
+	}
+
+	public LinkedList<GAbstractControl> windowControls = new LinkedList<GAbstractControl>();
+	// These next two lists are for controls that are to be added or remove since these
+	// actions must be performed outside the draw cycle to avoid concurrent modification
+	// exceptions when changing windowControls
+	public LinkedList<GAbstractControl> toRemove = new LinkedList<GAbstractControl>();
+	public LinkedList<GAbstractControl> toAdd = new LinkedList<GAbstractControl>();
+
+	/** The object to handle the pre event */
+	protected Object preHandlerObject = null;
+	/** The method in preHandlerObject to execute */
+	protected Method preHandlerMethod = null;
+	/** the name of the method to handle the event */ 
+	protected String preHandlerMethodName;
+
+	/** The object to handle the post event */
+	protected Object postHandlerObject = null;
+	/** The method in postHandlerObject to execute */
+	protected Method postHandlerMethod = null;
+	/** the name of the method to handle the event */ 
+	protected String postHandlerMethodName;
+
+	/** The object to handle the draw event */
+	protected Object drawHandlerObject = null;
+	/** The method in drawHandlerObject to execute */
+	protected Method drawHandlerMethod = null;
+	/** the name of the method to handle the event */ 
+	protected String drawHandlerMethodName;
+
+	/** The object to handle the key event */
+	protected Object keyHandlerObject = null;
+	/** The method in keyHandlerObject to execute */
+	protected Method keyHandlerMethod = null;
+	/** the name of the method to handle the event */ 
+	protected String keyHandlerMethodName;
+
+	/** The object to handle the mouse event */
+	protected Object mouseHandlerObject = null;
+	/** The method in mouseHandlerObject to execute */
+	protected Method mouseHandlerMethod = null;
+	/** the name of the method to handle the event */ 
+	protected String mouseHandlerMethodName;
+
+	/** The object to handle the window closing event */
+	protected Object closeHandlerObject = null;
+	/** The method in closeHandlerObject to execute */
+	protected Method closetHandlerMethod = null;
+	/** the name of the method to handle the event */ 
+	protected String closetHandlerMethodName;
+
+	protected boolean is3D;
 }
