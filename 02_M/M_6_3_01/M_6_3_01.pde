@@ -49,7 +49,7 @@ import java.util.Map;
 PApplet root = this;
 
 // start with this keyword
-String startKeyword = "Superegg";
+String startKeyword = "Nicolas Sarkozy";
 
 float zoom = 0.75;
 

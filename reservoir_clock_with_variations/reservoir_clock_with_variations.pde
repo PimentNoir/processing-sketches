@@ -19,7 +19,8 @@ int csize = 400;
 int keysize = 20;
  
 void setup() {
-  size(csize, csize);
+  //FIXME: size(csize, csize);
+  size(400, 400);
   background(0);
 }
 void draw() {
@@ -94,4 +95,3 @@ void draw() {
     text(String.format("%02d",ss) , margin + 2.5*sqsize/3 - fsize/2,fsize);
   } 
 }
-

@@ -12,7 +12,8 @@ Population pop;
 void setup()
 {
   int zoom = 4;
-  size(220*zoom,220*zoom,P3D);
+  //FIXME: size(220*zoom,220*zoom,P3D);
+  size(880,880,P3D);
   //int framerate = int(random(80,120))
   int framerate = 4;
   frameRate(framerate);
@@ -68,4 +69,3 @@ void mousePressed()
 {
   pop = new Population();
 }
-

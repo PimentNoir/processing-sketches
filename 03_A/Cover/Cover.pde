@@ -132,7 +132,8 @@ float tagBlockGapRatio = 0.25;
 
 
 void setup() {
-  size(1310*qf, 822*qf); 
+  //FIXME: Make a proper switch to define size(1310*qf, 822*qf);
+  size(1310, 822); 
   frameRate(4);
 
   smooth();
@@ -310,7 +311,7 @@ void setup() {
   // ------ load files ------
   imageCount = 0;
 
-  File dir = new File(sketchPath, "data/images");
+  File dir = new File("data/images");
 
   if (dir.isDirectory()) {
     String[] contents = dir.list();
@@ -633,55 +634,3 @@ String timestamp() {
   Calendar now = Calendar.getInstance();
   return String.format("%1$ty%1$tm%1$td_%1$tH%1$tM%1$tS", now);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

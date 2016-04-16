@@ -100,7 +100,8 @@ PFont font;
 
 
 void setup() {
-  size((2*205)*qf, 285*qf); 
+  //FIXME: size((2*205)*qf, 285*qf);
+  size(1230, 855); 
   background(255);
   smooth();
   noStroke();
@@ -407,49 +408,3 @@ void keyPressed() {
 String timestamp() {
   return String.format("%1$ty%1$tm%1$td_%1$tH%1$tM%1$tS", Calendar.getInstance());
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

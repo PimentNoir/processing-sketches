@@ -3,7 +3,7 @@ SimplexNoise simplexnoise = new SimplexNoise();
 INoise perlininoise = new INoise();
 ImprovedNoise perlinnoise = new ImprovedNoise();
 
-int i,w=500,h=w,x,y,s=3;
+int i,w=500,h=w,x,y,s=6;
 float k,m,r,j=0.01;
 
 void setup(){
@@ -131,7 +131,7 @@ float n(float i){
   float noise_scale = 0.5125;
   float rc = simplexnoise(lx_prev * noise_scale + abs(lx - lx_prev), ly_prev * noise_scale + abs(ly - ly_prev) + pulsey, lz_prev * noise_scale + abs(lz - lz_prev));
   //println(rc);
-  return rc*s*14+h/2;
+  return rc*s*12+h/2;
 }
 
 // Useless functions
@@ -166,9 +166,14 @@ void draw()
          100 * constrain(pow(1.00 * max(0, n(k*w+m) * 0.0125), 1.5), 0, 0.9)
          );
       fill(c);
-      quadraticVertex(x,n(y*w+x),y,m,n(y*w+m),y);
-      quadraticVertex(m,n(k*w+m),k,m,n(k*w+m),k);
-      quadraticVertex(x,n(k*w+x),k,x,n(y*w+x),y);
+      //beginShape(TRIANGLES);
+      vertex(x,n(y*w+x),y);
+      vertex(m,n(y*w+m),y);
+      vertex(m,n(k*w+m),k);
+      vertex(m,n(k*w+m),k);
+      vertex(x,n(k*w+x),k);
+      vertex(x,n(y*w+x),y);
+      //endShape();
       i+=i%w==0?w*(s-2):0;
   }
   endShape();
