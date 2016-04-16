@@ -16,7 +16,7 @@ FFT fft;
 FFT fft2;
 AudioInput in;
 AudioInput in2;
-int  nrOfIterations=100; //=29 fps on windows
+int nrOfIterations=100; // =29 fps on windows
 int iterationDistance=80;
 int bufferSizeSmall=512;
 int fftRatio=16; // how many times bigger is the big buffer for detailed analisis
