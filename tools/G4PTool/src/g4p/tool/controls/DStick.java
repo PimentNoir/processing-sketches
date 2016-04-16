@@ -1,16 +1,16 @@
 package g4p.tool.controls;
 
+import g4p.tool.ToolMessages;
+import g4p.tool.gui.propertygrid.EditorBase;
+import g4p.tool.gui.propertygrid.EditorJComboBox;
+import g4p_controls.G4P;
+
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
 import processing.core.PApplet;
-
-import g4p.tool.Messages;
-import g4p.tool.gui.propertygrid.EditorBase;
-import g4p.tool.gui.propertygrid.EditorJComboBox;
-import g4p_controls.G4P;
 
 @SuppressWarnings("serial")
 public class DStick extends DBaseVisual {
@@ -43,8 +43,8 @@ public class DStick extends DBaseVisual {
 	 */
 	protected String get_creator(DBase parent, String window){
 		String s;
-		s = Messages.build(CTOR_GSTICK, _0010_name, window, $(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height));
-		s += Messages.build(SET_STICK_MODE, _0010_name, _0902_stick_mode);
+		s = ToolMessages.build(CTOR_GSTICK, _0010_name, window, $(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height));
+		s += ToolMessages.build(SET_STICK_MODE, _0010_name, _0902_stick_mode);
 		s += super.get_creator(parent, window);		
 		return s;
 	}

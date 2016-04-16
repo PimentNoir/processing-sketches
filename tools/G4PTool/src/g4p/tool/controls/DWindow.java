@@ -1,12 +1,11 @@
 package g4p.tool.controls;
 
-import g4p.tool.Messages;
+import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.EditorBase;
 import g4p.tool.gui.propertygrid.EditorJComboBox;
 import g4p.tool.gui.propertygrid.Validator;
 import g4p.tool.gui.tabview.CtrlTabView;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
@@ -96,7 +95,7 @@ public final class DWindow extends DBase {
 			id[i] = IdGen.instance().getNext();
 
 		selectable = true;
-		resizeable = true;
+		resizeable = false;
 		moveable = false;
 		allowsChildren = true;
 		componentClass = "GWindow";
@@ -128,7 +127,6 @@ public final class DWindow extends DBase {
 			close_action_edit = close_action_show = true;
 			_0826_width = 240;
 			_0827_height = 120;
-
 			_0012_title = "Window title";
 			renderer_edit = renderer_show = true;
 			// Create a draw method for this window
@@ -136,7 +134,6 @@ public final class DWindow extends DBase {
 		}
 		width_edit = height_edit = true;
 		width_show = height_show = true;
-		opaque_show  = false;
 		eventHandler_show = false;
 		resizeable = false;
 	}
@@ -152,27 +149,27 @@ public final class DWindow extends DBase {
 		StringBuilder sb = new StringBuilder();
 
 		if(_0020_wdraw.length() > 0){
-			sb.append(Messages.build(WIN_DRAW, _0020_wdraw, _0010_name, $(id[0])).replace('[', '{'));  // event header
+			sb.append(ToolMessages.build(WIN_DRAW, _0020_wdraw, _0010_name, $(id[0])).replace('[', '{'));  // event header
 			sb.append(get_event_code(0) + get_event_end(0));
 		}
 		if(_0021_wmouse.length() > 0){
-			sb.append(Messages.build(WIN_MOUSE, _0021_wmouse, _0010_name, $(id[1])).replace('[', '{'));  // event header
+			sb.append(ToolMessages.build(WIN_MOUSE, _0021_wmouse, _0010_name, $(id[1])).replace('[', '{'));  // event header
 			sb.append(get_event_code(1) + get_event_end(1));
 		}
 		if(_0022_wkey.length() > 0){
-			sb.append(Messages.build(WIN_KEY, _0022_wkey, _0010_name, $(id[2])).replace('[', '{'));  // event header
+			sb.append(ToolMessages.build(WIN_KEY, _0022_wkey, _0010_name, $(id[2])).replace('[', '{'));  // event header
 			sb.append(get_event_code(2) + get_event_end(1));
 		}
 		if(_0023_wpre.length() > 0){
-			sb.append(Messages.build(WIN_PRE, _0023_wpre, _0010_name, $(id[3])).replace('[', '{'));  // event header
+			sb.append(ToolMessages.build(WIN_PRE, _0023_wpre, _0010_name, $(id[3])).replace('[', '{'));  // event header
 			sb.append(get_event_code(3) + get_event_end(3));
 		}
 		if(_0024_wpost.length() > 0){
-			sb.append(Messages.build(WIN_POST, _0024_wpost, _0010_name, $(id[4])).replace('[', '{'));  // event header
+			sb.append(ToolMessages.build(WIN_POST, _0024_wpost, _0010_name, $(id[4])).replace('[', '{'));  // event header
 			sb.append(get_event_code(4) + get_event_end(4));
 		}
 		if(_0025_wclose.length() > 0){
-			sb.append(Messages.build(ON_CLOSE, _0025_wclose, _0010_name, $(id[5])).replace('[', '{'));  // event header
+			sb.append(ToolMessages.build(ON_CLOSE, _0025_wclose, _0010_name, $(id[5])).replace('[', '{'));  // event header
 			sb.append(get_event_code(5) + get_event_end(5));
 		}
 		return new String(sb);
@@ -191,19 +188,19 @@ public final class DWindow extends DBase {
 				ev_code = CODE_GWINDOW_DRAW;
 				break;
 			case 1:
-				ev_code = Messages.build(CODE_GWINDOW_MOUSE, _0010_name);
+				ev_code = ToolMessages.build(CODE_GWINDOW_MOUSE, _0010_name);
 				break;
 			case 2:
-				ev_code = Messages.build(CODE_GWINDOW_KEY, _0010_name);
+				ev_code = ToolMessages.build(CODE_GWINDOW_KEY, _0010_name);
 				break;
 			case 3:
-				ev_code = Messages.build(CODE_GWINDOW_PEE, _0010_name);
+				ev_code = ToolMessages.build(CODE_GWINDOW_PEE, _0010_name);
 				break;
 			case 4:
-				ev_code = Messages.build(CODE_GWINDOW_POST, _0010_name);
+				ev_code = ToolMessages.build(CODE_GWINDOW_POST, _0010_name);
 				break;
 			case 5:
-				ev_code = Messages.build(CODE_GWINDOW_CLOSE, _0010_name);
+				ev_code = ToolMessages.build(CODE_GWINDOW_CLOSE, _0010_name);
 				break;
 			}
 		}
@@ -224,37 +221,46 @@ public final class DWindow extends DBase {
 	 * Get the creator statement var = new Foo(...);
 	 * @return
 	 */
-	protected String get_creator(DBase parent, String window){
+	protected String get_creator(DBase parent, String xwindow){
 		StringBuilder sb = new StringBuilder("");
 		if(mainSketch){
-			sb.append(Messages.build(SET_SKETCH_TITLE, _0012_title));
+			sb.append(ToolMessages.build(SET_SKETCH_TITLE, _0012_title));
 		}
 		else {
-			sb.append(Messages.build(CTOR_WINDOW, _0010_name, "this", _0012_title,
-					$(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height), false, _0031_renderer));
+			sb.append(ToolMessages.build(CTOR_WINDOW, _0010_name, "this", _0012_title,
+					$(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height), _0031_renderer));
 			if(!_0032_close_action.equals("KEEP_OPEN"))
-				sb.append(Messages.build(SET_ACTION_ON_CLOSE, _0010_name, _0032_close_action));
+				sb.append(ToolMessages.build(SET_ACTION_ON_CLOSE, _0010_name, _0032_close_action));
 			if(_0020_wdraw.length() > 0){
-				sb.append(Messages.build(ADD_DRAW_HANDLER, _0010_name, "this", _0020_wdraw));
+				sb.append(ToolMessages.build(ADD_DRAW_HANDLER, _0010_name, "this", _0020_wdraw));
 			}
 			if(_0021_wmouse.length() > 0){
-				sb.append(Messages.build(ADD_MOUSE_HANDLER, _0010_name, "this", _0021_wmouse));
+				sb.append(ToolMessages.build(ADD_MOUSE_HANDLER, _0010_name, "this", _0021_wmouse));
 			}
 			if(_0022_wkey.length() > 0){
-				sb.append(Messages.build(ADD_KEY_HANDLER, _0010_name, "this", _0022_wkey));
+				sb.append(ToolMessages.build(ADD_KEY_HANDLER, _0010_name, "this", _0022_wkey));
 			}
 			if(_0023_wpre.length() > 0){
-				sb.append(Messages.build(ADD_PRE_HANDLER, _0010_name, "this", _0023_wpre));
+				sb.append(ToolMessages.build(ADD_PRE_HANDLER, _0010_name, "this", _0023_wpre));
 			}
 			if(_0024_wpost.length() > 0){
-				sb.append(Messages.build(ADD_POST_HANDLER, _0010_name, "this", _0024_wpost));
+				sb.append(ToolMessages.build(ADD_POST_HANDLER, _0010_name, "this", _0024_wpost));
 			}
 			if(_0025_wclose.length() > 0){
-				sb.append(Messages.build(ADD_CLOSE_HANDLER, _0010_name, "this", _0025_wclose));
+				sb.append(ToolMessages.build(ADD_CLOSE_HANDLER, _0010_name, "this", _0025_wclose));
 			}
 		}
 		return new String(sb);
 	}
+
+	protected String get_window_loop(){
+		if(!mainSketch)
+			return ToolMessages.build(LOOP_WINDOW, _0010_name);
+		else
+			return null;
+		
+	}
+	
 
 	/**
 	 * This is the main method to create the code to create the Window
@@ -272,7 +278,7 @@ public final class DWindow extends DBase {
 				if(mainSketch)
 					comp.make_creator(lines, null, "this");
 				else
-					comp.make_creator(lines, this, _0010_name + ".papplet");
+					comp.make_creator(lines, this, _0010_name);
 			}
 		}				
 	}
@@ -311,7 +317,7 @@ public final class DWindow extends DBase {
 		if(CtrlTabView.showGrid){
 			g.setColor(CtrlTabView.gridCol);
 			for(int i = 0; i <= _0826_width; i+= CtrlTabView.gridSize)
-				for(int j = 0; j <= _0826_width; j+= CtrlTabView.gridSize)
+				for(int j = 0; j <= _0827_height; j+= CtrlTabView.gridSize)
 					g.fillOval(i-2, j-2, 3, 3);	
 		}
 		// Draw controls

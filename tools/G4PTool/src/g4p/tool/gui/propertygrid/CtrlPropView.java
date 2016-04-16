@@ -1,9 +1,8 @@
 package g4p.tool.gui.propertygrid;
 
-import g4p.tool.Messages;
 import g4p.tool.controls.DBase;
-import g4p.tool.gui.tabview.ITabView;
-import g4p.tool.gui.treeview.ISketchView;
+import g4p.tool.gui.tabview.CtrlTabView;
+import g4p.tool.gui.treeview.CtrlSketchView;
 
 import java.awt.event.MouseEvent;
 
@@ -14,8 +13,6 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-import processing.app.Editor;
-
 /**
  * A view of the property grid.
  * 
@@ -23,10 +20,10 @@ import processing.app.Editor;
  *
  */
 @SuppressWarnings({ "serial", "unused" })
-public class CtrlPropView extends JTable implements TableModelListener, IPropView {
+public class CtrlPropView extends JTable implements TableModelListener {
 
-	private ITabView tabs;
-	private ISketchView tree;
+	private CtrlTabView tabs;
+	private CtrlSketchView tree;
 
 	public CtrlPropView() {
 		super();
@@ -35,11 +32,17 @@ public class CtrlPropView extends JTable implements TableModelListener, IPropVie
 		setTableHeader(null); // hides column names
 	}
 
-	public void setViewLinks(ITabView tabs, ISketchView tree){
+	public void setViewLinks(CtrlTabView tabs, CtrlSketchView tree){
 		this.tabs = tabs;
 		this.tree = tree;
 	}
 
+	public void updateModelFor(DBase comp){
+		if(comp != null){
+			CtrlPropModel tm = (CtrlPropModel)this.getModel();
+			tm.createProperties(comp);
+		}
+	}
 	/**
 	 * This method should be called when the selected object in 
 	 * either tab or tree view changes
@@ -72,7 +75,7 @@ public class CtrlPropView extends JTable implements TableModelListener, IPropVie
 			int row = e.getFirstRow();
 			if(row >= 0){
 				// Just in case the window name was changed
-				tabs.updateCurrentTab();
+				tabs.updateCurrentTabName();
 				tabs.repaint();
 			}
 		}
@@ -126,7 +129,6 @@ public class CtrlPropView extends JTable implements TableModelListener, IPropVie
 		return super.getCellRenderer(row, col);
 	}
 
-	@Override
 	public void modelHasBeenChanged() {
 		((CtrlPropModel)getModel()).hasBeenChanged();
 	}

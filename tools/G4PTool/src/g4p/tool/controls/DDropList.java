@@ -1,6 +1,6 @@
 package g4p.tool.controls;
 
-import g4p.tool.Messages;
+import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.EditorBase;
 import g4p.tool.gui.propertygrid.EditorStringList;
 import g4p.tool.gui.propertygrid.Validator;
@@ -43,18 +43,15 @@ public class DDropList extends DBaseVisual {
 
 		_0682_list_file = "list_" + id[0];
 		_0826_width = 90;
-		_0827_height = 22;
+		_0827_height = 20;
 		opaque_show = false;
-		
-		width_validator = Validator.getValidator(int.class, 40, 9999);
-		height_validator = Validator.getValidator(int.class, 40, 9999);
 	}
 
 	protected String get_creator(DBase parent, String window){
 		String s = "";
-		s = Messages.build(CTOR_DROPLIST, _0010_name, window, 
-					 $(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height * _0680_nbr_rows) , $(_0680_nbr_rows));	
-		s += Messages.build(CTOR_SET_LIST,  _0010_name, _0682_list_file, $(_0681_selected));
+		s = ToolMessages.build(CTOR_DROPLIST, _0010_name, window, 
+					 $(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height * (_0680_nbr_rows + 1)) , $(_0680_nbr_rows));	
+		s += ToolMessages.build(CTOR_SET_LIST,  _0010_name, _0682_list_file, $(_0681_selected));
 		s += super.get_creator(parent, window);
 		return s;
 	}

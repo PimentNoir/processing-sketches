@@ -1,5 +1,6 @@
 package g4p.tool.gui.propertygrid;
 
+import g4p.tool.G4PTool;
 import g4p.tool.gui.GuiDesigner;
 import g4p.tool.gui.ToolIcon;
 
@@ -14,7 +15,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 
-import processing.app.Base;
+import processing.app.Util;
 
 /**
  * Editor to get a list of strings - DCombo
@@ -51,12 +52,12 @@ public class EditorStringList extends EditorBase {
 		component.setText(value.toString());
 		GuiDesigner.keepOpen(true);
 		
-		String fname = GuiDesigner.editor().getSketch().getDataFolder() + SEP + value.toString();
+		String fname = G4PTool.base.getActiveEditor().getSketch().getDataFolder() + SEP + value.toString();
 		File file;
 		try {
 			file = new File(fname);
 			if(file.exists())
-				content = Base.loadFile(file);
+				content = Util.loadFile(file);
 			else
 				System.out.println("====  CAN'T FIND FILE ================================================");
 		} catch (IOException e1) {
@@ -70,7 +71,7 @@ public class EditorStringList extends EditorBase {
 			try {
 				content = lister.getText();
 				file = new File(fname);
-				Base.saveFile(content, file);
+				Util.saveFile(content, file);
 			} catch (IOException e1) {
 				System.out.println("CANT SAVE OPTIONS");
 			}

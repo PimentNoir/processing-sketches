@@ -1,6 +1,6 @@
 package g4p.tool.controls;
 
-import g4p.tool.Messages;
+import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.EditorBase;
 import g4p.tool.gui.propertygrid.EditorJComboBox;
 import g4p.tool.gui.propertygrid.EditorJFileChooser;
@@ -77,13 +77,13 @@ public class DTextIconAlign extends DTextStyle {
 	protected String get_creator(DBase parent, String window){
 		String s = "";
 		if(_0150_icon_file.length() > 0){
-			s = Messages.build(SET_ICON, _0010_name, _0150_icon_file, _0152_nbr_tiles, _0154_icon_x_alignment, _0155_icon_y_alignment);
+			s = ToolMessages.build(SET_ICON, _0010_name, _0150_icon_file, _0152_nbr_tiles, _0154_icon_x_alignment, _0155_icon_y_alignment);
 		}
 		else if(icon != null && !isIconAlignDefaults()){
-			s = Messages.build(SET_ICON_ALIGN, _0010_name, _0154_icon_x_alignment, _0155_icon_y_alignment);
+			s = ToolMessages.build(SET_ICON_ALIGN, _0010_name, _0154_icon_x_alignment, _0155_icon_y_alignment);
 		}
 		if(!isTextAlignDefaults())
-			s += Messages.build(SET_TEXT_ALIGN, _0010_name, _0140_text_x_alignment, _0141_text_y_alignment);
+			s += ToolMessages.build(SET_TEXT_ALIGN, _0010_name, _0140_text_x_alignment, _0141_text_y_alignment);
 		s += super.get_creator(parent, window);
 		return s;
 	}

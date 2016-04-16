@@ -1,6 +1,6 @@
 package g4p.tool.controls;
 
-import g4p.tool.Messages;
+import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.Validator;
 
 import java.awt.Graphics2D;
@@ -11,12 +11,12 @@ import java.io.ObjectInputStream;
 @SuppressWarnings("serial")
 public class DTextField extends DTextBase {
 
-	public String 		_0132_dtext = "";
-	public String 		dtext_label = "Default Text";
-	public String 		dtext_tooltip = "text to show when empty";
-	public Boolean 		dtext_edit = true;
-	public Boolean 		dtext_show = true;
-	public Validator 	dtext_validator = Validator.getDefaultValidator(String.class);
+	public String 		_0132_ptext = "";
+	public String 		ptext_label = "Prompt Text";
+	public String 		ptext_tooltip = "text to show when empty";
+	public Boolean 		ptext_edit = true;
+	public Boolean 		ptext_show = true;
+	public Validator 	ptext_validator = Validator.getDefaultValidator(String.class);
 
 	public Boolean 		_0186_horz_scrollbar = false;
 	public String		horz_scrollbar_label = "Horizontal scrollbar?";
@@ -51,12 +51,12 @@ public class DTextField extends DTextBase {
 			if(_0188_hide_scrollbar)
 				sbpolicy += " | G4P.SCROLLBARS_AUTOHIDE";
 		}
-		s = Messages.build(CTOR_GTEXTFIELD, _0010_name, window, 
+		s = ToolMessages.build(CTOR_GTEXTFIELD, _0010_name, window, 
 				$(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height), sbpolicy);
 		if(_0130_text.length() > 0)
-			s += Messages.build(SET_TEXT, _0010_name, _0130_text);
-		if(_0132_dtext.length() > 0)
-			s += Messages.build(SET_DEFAULT_TEXT, _0010_name, _0132_dtext);
+			s += ToolMessages.build(SET_TEXT, _0010_name, _0130_text);
+		if(_0132_ptext.length() > 0)
+			s += ToolMessages.build(SET_PROMPT_TEXT, _0010_name, _0132_ptext);
 		s += super.get_creator(parent, window);		
 		return s;
 	}

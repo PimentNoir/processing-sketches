@@ -1,7 +1,7 @@
 package g4p.tool.controls;
 
 
-import g4p.tool.Messages;
+import g4p.tool.ToolMessages;
 
 
 @SuppressWarnings("serial")
@@ -52,8 +52,8 @@ public class DValue2D extends DValueBase {
 	
 	protected String get_creator(DBase parent, String window){
 		String s = "";
-		s += Messages.build(SET_X_LIMITS, _0010_name, $(_0220_value_x), $(_0221_min_x), $(_0222_max_x));
-		s += Messages.build(SET_Y_LIMITS, _0010_name, $(_0225_value_y), $(_0226_min_y), $(_0227_max_y));
+		s += ToolMessages.build(SET_X_LIMITS, _0010_name, $(_0220_value_x), $(_0221_min_x), $(_0222_max_x));
+		s += ToolMessages.build(SET_Y_LIMITS, _0010_name, $(_0225_value_y), $(_0226_min_y), $(_0227_max_y));
 		s += super.get_creator(parent, window);
 		return s;
 	}

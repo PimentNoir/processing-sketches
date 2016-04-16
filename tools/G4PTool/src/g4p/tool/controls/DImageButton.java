@@ -1,6 +1,6 @@
 package g4p.tool.controls;
 
-import g4p.tool.Messages;
+import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.EditorJFileChooser;
 
 import java.awt.Graphics2D;
@@ -30,30 +30,36 @@ public class DImageButton extends DBase {
 	public String 		img_off_label = "Mouse off image";
 	public String 		img_off_updater = "imageChanged_off";
 	
-	public String 		_0044_img_over = "";
+	public String 		_0043_img_over = "";
 	transient public 	EditorJFileChooser img_over_editor = new EditorJFileChooser();
 	public Boolean 		img_over_edit = true;
 	public Boolean 		img_over_show = false;
 	public String 		img_over_label = "Mouse over image";
 	public String 		img_over_updater = "imageChanged_over";
 
-	public String 		_0045_img_down = "";
+	public String 		_0044_img_down = "";
 	transient public 	EditorJFileChooser img_down_editor = new EditorJFileChooser();
 	public Boolean 		img_down_edit = true;
 	public Boolean 		img_down_show = false;
-	public String 		img_down_label = "Pressed over image";
+	public String 		img_down_label = "Mouse pressed image";
 
-	public String 		_0049_img_mask = "";
-	transient public 	EditorJFileChooser img_mask_editor = new EditorJFileChooser();
-	public Boolean 		img_mask_edit = true;
-	public Boolean 		img_mask_show = true;
-	public String 		img_mask_label = "Mask image";
-
-	public Boolean 		_0048_match_image_size = false;
+	public Boolean 		_0045_match_image_size = false;
 	public Boolean 		match_image_size_edit = true;
 	public Boolean 		match_image_size_show = false;
 	public String 		match_image_size_label = "Use image size";
 	public String 		match_image_size_updater = "updateSize";
+
+	public Boolean 		_0048_use_mask = false;
+	public Boolean 		use_mask_edit = true;
+	public Boolean 		use_mask_show = false;
+	public String 		use_mask_label = "Use alpha mask";
+	public String 		use_mask_updater = "updateUseMask";
+
+	public String 		_0049_img_mask = "";
+	transient public 	EditorJFileChooser img_mask_editor = new EditorJFileChooser();
+	public Boolean 		img_mask_edit = true;
+	public Boolean 		img_mask_show = false;
+	public String 		img_mask_label = "Mask image";
 
 	
 	public DImageButton(){
@@ -64,7 +70,6 @@ public class DImageButton extends DBase {
 
 		width_edit = height_edit = true;
 		width_show = height_show = true;
-		opaque_show = false;
 		_0826_width = 100;
 		_0827_height = 60;
 	}
@@ -77,21 +82,21 @@ public class DImageButton extends DBase {
 	protected String get_creator(DBase parent, String window){
 		String s = "";
 		String f0 = _0042_img_off;
-		String f1 = (_0044_img_over.length() > 0) ? _0044_img_over : f0;
-		String f2 = (_0045_img_down.length() > 0) ? _0045_img_down : f0;	
+		String f1 = (_0043_img_over.length() > 0) ? _0043_img_over : f0;
+		String f2 = (_0044_img_down.length() > 0) ? _0044_img_down : f0;	
 		String flist = "new String[] { \"" + f0 + "\", " + "\"" + f1 + "\", " + "\"" + f2 + "\" } " ;
 
-		if(_0049_img_mask.length() > 0){
-			if(_0048_match_image_size)
-				s += Messages.build(CTOR_IMG_BTN_XYFM, _0010_name, window, $(_0820_x), $(_0821_y), flist, _0049_img_mask);
+		if(_0048_use_mask &&  _0049_img_mask.length() > 0){ // Has mask file
+			if(_0045_match_image_size)
+				s += ToolMessages.build(CTOR_IMG_BTN_XYFM, _0010_name, window, $(_0820_x), $(_0821_y), flist, _0049_img_mask);
 			else
-				s += Messages.build(CTOR_IMG_BTN_XYWHFM, _0010_name, window, $(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height), flist, _0049_img_mask);
+				s += ToolMessages.build(CTOR_IMG_BTN_XYWHFM, _0010_name, window, $(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height), flist, _0049_img_mask);
 		}
-		else {
-			if(_0048_match_image_size)
-				s += Messages.build(CTOR_IMG_BTN_XYF, _0010_name, window, $(_0820_x), $(_0821_y), flist);
+		else { // No mask file
+			if(_0045_match_image_size)
+				s += ToolMessages.build(CTOR_IMG_BTN_XYF, _0010_name, window, $(_0820_x), $(_0821_y), flist);
 			else
-				s += Messages.build(CTOR_IMG_BTN_XYWHF, _0010_name, window, $(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height), flist);
+				s += ToolMessages.build(CTOR_IMG_BTN_XYWHF, _0010_name, window, $(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height), flist);
 			
 		}
 		s += super.get_creator(parent, window);
@@ -122,6 +127,7 @@ public class DImageButton extends DBase {
 			image = getImageFromDataFolder(_0042_img_off);
 			img_over_show = true;
 			match_image_size_show = true;
+			use_mask_show = true;
 			propertyModel.createProperties(this);			
 			propertyModel.hasBeenChanged();
 		}
@@ -136,7 +142,7 @@ public class DImageButton extends DBase {
 	}
 	
 	public void updateSize(){
-		if(_0048_match_image_size){
+		if(_0045_match_image_size){
 			_0826_width = image.getWidth();
 			_0827_height = image.getHeight();
 			width_show = height_show = false;
@@ -149,8 +155,13 @@ public class DImageButton extends DBase {
 		propertyModel.createProperties(this);			
 		propertyModel.hasBeenChanged();
 	}
-	
 
+	public void updateUseMask(){
+		img_mask_show = _0048_use_mask;
+		propertyModel.createProperties(this);			
+		propertyModel.hasBeenChanged();
+	}
+	
 	protected void read(){
 		super.read();
 		img_off_editor = new EditorJFileChooser();

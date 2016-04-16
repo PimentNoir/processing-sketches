@@ -82,7 +82,7 @@ public final class ListGen implements TDataConstants {
 
 	@SuppressWarnings("unchecked")
 	private void makeRendererSelection(int type) {
-		String[] s = new String[] {"JAVA2D", "P2D", "P3D"};		
+		String[] s = new String[] {"JAVA2D", "P2D", "P3D", "OPENGL"};		
 		cbList.put(type,  new DefaultComboBoxModel(s));
 	}
 

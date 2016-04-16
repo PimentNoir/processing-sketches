@@ -10,8 +10,8 @@ import g4p.tool.controls.DWindow;
 import g4p.tool.controls.IdGen;
 import g4p.tool.controls.NameGen;
 import g4p.tool.gui.ToolIcon;
-import g4p.tool.gui.propertygrid.IPropView;
-import g4p.tool.gui.tabview.ITabView;
+import g4p.tool.gui.propertygrid.CtrlPropView;
+import g4p.tool.gui.tabview.CtrlTabView;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -37,11 +37,11 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 @SuppressWarnings("serial")
-public class CtrlSketchView extends JTree implements ISketchView {
+public class CtrlSketchView extends JTree {
 
 
-	private ITabView tabs;
-	private IPropView props;
+	private CtrlTabView tabs;
+	private CtrlPropView props;
 
 	/**
 	 * Ctor creates an empty tree;
@@ -53,7 +53,7 @@ public class CtrlSketchView extends JTree implements ISketchView {
 		this.setRowHeight(24);
 	}
 
-	public void setViewLinks(ITabView tabs, IPropView props){
+	public void setViewLinks(CtrlTabView tabs, CtrlPropView props){
 		this.tabs = tabs;
 		this.props = props;
 	}
@@ -79,12 +79,6 @@ public class CtrlSketchView extends JTree implements ISketchView {
 		setEditable(false);
 	}
 
-	// Methods for Interface   ====================================================================================================================
-
-	/* (non-Javadoc)
-	 * @see g4p.tool.gui.ISketchView#setSelectedNode(javax.swing.tree.DefaultMutableTreeNode)
-	 */
-	@Override
 	public void setSelectedComponent(DBase comp){
 		DefaultTreeModel m = (DefaultTreeModel) getModel();
 		TreeNode[] nodes = m.getPathToRoot(comp);
@@ -93,9 +87,6 @@ public class CtrlSketchView extends JTree implements ISketchView {
 		repaint();
 	}
 
-	/* (non-Javadoc)
-	 * @see g4p.tool.gui.ISketchView#getWindowFor(javax.swing.tree.DefaultMutableTreeNode)
-	 */
 	public DBase getWindowFor(DBase comp){
 		DefaultTreeModel m = (DefaultTreeModel) getModel();
 		TreeNode[] nodes = m.getPathToRoot(comp);
@@ -103,11 +94,11 @@ public class CtrlSketchView extends JTree implements ISketchView {
 		return w;
 	}
 
-	// Get the first
 	public DBase getGuiContainerFor(DBase comp){
 		DefaultTreeModel m = (DefaultTreeModel) getModel();
-		DBase c = null;
 		TreeNode[] nodes = m.getPathToRoot(comp);
+		// Default to main sketch window
+		DBase c = (DBase) ((DefaultMutableTreeNode) m.getRoot()).getChildAt(0);
 		if(nodes != null){
 			for(int i = nodes.length - 1; i > 0; i--){
 				if(nodes[i].getAllowsChildren() && nodes[i] instanceof DWindow || nodes[i] instanceof DPanel){
@@ -116,8 +107,11 @@ public class CtrlSketchView extends JTree implements ISketchView {
 				}
 			}
 		}
+//		if(c == null)
+//			c = getMainSketchWindow();
 		return c;
 	}
+
 	public DBase getOptionGroupFor(DBase comp){
 		DefaultTreeModel m = (DefaultTreeModel) getModel();
 		DBase c = null;
@@ -144,15 +138,13 @@ public class CtrlSketchView extends JTree implements ISketchView {
 			return loc;
 		}
 	}
-	
-	@Override
+
 	public Dimension getSketchSizeFromDesigner() {
 		DefaultTreeModel m = (DefaultTreeModel) getModel();
 		DBase t0 = (DBase) ((DefaultMutableTreeNode) m.getRoot()).getFirstChild();	
 		return new Dimension(t0._0826_width, t0._0827_height);
 	}
 
-	@Override
 	public String getSketchRendererFromDesigner(){
 		DefaultTreeModel m = (DefaultTreeModel) getModel();
 		DWindow t0 = (DWindow) ((DefaultMutableTreeNode) m.getRoot()).getFirstChild();	
@@ -165,7 +157,6 @@ public class CtrlSketchView extends JTree implements ISketchView {
 	 * 2) In general all controls are added to a window
 	 * 3) Option buttons must be added to an option group component
 	 */
-	@Override
 	public void addComponent(DBase comp) {
 		DefaultTreeModel m = (DefaultTreeModel) getModel();
 		DefaultMutableTreeNode r = (DefaultMutableTreeNode) m.getRoot();
@@ -218,6 +209,11 @@ public class CtrlSketchView extends JTree implements ISketchView {
 			DBase selected = (DBase) getLastSelectedPathComponent();
 			// Find the window or panel that contains the selected component
 			DBase window = getGuiContainerFor(selected);
+			if(window == null){
+				System.out.println("Can't find window container");
+				System.out.println(comp.getRoot());
+				return;
+			}
 			// Only need to do something if we have a window/panel componen
 			if(window instanceof DWindow) {
 				comp._0820_x = va.x + (va.width - comp._0826_width)/ 2;
@@ -265,35 +261,31 @@ public class CtrlSketchView extends JTree implements ISketchView {
 		NameGen.instance().remove(comp.get_name());			
 		NameGen.instance().remove(comp._0030_eventHandler);
 		for(int i = 0; i < comp.id.length; i++)
-			IdGen.instance().remove(comp.id[i]);							///
+			IdGen.instance().remove(comp.id[i]);
 	}
 
-	@Override
 	public DBase getRoot() {
 		return (DBase) getModel().getRoot();
 	}
 
-
-	@Override
 	public void generateDeclarations(ArrayList<String> lines) {
 		DefaultTreeModel m = (DefaultTreeModel) getModel();
 		DBase r = (DBase) m.getRoot();
 		r.make_declaration(lines);
 	}
 
-	@Override
 	public void generateEvtMethods(ArrayList<String> lines) {
 		DefaultTreeModel m = (DefaultTreeModel) getModel();
 		DBase r = (DBase) m.getRoot();
 		r.make_event_method(lines);
 	}
 
-	@Override
 	public void generateCreator(ArrayList<String> lines) {
 		DefaultTreeModel m = (DefaultTreeModel) getModel();
 		// Start with application
 		DBase r = (DBase) m.getRoot();
 		r.make_creator(lines, null, "this");
+		r.make_window_loop(lines);
 	}
 
 	// ==========================================================================

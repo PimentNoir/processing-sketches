@@ -1,6 +1,6 @@
 package g4p.tool.controls;
 
-import g4p.tool.Messages;
+import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.EditorBase;
 import g4p.tool.gui.propertygrid.EditorJComboBox;
 import g4p.tool.gui.propertygrid.Validator;
@@ -96,16 +96,16 @@ public class DKnob extends DValue1D {
 	 */
 	protected String get_creator(DBase parent, String window){
 		String s;
-		s = Messages.build(CTOR_GKNOB, _0010_name, window, $(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height), $(_0418_grip_ratio));
+		s = ToolMessages.build(CTOR_GKNOB, _0010_name, window, $(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height), $(_0418_grip_ratio));
 
-		s += Messages.build(SET_TURN_RANGE,_0010_name, _0411_dial_start_angle, _0412_dial_end_angle);
-		s += Messages.build(SET_CONTROLLER,_0010_name, _0415_controller);
+		s += ToolMessages.build(SET_TURN_RANGE,_0010_name, _0411_dial_start_angle, _0412_dial_end_angle);
+		s += ToolMessages.build(SET_CONTROLLER,_0010_name, _0415_controller);
 		if(sensitivity_show) // only happens when not angular
-			s += Messages.build(SET_DRAG_SENSITIVITY, _0010_name, _0416_sensitivity);	
-		s += Messages.build(SET_SHOW_ARC_ONLY, _0010_name, _0430_show_arc_only);
-		s += Messages.build(SET_OVER_ARC_ONLY, _0010_name, _0422_over_arc_only);
-		s += Messages.build(SET_OVER_GRIP_ONLY, _0010_name, !_0421_over_grip_only);
-		s += Messages.build(SET_SHOW_TRACK, _0010_name, _0431_show_track);
+			s += ToolMessages.build(SET_DRAG_SENSITIVITY, _0010_name, _0416_sensitivity);	
+		s += ToolMessages.build(SET_SHOW_ARC_ONLY, _0010_name, _0430_show_arc_only);
+		s += ToolMessages.build(SET_OVER_ARC_ONLY, _0010_name, _0422_over_arc_only);
+		s += ToolMessages.build(SET_OVER_GRIP_ONLY, _0010_name, !_0421_over_grip_only);
+		s += ToolMessages.build(SET_SHOW_TRACK, _0010_name, _0431_show_track);
 		s += super.get_creator(parent, window);		
 		return s;
 	}

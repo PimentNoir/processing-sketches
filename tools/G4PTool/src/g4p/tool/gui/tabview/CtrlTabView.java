@@ -1,12 +1,10 @@
 package g4p.tool.gui.tabview;
 
-import g4p.tool.G4PTool;
 import g4p.tool.controls.DBase;
-import g4p.tool.controls.DPanel;
 import g4p.tool.controls.DWindow;
 import g4p.tool.gui.ToolIcon;
-import g4p.tool.gui.propertygrid.IPropView;
-import g4p.tool.gui.treeview.ISketchView;
+import g4p.tool.gui.propertygrid.CtrlPropView;
+import g4p.tool.gui.treeview.CtrlSketchView;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -24,10 +22,10 @@ import javax.swing.event.ChangeListener;
  *
  */
 @SuppressWarnings("serial")
-public class CtrlTabView extends JTabbedPane implements ITabView, ChangeListener {
+public class CtrlTabView extends JTabbedPane implements ChangeListener {
 
-	private ISketchView tree;
-	private IPropView props;
+	private CtrlSketchView tree;
+	private CtrlPropView props;
 
 	public static int gridSize = 4;
 	public static boolean showGrid;
@@ -42,7 +40,7 @@ public class CtrlTabView extends JTabbedPane implements ITabView, ChangeListener
 		this.addChangeListener(this);
 	}
 
-	public void setViewLinks(ISketchView tree, IPropView props){
+	public void setViewLinks(CtrlSketchView tree, CtrlPropView props){
 		this.tree = tree;
 		this.props = props;
 	}
@@ -55,7 +53,6 @@ public class CtrlTabView extends JTabbedPane implements ITabView, ChangeListener
 	/* (non-Javadoc)
 	 * @see g4p.tool.gui.IWindowView#addWindow(g4p.tool.components.DBase)
 	 */
-	@Override
 	public void addWindow(DBase winComp){
 		ScrollControl winView = new ScrollControl(this, winComp);
 		tabMap.put(winComp, winView);
@@ -65,7 +62,6 @@ public class CtrlTabView extends JTabbedPane implements ITabView, ChangeListener
 	/* (non-Javadoc)
 	 * @see g4p.tool.gui.IWindowView#deleteWindow(g4p.tool.components.DBase)
 	 */
-	@Override
 	public boolean deleteWindow(DBase window){
 		ScrollControl winView = tabMap.get(window);
 		if(winView != null){
@@ -120,7 +116,7 @@ public class CtrlTabView extends JTabbedPane implements ITabView, ChangeListener
 	/**
 	 * Call this if the name of any window has changed
 	 */
-	public void updateCurrentTab(){
+	public void updateCurrentTabName(){
 		int selIdx = this.getSelectedIndex();
 		ScrollControl sc = (ScrollControl) getComponentAt(selIdx);
 		DWindow window = sc.getWindowComponent();
@@ -133,6 +129,13 @@ public class CtrlTabView extends JTabbedPane implements ITabView, ChangeListener
 		sc.setScale(scale);
 	}
 
+
+
+	public void updateCurrentDisplay() {
+		for(ScrollControl sc : tabMap.values()){
+			sc.getScrollableArea().revalidate();
+		}
+	}
 
 	/**
 	 * Change of state caused by clicking on a tab for another GWindow
@@ -148,53 +151,39 @@ public class CtrlTabView extends JTabbedPane implements ITabView, ChangeListener
 		}
 	}
 
-	/**
-	 * Called from WindowView when a component is selected using the mouse
-	 * From ITabView
-	 */
-	@Override
+
 	public void componentHasBeenSelected(DBase comp) {
 		if(comp != null)
 			tree.setSelectedComponent(comp);		
 	}
 
-	@Override
 	public void componentChangedInGUI(DBase comp) {
 		comp.updatedInGUI();
 		props.modelHasBeenChanged();
 	}
 
-	@Override
 	public void scaleWindow(int scale) {
 		ScrollControl winView = (ScrollControl) this.getSelectedComponent();
 		winView.setScale(scale);
 	}
 
-
-	@Override
 	public void setGridSize(int gsize) {
 		gridSize = gsize;
 		repaint();
 	}
 
-	@Override
 	public void setShowGrid(boolean show) {
 		showGrid = show;		
 		repaint();
 	}
 
-	@Override
 	public void setSnapToGrid(boolean snap) {
 		snapToGrid = snap;		
 		repaint();
 	}
 
-	@Override
 	public void deleteAllWindows() {
 		this.removeAll();
-
 	}
-
-
 
 }

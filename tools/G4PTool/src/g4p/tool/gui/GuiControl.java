@@ -1,6 +1,5 @@
 package g4p.tool.gui;
 
-import g4p.tool.G4PTool;
 import g4p.tool.TDataConstants;
 import g4p.tool.TFileConstants;
 import g4p.tool.controls.Code;
@@ -9,10 +8,10 @@ import g4p.tool.controls.DBase;
 import g4p.tool.controls.DWindow;
 import g4p.tool.controls.IdGen;
 import g4p.tool.controls.NameGen;
-import g4p.tool.gui.propertygrid.IPropView;
-import g4p.tool.gui.tabview.ITabView;
+import g4p.tool.gui.propertygrid.CtrlPropView;
+import g4p.tool.gui.tabview.CtrlTabView;
 import g4p.tool.gui.treeview.CtrlSketchModel;
-import g4p.tool.gui.treeview.ISketchView;
+import g4p.tool.gui.treeview.CtrlSketchView;
 
 import java.awt.Dimension;
 import java.io.File;
@@ -26,9 +25,10 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
 import processing.app.Base;
-import processing.app.Editor;
 import processing.app.Sketch;
 import processing.app.SketchCode;
+import processing.app.Util;
+import processing.app.ui.Editor;
 import processing.core.PApplet;
 
 /**
@@ -43,9 +43,9 @@ public class GuiControl implements TFileConstants, TDataConstants {
 
 	private Editor editor = null;
 
-	private ITabView tabs;
-	private ISketchView tree;
-	private IPropView props;
+	private CtrlTabView tabs;
+	private CtrlSketchView tree;
+	private CtrlPropView props;
 
 	private String guiPdeBase = "";
 
@@ -57,7 +57,7 @@ public class GuiControl implements TFileConstants, TDataConstants {
 	 * @param tree
 	 * @param props
 	 */
-	public GuiControl(Editor editor, ITabView tabs, ISketchView tree, IPropView props) {
+	public GuiControl(Editor editor, CtrlTabView tabs, CtrlSketchView tree, CtrlPropView props) {
 		super();
 		this.editor = editor;
 		this.tabs = tabs;
@@ -65,13 +65,8 @@ public class GuiControl implements TFileConstants, TDataConstants {
 		this.props = props;
 		if(editor != null){
 			try {
-//				editor.getBase();
-//				editor.getBase();
-				// Get the start text for the gui tab
-				// 1.5.1 format used here in 2.0b6 use Base.getSketchbookFolder
-				// File f = new File(editor.getBase().getSketchbookFolder() + SEP + GUI_PDE_BASE);
 				File f = new File(Base.getSketchbookFolder() + SEP + GUI_PDE_BASE);
-				guiPdeBase = Base.loadFile(f);
+				guiPdeBase = Util.loadFile(f);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -108,13 +103,27 @@ public class GuiControl implements TFileConstants, TDataConstants {
 
 	/**
 	 * Set the sketch size in the designer window if one is provided
-	 * @param size width and height
+	 * @param sst width and height
 	 */
-	public void setSketchSize(Dimension size){
-		if(size != null){
-			DBase m = (DBase) tree.getRoot().getChildAt(0);
-			m._0826_width = size.width;
-			m._0827_height = size.height;
+	public void setSketchSize(SketchSizeType sst){
+		if(sst != null){
+			DWindow m = (DWindow) tree.getRoot().getChildAt(0);
+			if(m._0826_width != sst.width && sst.width > 0){
+				m._0826_width = sst.width;
+			}
+			if(m._0827_height != sst.height && sst.height > 0){
+				m._0827_height = sst.height;
+			}
+			if(!m._0031_renderer.equals(sst.type)){
+				m._0031_renderer = sst.type;
+			}
+			props.modelHasBeenChanged();
+			tabs.updateCurrentTabName();
+			m.width_edit = false;
+			m.height_edit = false;
+			m.renderer_edit = false;
+			props.updateModelFor(m);		
+			tabs.revalidate();
 		}
 	}
 
@@ -122,30 +131,20 @@ public class GuiControl implements TFileConstants, TDataConstants {
 	 * Get the size of the sketch from the code
 	 * @return null if no size found
 	 */
-	public Dimension getSketchSizeFromCode(){
-		Dimension s = null;
+	public SketchSizeType getSketchSizeFromCode(){		
+		SketchSizeType s = null;
 		Sketch sketch = editor.getSketch();
 		SketchCode curr =  sketch.getCurrentCode();
 		int currIndex = getTabIndex(sketch, curr.getPrettyName());
-		if(currIndex != 0)
-			sketch.setCurrentCode(0);
+		sketch.setCurrentCode(0);
 		String code = editor.getText();
 		code = scrubComments(code);
 		m = pSize.matcher(code);
 		if(m.find() && m.groupCount() >= 3){
-			try	{
-				int wide = Integer.parseInt(m.group(1));
-				int high = Integer.parseInt(m.group(2));
-//				if(m.groupCount() > 3)
-//					System.out.println("Renderer >>"+m.group(3)+"<<");
-//				else
-//					System.out.println("Can't find renderer ");
-				s = new Dimension(wide, high);
-			} catch (NumberFormatException e) {
-				s = null;
-			}
+			s = new SketchSizeType(m.group(1), m.group(2), m.group(3));
 		}
 		sketch.setCurrentCode(currIndex);
+		tabs.repaint();
 		return s;
 	}
 
@@ -193,7 +192,7 @@ public class GuiControl implements TFileConstants, TDataConstants {
 				}
 				if (!endOfRainbow) {
 					throw new RuntimeException("Missing the */ from the end of a " +
-					"/* comment */");
+							"/* comment */");
 				}
 			} else {  // any old character, move along
 				index++;
@@ -207,6 +206,7 @@ public class GuiControl implements TFileConstants, TDataConstants {
 	 */
 	public void codeCapture(){
 		Sketch sketch = editor.getSketch();
+		int currTab = sketch.getCurrentCodeIndex();
 		SketchCode gui_tab = getTab(sketch, PDE_TAB_PRETTY_NAME);
 		int gui_tab_index = sketch.getCodeIndex(gui_tab);
 		sketch.setCurrentCode(gui_tab_index);
@@ -230,7 +230,7 @@ public class GuiControl implements TFileConstants, TDataConstants {
 			String snippet = code.substring(tags.get(t).e + 1, tags.get(t+1).s - 2);
 			Code.instance().add(tags.get(t).id, snippet);
 		}
-
+		sketch.setCurrentCode(currTab);
 	}
 
 	/**
@@ -239,6 +239,7 @@ public class GuiControl implements TFileConstants, TDataConstants {
 	public void codeGeneration(){
 		String code;
 		Sketch sketch = editor.getSketch();
+		int currTab = sketch.getCurrentCodeIndex();
 		SketchCode gui_tab = getTab(sketch, PDE_TAB_PRETTY_NAME);
 		int gui_tab_index = sketch.getCodeIndex(gui_tab);
 		sketch.setCurrentCode(gui_tab_index);
@@ -257,12 +258,8 @@ public class GuiControl implements TFileConstants, TDataConstants {
 		if(code0 != null && code0.length() == 0){
 			SketchCode tab0 = sketch.getCurrentCode();
 			try {
-				editor.getBase();
-				editor.getBase();
-				// 1.5.1 format used here in 2.0b6 use Base.getSketchbookFolder
-				//File f = new File(editor.getBase().getSketchbookFolder() + SEP + TAB0_PDE_BASE);
 				File f = new File(Base.getSketchbookFolder() + SEP + TAB0_PDE_BASE);
-				String tab0code = Base.loadFile(f);
+				String tab0code = Util.loadFile(f);
 				Dimension size = tree.getSketchSizeFromDesigner();
 				String graphics = tree.getSketchRendererFromDesigner();
 				tab0code = tab0code.replace("WIDTH", "" + size.width);
@@ -276,12 +273,7 @@ public class GuiControl implements TFileConstants, TDataConstants {
 			}
 		}
 		editor.repaint();
-		// Save the generated code
-		//		try {
-		//			gui_tab.save();
-		//		} catch (IOException e) {
-		//			e.printStackTrace();
-		//		}
+		sketch.setCurrentCode(currTab);
 	}
 
 	private String makeGuiCode(){
@@ -362,10 +354,10 @@ public class GuiControl implements TFileConstants, TDataConstants {
 		File file;
 		// Editor == null if run outside of Processing
 		if(editor == null){
-			file = new File(GUI_MODEL_FILENAME);
+			file = new File(GUI_MODEL_FILE);
 		}
 		else {
-			file = new File(editor.getSketch().getFolder(), GUI_MODEL_FILENAME);
+			file = new File(editor.getSketch().getFolder(), GUI_MODEL_FILE);
 		}
 		tree.saveModel(file);
 	}
@@ -376,7 +368,7 @@ public class GuiControl implements TFileConstants, TDataConstants {
 	 */
 	public void loadGuiLayout() {
 		DefaultTreeModel dm = null;
-		File file = new File(editor.getSketch().getFolder(), GUI_MODEL_FILENAME);
+		File file = new File(editor.getSketch().getFolder(), GUI_MODEL_FILE);
 
 		if(file.exists()){
 			NameGen.instance().reset();

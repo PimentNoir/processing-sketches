@@ -1,7 +1,7 @@
 /**
  * GUI form designer for G4P.
  *
- * (C) 2013
+ * (C) 2015
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * Boston, MA  02111-1307  USA
  * 
  * @author		Peter Lager http://www.lagers.org.uk
- * @modified	12/27/2013
+ * @modified	12/16/2015
  * @version		##version##
  */
 package g4p.tool;
@@ -32,8 +32,10 @@ import java.io.File;
 import javax.swing.JFrame;
 
 import processing.app.Base;
+import processing.app.Messages;
 import processing.app.Sketch;
 import processing.app.tools.Tool;
+import processing.app.ui.Editor;
 
 /**
  * 
@@ -42,15 +44,16 @@ import processing.app.tools.Tool;
  */
 public class G4PTool implements Tool, TFileConstants {
 
-	// Keep track of the editor using this sketch
-	private processing.app.Editor editor;
+	// Keep traks of the base and use this to get the editor
+	public static Base base;
 	// keep track of the FUI designer for this sketch
 	private GuiDesigner dframe;
 
 	private boolean g4p_error_shown = false;
-	
+
+
 	public String getMenuTitle() {
-		return "GUI builder";
+		return "G4P GUI builder";
 	}
 
 	/**
@@ -58,18 +61,18 @@ public class G4PTool implements Tool, TFileConstants {
 	 * @return revision number string
 	 */
 	public static String getVersion(){
-		return "2.4.1";
+		return "4.1";
 	}
-	
+
 	/**
 	 * Get compatible version string of this tool
 	 * @return revision number string
 	 */
 	public static String getCompatibleVersionNo(){
-		String n[] = "2.4.1".split("[\\.]");
+		String n[] = "4.1".split("[\\.]");
 		return n[0] + "." + n[1];
 	}
-	
+
 	/**
 	 * Get version number of this tool as an integer with the form  <br>
 	 * MMmmii <br>
@@ -79,7 +82,7 @@ public class G4PTool implements Tool, TFileConstants {
 	 * @return version number as int
 	 */
 	public static int getVersionNo(){
-		String n[] = "2.4.1".split("[\\.]");
+		String n[] = "4.1".split("[\\.]");
 		int[] vnp = new int[3];
 		for(int i = 0; i < n.length; i++){
 			try {
@@ -90,72 +93,93 @@ public class G4PTool implements Tool, TFileConstants {
 		}
 		return ((vnp[0] * 100) + vnp[1]) * 100 + vnp[2];
 	}
+
+	public void clearFrame(){
+		dframe = null;
+	}
 	
 	/**
 	 * Called once first time the tool is called
 	 */
-	public void init(processing.app.Editor theEditor) {
-		this.editor = theEditor;
+	@Override
+	public void init(Base theBase) {
+		base = theBase;
 	}
-
+	
 	/**
 	 * This is executed every time we launch the tool using the menu item in Processing IDE
 	 * 
 	 */
 	public void run() {
+		Editor editor = base.getActiveEditor();
+		System.out.println("========  Tool run()  ==========");
+		boolean terminateTool = false;
 		GCScheme.makeColorSchemes();
-		
-//		Base base = editor.getBase();
+
 		Sketch sketch = editor.getSketch();
 		File sketchFolder = sketch.getFolder();
 		File sketchbookFolder = Base.getSketchbookFolder();
+		boolean thisVersion = false, anotherVersion = false;
 
 		// Provide a warning (first time only) if G4P is not loaded
 		if (!g4p_error_shown && !g4pJarExists(Base.getSketchbookLibrariesFolder())) {
-			Base.showWarning("GUI Builder warning", 
+			Messages.showWarning("GUI Builder warning", 
 					"Although you can use this tool the sketch created will not \nwork because the G4P library needs to be installed.\nSee G4P at http://www.lagers.org.uk/g4p/",
 					(Exception) null);
 			g4p_error_shown = true;
 		}
 		// The tool is not open so create the designer window
-		if (dframe == null) {
-			System.out.println("===================================================");
-			System.out.println("   G4PTool V2.4.1 created by Peter Lager");
-			System.out.println("===================================================");
+		if (dframe == null) { // Design window does not exist
 			
+			System.out.println("===================================================");
+			System.out.println("   G4P GUI Builder 4.1 created by Peter Lager");
+			System.out.println("===================================================");
+
 			// If the gui.pde tab does not exist create it
 			if (!guiTabExists(sketch)) {
-				System.out.println("G4PTool : run()   ---   adding   gui.tab");
-				System.out.println("Sketch book floder: " + sketchbookFolder);
-				System.out.println(G4P_TOOL_DATA_FOLDER + SEP + PDE_TAB_NAME);
-				System.out.println("-----------------------------------------------------------");
-				sketch.addFile(new File(sketchbookFolder, G4P_TOOL_DATA_FOLDER + SEP + PDE_TAB_NAME));
+				File source = new File(sketchbookFolder, G4P_TOOL_DATA_FOLDER + SEP + PDE_TAB_NAME);
+				sketch.addFile(source);
 			}
 			// Create data folder if necessary
 			sketch.prepareDataFolder();
-			
+
 			// Create a sub-folder called 'GUI_BUILDER_DATA' inside the sketch folder if
 			// it doesn't already exist
 			File configFolder = new File(sketchFolder, CONFIG_FOLDER);
 			if (!configFolder.exists()) {
 				configFolder.mkdir();
 			}
-			
-			dframe = new GuiDesigner(editor);
-			
-//			try {
-//				BufferedImage img = ImageIO.read(new File(sketchbookFolder, G4P_TOOL_DATA_FOLDER + SEP + "default_gui_palette.png"));
-//				System.out.println("Image " + img);
-//			} catch (IOException e) {
-//				System.out.println("Unable to load colour schemes");
-//				e.printStackTrace();
-//			}
+			else { // if it exists then get list of existing guis
+				File[] files = configFolder.listFiles();
+				for(File f : files){
+					String name = f.getName();
+					if(name.equals(GUI_MODEL_FILENAME)){
+						// GUI that matches this version
+						thisVersion = true;
+					}
+					else if(name.startsWith(GUI_MODEL_FILE_FILTER)){
+						// GUI that matches another version
+						anotherVersion = true;
+					}
+				}
+			}
+			// Terminate tool if we can find a GUI for another version but not for this one
+			terminateTool = !thisVersion & anotherVersion;
+			if(terminateTool){
+				Messages.showWarning("GUI Builder Version Error", "GUI Builder will close because the GUI found was \ncreated with an earlier version of GUI Builder\n", null);
+			}
+			else {				
+				dframe = new GuiDesigner(this);
+				dframe.setVisible(true);
+				dframe.setExtendedState(JFrame.NORMAL);
+				dframe.toFront();
+			}
 		}
-		// Design window exists so make visible, open to normal size
-		// and bring to front.
-		dframe.setVisible(true);
-		dframe.setExtendedState(JFrame.NORMAL);
-		dframe.toFront();
+		else { // Design window exists so make visible, open to normal size and bring to front.
+			dframe.setVisible(true);
+			dframe.setExtendedState(JFrame.NORMAL);
+			dframe.toFront();
+		}
 	}
 
 	/**
@@ -164,14 +188,8 @@ public class G4PTool implements Tool, TFileConstants {
 	 * @return true if found else false
 	 */
 	private boolean g4pJarExists(File sketchbookLibrariesFolder) {
-		boolean exists = false;
-		System.out.println("G4PTool : g4pJarExists() : testing whether G4P has been installed.");
-		System.out.println("Libraries folder: " + sketchbookLibrariesFolder);
-		System.out.println(G4P_LIB);
 		File f = new File(sketchbookLibrariesFolder, G4P_LIB);
-		exists = f.exists();
-		System.out.println("G4P installed " + exists);
-		System.out.println("-----------------------------------------------------");
+		boolean exists = f.exists();
 		return exists;
 	}
 
@@ -184,4 +202,6 @@ public class G4PTool implements Tool, TFileConstants {
 		File f = new File(sketch.getFolder(), PDE_TAB_NAME);
 		return f.exists();
 	}
+
+
 }

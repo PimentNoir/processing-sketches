@@ -1,10 +1,10 @@
 package g4p.tool.controls;
 
-import g4p.tool.Messages;
+import g4p.tool.G4PTool;
 import g4p.tool.TDataConstants;
 import g4p.tool.TFileConstants;
 import g4p.tool.TGuiConstants;
-import g4p.tool.gui.GuiDesigner;
+import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.CtrlPropModel;
 import g4p.tool.gui.propertygrid.Validator;
 import g4p.tool.gui.tabview.MutableDBase;
@@ -23,7 +23,7 @@ import java.util.Enumeration;
 import javax.imageio.ImageIO;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import processing.app.Editor;
+import processing.app.ui.Editor;
 
 /**
  * Every control in the G4P library has its equivalent class in this package, for instance
@@ -76,7 +76,7 @@ public abstract class DBase extends DefaultMutableTreeNode implements Serializab
 	/**
 	 * The property model used in the table view
 	 */
-	transient public CtrlPropModel propertyModel;
+	transient protected CtrlPropModel propertyModel;
 
 	// Whether it is selectable in the WindowView
 	// set to false for DOptionGroup and DTimer
@@ -140,11 +140,6 @@ public abstract class DBase extends DefaultMutableTreeNode implements Serializab
 	public Boolean 		eventHandler_show = true;
 	public Validator 	eventHandler_validator = Validator.getValidator(COMPONENT_NAME_0);  // modified 09-02-2013 to allow zero length
 
-	public Boolean 		_0600_opaque  = false;
-	public Boolean 		opaque_edit = true;
-	public Boolean 		opaque_show = true;
-	public String 		opaque_label = "Opaque background?";
-
 	/**
 	 * 
 	 */
@@ -193,6 +188,22 @@ public abstract class DBase extends DefaultMutableTreeNode implements Serializab
 	}
 
 	/**
+	 * Make windows loop
+	 * @param lines
+	 */
+	public void make_window_loop(ArrayList<String> lines){
+		String decl = get_window_loop();
+		if(decl != null)
+			lines.add(decl);
+		if(allowsChildren){
+			Enumeration<?> e = children();
+			while(e.hasMoreElements()){
+				((DBase)e.nextElement()).make_window_loop(lines);
+			}
+		}		
+	}
+
+	/**
 	 * Recursive function to first get the creator code for this
 	 * component then repeat for any children. <br>
 	 * This method is overridden in DWindow, DPanel and DOptionGroup.
@@ -224,51 +235,67 @@ public abstract class DBase extends DefaultMutableTreeNode implements Serializab
 
 	/**
 	 * Get the declaration for this control <pre>Foo variable_name;</pre><br>
+	 * 
+	 * Overridden in :- DWindow
 	 */
 	protected String get_declaration(){
 		return componentClass + " " + _0010_name+ "; \n";
 	}
 
+	
 	/**
 	 * Get the creator statement <pre>var = new Foo(...);</pre><br>
+	 * 
 	 * Override this method in all classes.
 	 */
 	protected String get_creator(DBase parent, String window){
 		String s = "";
-		if(opaque_show)
-			s = Messages.build(SET_OPAQUE, _0010_name, _0600_opaque);
 		// Finally add the event handler if appropriate
 		if(eventHandler_show && _0030_eventHandler.trim().length() > 0)
-			s += Messages.build(ADD_HANDLER, _0010_name, "this", _0030_eventHandler);
+			s += ToolMessages.build(ADD_HANDLER, _0010_name, "this", _0030_eventHandler);
 		return s;
 	}
 	
 	/** 
-	 * Get the event method for this control.
+	 * Get the generic event method definition including any associated code. <br>
 	 * 
-	 * Used for everything except DWindow
+	 * 
+	 * Overridden in :-  DWindow <br>
+	 * 
 	 * Modified 09-02-2013 to return null if no method name
 	 * 
 	 */
 	protected String get_event_definition(){
 		if(_0030_eventHandler.length() > 0)
-			return get_event_header() + get_event_code() + get_event_end(0);
+			return get_event_header() + get_event_code() + get_event_end();
 		else
 			return null;
 	}
 	
 	/**
-	 * Get the event code if none then return generic message
-	 * @param code
-	 * @return
+	 * Get the event code if none then return generic message.
+	 * 
+	 * 
+	 * Overridden in :- DTimer
+	 * 
+	 * @return event handler code
 	 */
 	protected String get_event_code(){ 
 		return get_event_code(0);
 	}
 
 	/**
-	 * Get the event code if none then return generic message
-	 * @param n
+	 * Some controls have more than one event associated with it e.g.
+	 * DWindows has 6 one for each of the possible events. <br>
+	 * 
+	 * This method will get the code associated with one of these id numbers
+	 * so this method can get called several times for a control. <br>
+	 * 
+	 * If it cannot find any code then it will return a generic message. <br>
+	 * 
+	 * Overridden in :- DWindow
+	 * 
+	 * @param n the index used for the event id
 	 * @return
 	 */
 	protected String get_event_code(int n){
@@ -276,25 +303,28 @@ public abstract class DBase extends DefaultMutableTreeNode implements Serializab
 			n = 0;
 		String ev_code = Code.instance().get(id[n]);
 		if(ev_code == null)
-			return Messages.build(CODE_ANY, _0010_name, componentClass);
+			return ToolMessages.build(CODE_ANY, _0010_name, componentClass);
 		else
 			return ev_code; 
 	}
 	
 	/**
-	 * Get the event header
+	 * Get the generic event header for an event<br>
+	 * 
+	 * 
 	 * @return
 	 */
 	protected String get_event_header(int n){
 		if(n < 0 || n >= id.length)
 			n = 0;
-		return Messages.build(METHOD_START_1, _0030_eventHandler, componentClass, 
+		return ToolMessages.build(METHOD_START_1, _0030_eventHandler, componentClass, 
 				_0010_name, $(id[n])).replace('[', '{');
 	}
 	
 	protected String get_event_header(){
 		return get_event_header(0);
 	}
+	
 	
 	/**
 	 * Get the event method end with tag
@@ -303,7 +333,7 @@ public abstract class DBase extends DefaultMutableTreeNode implements Serializab
 	protected String get_event_end(int n){
 		if(n < 0 || n >= id.length)
 			n = 0;
-		return Messages.build(METHOD_END, _0010_name, 
+		return ToolMessages.build(METHOD_END, _0010_name, 
 				$(id[n])).replace(']', '}');
 	}
 	
@@ -311,6 +341,9 @@ public abstract class DBase extends DefaultMutableTreeNode implements Serializab
 		return get_event_end(0);
 	}
 	
+	protected String get_window_loop(){
+		return null;
+	}
 	
 	// ==========================================================================
 	// ==========================================================================
@@ -333,7 +366,7 @@ public abstract class DBase extends DefaultMutableTreeNode implements Serializab
 	 * Display details - used for debugging only
 	 */
 	public String show(){
-		return Messages.build("{0}  {1} Pos [{2},{3}] Size [{4}, {5}]", this.getClass(), _0010_name, _0820_x, _0821_y, _0826_width, _0827_height);
+		return ToolMessages.build("{0}  {1} Pos [{2},{3}] Size [{4}, {5}]", this.getClass(), _0010_name, _0820_x, _0821_y, _0826_width, _0827_height);
 	}
 
 	/**
@@ -493,8 +526,8 @@ public abstract class DBase extends DefaultMutableTreeNode implements Serializab
 	 */
 	public BufferedImage getImageFromDataFolder(String filename){
 		BufferedImage img = null;
-		Editor ed = GuiDesigner.editor();
-		File f = new File(ed.getSketch().getDataFolder(), filename);
+		Editor editor = G4PTool.base.getActiveEditor();
+		File f = new File(editor.getSketch().getDataFolder(), filename);
 		try {
 			img = ImageIO.read(f);
 		} 

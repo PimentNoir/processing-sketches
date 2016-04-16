@@ -1,6 +1,6 @@
 package g4p.tool.controls;
 
-import g4p.tool.Messages;
+import g4p.tool.ToolMessages;
 import g4p.tool.gui.tabview.MutableDBase;
 import g4p_controls.StyledString;
 import g4p_controls.StyledString.TextLayoutInfo;
@@ -83,14 +83,14 @@ public class DPanel extends DTextStyle {  // was DTextIcon now DText since no ic
 
 	protected String get_creator(DBase parent, String window){
 		String s;
-		s = Messages.build(CTOR_GPANEL, _0010_name, window,
+		s = ToolMessages.build(CTOR_GPANEL, _0010_name, window,
 				$(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height), _0130_text);
 		if(_0300_collapsed)
-			s += Messages.build(COLLAPSED, _0010_name, _0300_collapsed);
+			s += ToolMessages.build(COLLAPSED, _0010_name, _0300_collapsed);
 		if(!_0301_collapsible)
-			s += Messages.build(COLLAPSIBLE, _0010_name, _0301_collapsible);
+			s += ToolMessages.build(COLLAPSIBLE, _0010_name, _0301_collapsible);
 		if(!_0310_draggable)
-			s += Messages.build(DRAGGABLE, _0010_name, _0310_draggable);
+			s += ToolMessages.build(DRAGGABLE, _0010_name, _0310_draggable);
 		s += super.get_creator(parent, window);		
 		return s;
 	}
@@ -111,7 +111,7 @@ public class DPanel extends DTextStyle {  // was DTextIcon now DText since no ic
 			while(e.hasMoreElements()){
 				comp = (DBase)e.nextElement();
 				if(!(comp instanceof DToggleGroup))
-					lines.add(Messages.build(ADD_A_CHILD, _0010_name, comp._0010_name));
+					lines.add(ToolMessages.build(ADD_A_CHILD, _0010_name, comp._0010_name));
 			}
 		}				
 	}

@@ -1,6 +1,6 @@
 package g4p.tool.controls;
 
-import g4p.tool.Messages;
+import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.Validator;
 
 import java.awt.Graphics2D;
@@ -47,7 +47,7 @@ public class DSlider extends DLinearTrack {
 			w = $(_0826_width);
 			h = $(_0827_height);
 		}
-		s = Messages.build(CTOR_GSLIDER, _0010_name, window, 
+		s = ToolMessages.build(CTOR_GSLIDER, _0010_name, window, 
 				x, y, w, h, $(_0300_thick));
 		s += super.get_creator(parent, window);		
 		return s;

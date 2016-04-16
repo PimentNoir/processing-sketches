@@ -11,7 +11,9 @@ public interface TFileConstants {
 	public final String PDE_TAB_NAME 			= PDE_TAB_PRETTY_NAME + ".pde";
 	public final String CONFIG_FOLDER 			= "GUI_BUILDER_DATA";
 	
-	public final String GUI_MODEL_FILENAME 		= CONFIG_FOLDER + SEP + "gui.ser." + G4PTool.getCompatibleVersionNo();
+	public final String GUI_MODEL_FILE_FILTER	= "gui.ser.";
+	public final String GUI_MODEL_FILENAME 		= GUI_MODEL_FILE_FILTER + G4PTool.getCompatibleVersionNo();
+	public final String GUI_MODEL_FILE 			= CONFIG_FOLDER + SEP + GUI_MODEL_FILENAME;
 	
 	// These are relative to the processing sketch folder
 	public final String G4P_TOOL_DATA_FOLDER 	= "tools" + SEP + "G4PTool" + SEP + "data";

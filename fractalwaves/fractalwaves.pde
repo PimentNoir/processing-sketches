@@ -166,14 +166,12 @@ void draw()
          100 * constrain(pow(1.00 * max(0, n(k*w+m) * 0.0125), 1.5), 0, 0.9)
          );
       fill(c);
-      //beginShape(TRIANGLES);
       vertex(x,n(y*w+x),y);
       vertex(m,n(y*w+m),y);
       vertex(m,n(k*w+m),k);
       vertex(m,n(k*w+m),k);
       vertex(x,n(k*w+x),k);
       vertex(x,n(y*w+x),y);
-      //endShape();
       i+=i%w==0?w*(s-2):0;
   }
   endShape();

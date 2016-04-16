@@ -1,7 +1,7 @@
 package g4p.tool.gui.tabview;
 
-import g4p.tool.Messages;
 import g4p.tool.TGuiConstants;
+import g4p.tool.ToolMessages;
 import g4p.tool.controls.DBase;
 
 public class MutableDBase implements TGuiConstants {
@@ -26,6 +26,6 @@ public class MutableDBase implements TGuiConstants {
 	}
 
 	public String toString(){
-		return Messages.build("{0}   over  {1}", comp, selID);
+		return ToolMessages.build("{0}   over  {1}", comp, selID);
 	}
 }

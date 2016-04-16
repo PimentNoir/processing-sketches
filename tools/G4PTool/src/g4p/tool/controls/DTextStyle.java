@@ -1,6 +1,6 @@
 package g4p.tool.controls;
 
-import g4p.tool.Messages;
+import g4p.tool.ToolMessages;
 import g4p_controls.G4P;
 
 @SuppressWarnings("serial")
@@ -34,12 +34,12 @@ public class DTextStyle extends DTextBase {
 	protected String get_creator(DBase parent, String window){
 		String s = "";
 		if(_0130_text.length() > 0){
-			s += Messages.build(SET_TEXT, _0010_name, _0130_text);
+			s += ToolMessages.build(SET_TEXT, _0010_name, _0130_text);
 			// Only need bold/italic if some text is set
 			if(_0136_bold)
-				s += Messages.build(SET_TEXT_BOLD, _0010_name);
+				s += ToolMessages.build(SET_TEXT_BOLD, _0010_name);
 			if(_0137_italic)
-				s += Messages.build(SET_TEXT_ITALIC, _0010_name);
+				s += ToolMessages.build(SET_TEXT_ITALIC, _0010_name);
 		}
 		s += super.get_creator(parent, window);		
 		return s;

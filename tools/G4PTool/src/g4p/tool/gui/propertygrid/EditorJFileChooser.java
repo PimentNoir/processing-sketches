@@ -1,5 +1,6 @@
 package g4p.tool.gui.propertygrid;
 
+import g4p.tool.G4PTool;
 import g4p.tool.gui.GuiDesigner;
 
 import java.awt.Component;
@@ -18,8 +19,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 
-import processing.app.Base;
-import processing.app.Editor;
+import processing.app.Util;
+import processing.app.ui.Editor;
 
 /**
  * Editor allowing user to select image files. The selected image file
@@ -57,18 +58,18 @@ public class EditorJFileChooser extends EditorBase {
 			boolean isSelected, int row, int column) {
 //		chooser = (JFileChooser) chooser;
 		GuiDesigner.keepOpen(true);
-		Editor e = GuiDesigner.editor();
+		Editor editor = G4PTool.base.getActiveEditor();
 		int selected = chooser.showDialog(GuiDesigner.instance(), "Use Image");
 		if(selected == JFileChooser.APPROVE_OPTION){
 			File src = chooser.getSelectedFile();	
 			name = src.getName();
-			File dest = new File(e.getSketch().getDataFolder(), name);
+			File dest = new File(editor.getSketch().getDataFolder(), name);
 			// Copy file to data folder
 			try {
 				// Make sure we do not attempt to use an image already in the data folder
 				if(!src.equals(dest))
 					// Source is not inside the data folder so copy it there
-					Base.copyFile(src, dest);
+					Util.copyFile(src, dest);
 			} catch (IOException e1) {
 				System.out.println("COPY failed");
 			}

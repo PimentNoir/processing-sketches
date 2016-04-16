@@ -1,13 +1,13 @@
 package g4p.tool.controls;
 
+import g4p.tool.ToolMessages;
+import g4p.tool.gui.propertygrid.EditorBase;
+import g4p.tool.gui.propertygrid.EditorJComboBox;
+
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-
-import g4p.tool.Messages;
-import g4p.tool.gui.propertygrid.EditorBase;
-import g4p.tool.gui.propertygrid.EditorJComboBox;
 
 @SuppressWarnings("serial")
 public class DCustomSlider extends DLinearTrack {
@@ -47,7 +47,7 @@ public class DCustomSlider extends DLinearTrack {
 			w = $(_0826_width);
 			h = $(_0827_height);
 		}
-		s = Messages.build(CTOR_GCUSTOMSLIDER, _0010_name, window, 
+		s = ToolMessages.build(CTOR_GCUSTOMSLIDER, _0010_name, window, 
 				x, y, w, h, _0900_skin);
 		s += super.get_creator(parent, window);		
 		return s;

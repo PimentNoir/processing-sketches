@@ -21,7 +21,7 @@ void draw(){    // abertura da funçao de desenho void draw
     fill(360);   // pinta o cubo 3D de branco
     lights(); // define uma matriz base de luzes para o objecto 3D
     box(50); // desenha um cubo 3D com 50 de valor de lado que servirá de centro para os ponteiros
-   noLights(); // liberta a iluminação 3D e assim não iluminará os outros objectos seguintes segundo ela
+    noLights(); // liberta a iluminação 3D e assim não iluminará os outros objectos seguintes segundo ela
   popMatrix(); // assume, guarda, mas liberta o valor da matriz de localização da imagem ou objecto desenhado anteriormente
    
   PFont LCD;         // cria a fonte LCD
@@ -100,4 +100,3 @@ void draw(){    // abertura da funçao de desenho void draw
     popMatrix();        // assume, guarda, mas liberta o valor da matriz de localização da imagem ou objecto desenhado anteriormente
  
 } // fecha a funçao de desenho void draw
-

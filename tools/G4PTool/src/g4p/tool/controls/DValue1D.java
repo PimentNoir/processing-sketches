@@ -1,6 +1,6 @@
 package g4p.tool.controls;
 
-import g4p.tool.Messages;
+import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.Validator;
 
 @SuppressWarnings("serial")
@@ -75,17 +75,17 @@ public class DValue1D extends DValueBase {
 	protected String get_creator(DBase parent, String window){
 		String s = "";
 		if(_0250_vtype.equals("INTEGER"))
-			s += Messages.build(SET_LIMITS, _0010_name, $(Math.round(_0220_value)), $(Math.round(_0221_min)), $(Math.round(_0222_max)));
+			s += ToolMessages.build(SET_LIMITS, _0010_name, $(Math.round(_0220_value)), $(Math.round(_0221_min)), $(Math.round(_0222_max)));
 		else
-			s += Messages.build(SET_LIMITS, _0010_name, $(_0220_value), $(_0221_min), $(_0222_max));
+			s += ToolMessages.build(SET_LIMITS, _0010_name, $(_0220_value), $(_0221_min), $(_0222_max));
 		if(_0260_nticks != 2)
-			s += Messages.build(SET_NBR_TICKS, _0010_name, $(_0260_nticks));
+			s += ToolMessages.build(SET_NBR_TICKS, _0010_name, $(_0260_nticks));
 		if(_0261_stick_to_ticks)
-			s += Messages.build(SET_STICK_TICKS, _0010_name, _0261_stick_to_ticks);
+			s += ToolMessages.build(SET_STICK_TICKS, _0010_name, _0261_stick_to_ticks);
 		if(_0620_show_ticks)
-			s += Messages.build(SET_SHOW_TICKS, _0010_name, _0620_show_ticks);
+			s += ToolMessages.build(SET_SHOW_TICKS, _0010_name, _0620_show_ticks);
 		if(_0270_ease > 1)
-			s += Messages.build(SET_EASING, _0010_name, $(_0270_ease));
+			s += ToolMessages.build(SET_EASING, _0010_name, $(_0270_ease));
 		s += super.get_creator(parent, window);		
 		return s;
 	}

@@ -1,12 +1,12 @@
 package g4p.tool.controls;
 
+import g4p.tool.ToolMessages;
+import g4p.tool.gui.propertygrid.Validator;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
 import javax.swing.event.TableModelEvent;
-
-import g4p.tool.Messages;
-import g4p.tool.gui.propertygrid.Validator;
 
 @SuppressWarnings("serial")
 public class DTimer extends DBase {
@@ -50,7 +50,7 @@ public class DTimer extends DBase {
 		set_name(NameGen.instance().getNext("timer"));
 		set_event_name(NameGen.instance().getNext(get_name()+ "_Action"));
 
-		x_show = y_show = width_show = height_show = opaque_show = false;
+		x_show = y_show = width_show = height_show = false;
 		
 //		name_label = "Variable name";
 //		name_tooltip = "Java naming rules apply";
@@ -63,8 +63,24 @@ public class DTimer extends DBase {
 	 * @return
 	 */
 	protected String get_event_header(int n){
-		return Messages.build(METHOD_START_0, _0030_eventHandler, componentClass, 
+		return ToolMessages.build(METHOD_START_0, _0030_eventHandler, componentClass, 
 				_0010_name, $(id[n])).replace('[', '{');
+	}
+
+	/**
+	 * Get the event code if none then return generic message.
+	 * 
+	 * 
+	 * Overridden in :- DTimer
+	 * 
+	 * @return event handler code
+	 */
+	protected String get_event_code(){ 
+		String ev_code = Code.instance().get(id[0]);
+		if(ev_code == null)
+			return ToolMessages.build(CODE_NO_EVENT_PARAM, _0010_name, componentClass);
+		else
+			return ev_code; 
 	}
 
 	/**
@@ -73,15 +89,15 @@ public class DTimer extends DBase {
 	 */
 	protected String get_creator(DBase parent, String window){
 		String s;
-		s = Messages.build(CTOR_GTIMER, _0010_name, "this", "this", _0030_eventHandler, $(_0692_interval));
+		s = ToolMessages.build(CTOR_GTIMER, _0010_name, "this", "this", _0030_eventHandler, $(_0692_interval));
 		if(_0691_initDelay != _0692_interval){
-			s += Messages.build(INIT_DELAY_TIMER, _0010_name, $(_0691_initDelay));			
+			s += ToolMessages.build(INIT_DELAY_TIMER, _0010_name, $(_0691_initDelay));			
 		}
 		if(_0693_timer_starts){
 			if(_0694_repeats <= 0)
-				s += Messages.build(START_TIMER_0 ,_0010_name);
+				s += ToolMessages.build(START_TIMER_0 ,_0010_name);
 			else
-				s += Messages.build(START_TIMER_1, _0010_name, $(_0694_repeats));
+				s += ToolMessages.build(START_TIMER_1, _0010_name, $(_0694_repeats));
 		}	
 		return s;
 	}

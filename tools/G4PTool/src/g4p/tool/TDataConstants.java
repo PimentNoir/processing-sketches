@@ -61,12 +61,12 @@ public interface TDataConstants {
 	// 0 = event method name  :  1/2 = parameter type/name : 1/3 =  parameter type/name : 4/5 =  component name/id	
 //	String METHOD_START_2	=	"void {0}({1} {2}, {1} {3}) [ //_CODE_:{4}:{5}:\n";
 	
-	// 0 = event method name  :  1/2 = component name/id	
-	String WIN_DRAW			=	"synchronized public void {0}(GWinApplet appc, GWinData data) [ //_CODE_:{1}:{2}:\n";
-	String WIN_MOUSE		=	"synchronized public void {0}(GWinApplet appc, GWinData data, MouseEvent mevent) [ //_CODE_:{1}:{2}:\n";
-	String WIN_KEY			=	"synchronized public void {0}(GWinApplet appc, GWinData data, KeyEvent kevent) [ //_CODE_:{1}:{2}:\n";
-	String WIN_PRE			=	"synchronized public void {0}(GWinApplet appc, GWinData data) [ //_CODE_:{1}:{2}:\n";
-	String WIN_POST			=	"synchronized public void {0}(GWinApplet appc, GWinData data) [ //_CODE_:{1}:{2}:\n";
+	// 0 = event method name  :  1/2 = component name/ unique id	
+	String WIN_DRAW			=	"synchronized public void {0}(PApplet appc, GWinData data) [ //_CODE_:{1}:{2}:\n";
+	String WIN_MOUSE		=	"synchronized public void {0}(PApplet appc, GWinData data, MouseEvent mevent) [ //_CODE_:{1}:{2}:\n";
+	String WIN_KEY			=	"synchronized public void {0}(PApplet appc, GWinData data, KeyEvent kevent) [ //_CODE_:{1}:{2}:\n";
+	String WIN_PRE			=	"synchronized public void {0}(PApplet appc, GWinData data) [ //_CODE_:{1}:{2}:\n";
+	String WIN_POST			=	"synchronized public void {0}(PApplet appc, GWinData data) [ //_CODE_:{1}:{2}:\n";
 	String ON_CLOSE			=	"public void {0}(GWindow window) [ //_CODE_:{1}:{2}:\n";
 	
 	// 0 = component name  : 1 = id
@@ -76,14 +76,14 @@ public interface TDataConstants {
 	/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	 * Creator and initialisation patterns
 	 */
-	String SET_SKETCH_TITLE		=	"  if(frame != null)\n    frame.setTitle(\"{0}\");\n";
+	String SET_SKETCH_TITLE		=	"  surface.setTitle(\"{0}\");\n";
 	String SET_SKETCH_COLOR		= 	"  G4P.setGlobalColorScheme(GCScheme.{0});\n";
 	String SET_G4P_MESSAGES		=  	"  G4P.messagesEnabled({0});\n";
 	String SET_CURSOR_OFF		=	"  G4P.setCursor({0});\n";
 	String SET_MOUSE_OVER_ON	=	"  G4P.setMouseOverEnabled({0});\n";
 	
 	String SET_TEXT				=	"  {0}.setText(\"{1}\");\n";
-	String SET_DEFAULT_TEXT		=	"  {0}.setDefaultText(\"{1}\");\n";
+	String SET_PROMPT_TEXT		=	"  {0}.setPromptText(\"{1}\");\n";
 	String SET_TEXT_ALIGN		=	"  {0}.setTextAlign(GAlign.{1}, GAlign.{2});\n";
 	String SET_ICON				= 	"  {0}.setIcon(\"{1}\", {2}, GAlign.{3}, GAlign.{4});\n";
 	String SET_ICON_ALIGN		=	"  {0}.setIconAlign(GAlign.{1}, GAlign.{2});\n";
@@ -95,7 +95,8 @@ public interface TDataConstants {
 
 	
 	// 		GWindow(PApplet theApplet, String name, int x, int y, int w, int h, boolean noFrame, String mode)
-	String CTOR_WINDOW				=	"  {0} = new GWindow({1}, \"{2}\", {3}, {4}, {5}, {6}, {7}, {8});\n";
+	String CTOR_WINDOW				=	"  {0} = GWindow.getWindow({1}, \"{2}\", {3}, {4}, {5}, {6}, {7});\n  {0}.noLoop();\n";
+	String LOOP_WINDOW				=	"  {0}.loop();\n";
 	
 	//		GButton(PApplet theApplet, String text, int x, int y, int width, int height)
 	String CTOR_GBUTTON		=	"  {0} = new GButton({1}, {2}, {3}, {4}, {5});\n";
@@ -143,6 +144,11 @@ public interface TDataConstants {
 	String COLLAPSIBLE			=	"  {0}.setCollapsible({1});\n";
 	String DRAGGABLE			=	"  {0}.setDraggable({1});\n";
 
+	//		GCheckbox(PApplet theApplet, int x, int y, int width, int height)
+	String CTOR_GPASSWORD1		=	"  {0} = new GPassword({1}, {2}, {3}, {4}, {5});\n";
+	String CTOR_GPASSWORD2		=	"  {0} = new GPassword({1}, {2}, {3}, {4}, {5}, {6});\n";
+	String PWORD_SIZE			=	"  {0}.setMaxWordLength({1});\n";
+	
 	//		GTextField(PApplet theApplet, int x, int y, int width, int height, int scrollbar policy){
 	String CTOR_GTEXTFIELD		=	"  {0} = new GTextField({1}, {2}, {3}, {4}, {5}, {6});\n";
 	String CTOR_GTEXTAREA		=	"  {0} = new GTextArea({1}, {2}, {3}, {4}, {5}, {6});\n";
@@ -198,14 +204,10 @@ public interface TDataConstants {
 	/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	 * Default test code patterns
 	 */
-	String TIME 				= 	"+ System.currentTimeMillis()%10000000 );\n";
-	String CODE_ANY				=	"  println(\"{0} - {1} event occured \" " + TIME;
-	String CODE_TIMER			=	"  println(\"{0} - {1} timer event occured at \" " + TIME;
-	String CODE_GBUTTON			=	"  println(\"{0} - button clicked \" " + TIME;
-	String CODE_GCHECKBOX		=	"  println(\"{0} - checkbox selected \" " + TIME;
-	String CODE_GOPTION			=	"  println(\"{0} - option selected \" " + TIME;
-	String CODE_GPANEL			=	"  println(\"{0} - panel collapsed or expanded \" " + TIME;
-	String CODE_GTEXTFIELD		=	"  println(\"{0} - change or enter key pressed in textfield \" " + TIME;
+	String TIME 				= 	"+ millis());\n";
+	String EVENT_TYPE_TIME		= 	"+ event + \" @ \" + millis());\n";
+	String CODE_ANY				=	"  println(\"{0} - {1} >> GEvent.\" " + EVENT_TYPE_TIME;
+	String CODE_NO_EVENT_PARAM	=	"  println(\"{0} - {1} >> an event occured @ \" " + TIME;
 	String CODE_GWINDOW_DRAW	=	"  appc.background(230);\n";
 	String CODE_GWINDOW_MOUSE	=	"  println(\"{0} - mouse event \" " + TIME;
 	String CODE_GWINDOW_KEY		=	"  println(\"{0} - key event \" " + TIME;

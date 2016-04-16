@@ -513,6 +513,7 @@ public abstract class Validator implements TDataConstants, Serializable {
 	 */
 	static class Validator_Combo extends Validator{
 
+		@SuppressWarnings("rawtypes")
 		DefaultComboBoxModel list;
 		/**
 		 * 
@@ -520,6 +521,7 @@ public abstract class Validator implements TDataConstants, Serializable {
 		 * Integer (min, max)
 		 * @param args
 		 */
+		@SuppressWarnings("rawtypes")
 		public Validator_Combo(Object ... args){
 			list = (DefaultComboBoxModel) args[0];
 		}

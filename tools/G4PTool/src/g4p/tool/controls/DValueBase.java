@@ -1,6 +1,6 @@
 package g4p.tool.controls;
 
-import g4p.tool.Messages;
+import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.EditorBase;
 import g4p.tool.gui.propertygrid.EditorJComboBox;
 import g4p.tool.gui.propertygrid.Validator;
@@ -37,7 +37,7 @@ public class DValueBase extends DBaseVisual {
 	protected String get_creator(DBase parent, String window){
 		String s = "";
 		if(vtype_show)
-			s += Messages.build(SET_VALUE_TYPE, _0010_name, _0250_vtype, $(_0251_precision));
+			s += ToolMessages.build(SET_VALUE_TYPE, _0010_name, _0250_vtype, $(_0251_precision));
 		s += super.get_creator(parent, window);		
 		return s;
 	}

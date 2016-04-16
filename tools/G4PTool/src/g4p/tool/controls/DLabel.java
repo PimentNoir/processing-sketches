@@ -1,6 +1,6 @@
 package g4p.tool.controls;
 
-import g4p.tool.Messages;
+import g4p.tool.ToolMessages;
 import g4p_controls.StyledString;
 
 import java.awt.Graphics2D;
@@ -37,7 +37,7 @@ public class DLabel extends DTextIconAlign {
 	 */
 	protected String get_creator(DBase parent, String window){
 		String s = "";
-		s = Messages.build(CTOR_GLABEL, _0010_name, window, 
+		s = ToolMessages.build(CTOR_GLABEL, _0010_name, window, 
 				$(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height));
 		s += super.get_creator(parent, window);
 		return s;

@@ -1,6 +1,6 @@
 package g4p.tool.controls;
 
-import g4p.tool.Messages;
+import g4p.tool.ToolMessages;
 import g4p.tool.gui.ToolImage;
 import g4p.tool.gui.propertygrid.EditorJFileChooser;
 import g4p.tool.gui.propertygrid.Validator;
@@ -63,7 +63,6 @@ public class DImageToggleButton extends DBase {
 		resizeable = false;
 		width_edit = height_edit = false;
 		width_show = height_show = false;
-		opaque_show = false;
 	}
 
 	/**
@@ -77,14 +76,14 @@ public class DImageToggleButton extends DBase {
 		String overImage = (_0044_img_over.length() == 0) ? null : _0044_img_over;
 
 		if(offImage == null){
-			s += Messages.build(CTOR_IMG_TOG_BTN_0, _0010_name, window, $(_0820_x), $(_0821_y));
+			s += ToolMessages.build(CTOR_IMG_TOG_BTN_0, _0010_name, window, $(_0820_x), $(_0821_y));
 		}
 		else {
 			if(overImage == null){
-				s += Messages.build(CTOR_IMG_TOG_BTN_1, _0010_name, window, $(_0820_x), $(_0821_y), offImage, $(_0052_cols), $(_0053_rows) );
+				s += ToolMessages.build(CTOR_IMG_TOG_BTN_1, _0010_name, window, $(_0820_x), $(_0821_y), offImage, $(_0052_cols), $(_0053_rows) );
 			}
 			else {			
-				s += Messages.build(CTOR_IMG_TOG_BTN_2, _0010_name, window, $(_0820_x), $(_0821_y), offImage, overImage, $(_0052_cols), $(_0053_rows) );
+				s += ToolMessages.build(CTOR_IMG_TOG_BTN_2, _0010_name, window, $(_0820_x), $(_0821_y), offImage, overImage, $(_0052_cols), $(_0053_rows) );
 			}
 
 		}

@@ -10,7 +10,9 @@
  */
 package g4p.tool.gui;
 
+import g4p.tool.G4PTool;
 import g4p.tool.controls.DApplication;
+import g4p.tool.controls.DBase;
 import g4p.tool.controls.DButton;
 import g4p.tool.controls.DCheckbox;
 import g4p.tool.controls.DCustomSlider;
@@ -21,6 +23,7 @@ import g4p.tool.controls.DKnob;
 import g4p.tool.controls.DLabel;
 import g4p.tool.controls.DOption;
 import g4p.tool.controls.DPanel;
+import g4p.tool.controls.DPassword;
 import g4p.tool.controls.DSketchPad;
 import g4p.tool.controls.DSlider;
 import g4p.tool.controls.DSlider2D;
@@ -36,19 +39,24 @@ import g4p.tool.gui.treeview.CtrlSketchView;
 
 import java.awt.BorderLayout;
 import java.awt.Frame;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
 import javax.swing.JCheckBox;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JSlider;
+import javax.swing.KeyStroke;
 
-import processing.app.Editor;
+import processing.app.ui.Editor;
 
 /**
  * The GUI designer window for the tool.
@@ -59,231 +67,261 @@ import processing.app.Editor;
 @SuppressWarnings("serial")
 public class GuiDesigner extends javax.swing.JFrame {
 
-    private static GuiDesigner instance = null;
-    private static Editor editor = null;
-    //private static FontMetrics metrics = null;
-    private static boolean stayOpen = false;
-    private static boolean autoHide = false;
+	private static GuiDesigner instance = null;
+	private G4PTool tool;
+	
+	// Whether the window is closed when a JOptionPane is opened.
+	private static boolean stayOpen = false;
+	private static boolean autoHide = false;
 
-    public static GuiDesigner instance() {
-        return instance;
-    }
+	
+	public static GuiDesigner instance() {
+		return instance;
+	}
 
-    public static Editor editor() {
-        return editor;
-    }
+	public static void keepOpen(boolean mode) {
+		stayOpen = mode;
+	}
 
-    //	public static FontMetrics metrics(){
-    //		return metrics;
-    //	}
-    public static void keepOpen(boolean mode) {
-        stayOpen = mode;
-    }
+	/**
+	 * This is provided because the GuiDesigner window is specified as
+	 * always-on-top and this conflicts with using a new Frame with JOptionPane.
+	 *
+	 * Use this in preference to the static method in the class
+	 * processing.app.Base
+	 *
+	 * @param title
+	 * @param message
+	 * @param e option exception
+	 */
+	public static void showWarning(String title, String message, Exception e) {
+		stayOpen = true;
+		if (title == null || title.equals("")) {
+			title = "Warning";
+		}
+		if (instance == null) {
+			JOptionPane.showMessageDialog(new Frame(), message, title,
+					JOptionPane.WARNING_MESSAGE);
+		} else {
+			JOptionPane.showMessageDialog(instance, message, title,
+					JOptionPane.WARNING_MESSAGE);
+		}
+		stayOpen = false;
+		if (e != null) {
+			e.printStackTrace();
+		}
+	}
+	
+	private WindowListener winAdapt;
+	private CtrlSketchView treeSketchView;
+	private CtrlPropView tblPropView;
+	private CtrlTabView tabWindows;
+	private GuiControl guiControl;
 
-    /**
-     * This is provided because the GuiDesigner window is specified as
-     * always-on-top and this conflicts with using a new Frame with JOptionPane.
-     *
-     * Use this in preference to the static method in the class
-     * processing.app.Base
-     *
-     * @param title
-     * @param message
-     * @param e option exception
-     */
-    public static void showWarning(String title, String message, Exception e) {
-        stayOpen = true;
-        if (title == null || title.equals("")) {
-            title = "Warning";
-        }
-        if (instance == null) {
-            JOptionPane.showMessageDialog(new Frame(), message, title,
-                    JOptionPane.WARNING_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(instance, message, title,
-                    JOptionPane.WARNING_MESSAGE);
-        }
-        stayOpen = false;
-        if (e != null) {
-            e.printStackTrace();
-        }
-    }
-    private WindowListener winAdapt;
-    private CtrlSketchView treeSketchView;
-    private CtrlPropView tblPropView;
-    private CtrlTabView tabWindows;
-    private GuiControl guiControl;
+	/**
+	 * Creates new form GuiDesignFrame
+	 */
+	private GuiDesigner() {
+		instance = this;
+		initComponents();
+		initCustomComponents();
+		guiControl = new GuiControl(null, tabWindows, treeSketchView, tblPropView);
+		createWindowAdapter();
+	}
 
-    /**
-     * Creates new form GuiDesignFrame
-     */
-    public GuiDesigner() {
-        instance = this;
-        initComponents();
-        initCustomComponents();
-        guiControl = new GuiControl(null, tabWindows, treeSketchView, tblPropView);
-        createWindowAdapter();
-    }
+	/**
+	 * Creates new form GuiDesignFrame <br>
+	 * Keep a reference to the editor
+	 *
+	 * @param theEditor
+	 * @param size
+	 */
+	public GuiDesigner(G4PTool tool) {
+		instance = this;
+		Editor editor = G4PTool.base.getActiveEditor();
+		this.tool = tool;
+		initComponents();
+		initCustomComponents();
+		this.setTitle("G4P GUI Builder " + "4.1");
+		guiControl = new GuiControl(editor, tabWindows, treeSketchView, tblPropView);
+		guiControl.loadGuiLayout();
+		addKeyBinding(editor);
+		createWindowAdapter();
+		listenToEditorClosing(this);
+	}
 
-    /**
-     * Creates new form GuiDesignFrame <br>
-     * Keep a reference to the editor
-     *
-     * @param theEditor
-     * @param size
-     */
-    public GuiDesigner(Editor theEditor) {
-        instance = this;
-        editor = theEditor;
-        initComponents();
-        initCustomComponents();
-        guiControl = new GuiControl(editor, tabWindows, treeSketchView, tblPropView);
-        guiControl.loadGuiLayout();
-        guiControl.getSketchSizeFromCode();
+	/**
+	 * Listen to the editor and when it is closed then close this window
+	 */
+	private void listenToEditorClosing(final javax.swing.JFrame window){
+		G4PTool.base.getActiveEditor().addWindowListener(new WindowAdapter(){
+			
+			public void windowClosed(WindowEvent e) {
+				WindowEvent wev = new WindowEvent(window, WindowEvent.WINDOW_CLOSING);
+				Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(wev);
+				tool.clearFrame();
+				//dispose();
+			}
 
-        //		Dimension size = guiControl.getSketchSizeFromCode();
-        //		if(size == null){
-        //			final String message =
-        //				"The size of this sketch could not automatically be\n" +
-        //				"determined from your code. You'll have to set the\n" +
-        //				"width and height in the designer window.";
-        //
-        //			showWarning("Could not find applet size", message, null);
-        //		}
-        createWindowAdapter();
-    }
+		});
+	}
 
-    private void createWindowAdapter() {
-        winAdapt = new WindowAdapter() {
-            /**
-             * Invoked when a window is in the process of being closed. The
-             * close operation can be overridden at this point.
-             */
-            public void windowClosing(WindowEvent e) {
-                //				System.out.println("CLOSING");
-                setVisible(false);
-                setExtendedState(ICONIFIED);
-            }
-
-            /**
-             * Invoked when a window has been closed.
-             */
-            public void windowClosed(WindowEvent e) {
-                //				System.out.println("CLOSED");
-            }
-
-            /**
-             * Invoked when a window is iconified.
-             */
-            public void windowIconified(WindowEvent e) {
-                //				System.out.println("ICONIFIED");
-            }
-
-            /**
-             * Invoked when a window is de-iconified.
-             */
-            public void windowDeiconified(WindowEvent e) {
-                //				System.out.println("DEICONIFIED");
-            }
-
-            /**
-             * Invoked when a window is activated.
-             */
-            public void windowActivated(WindowEvent e) {
-                setVisible(true);
-                setExtendedState(NORMAL);
-                guiControl.setSketchSize(guiControl.getSketchSizeFromCode());
-                if (treeSketchView != null) { // the GUI is drawn safe to repaint
-                    treeSketchView.repaint();
-                    tblPropView.repaint();
-                    tabWindows.repaint();
-                }
-                guiControl.codeCapture();
-            }
-
-            /**
-             * Invoked when a window is de-activated.
-             */
-            public void windowDeactivated(WindowEvent e) {
-                if (!stayOpen) {
-                    if (autoHide) {
-                        setExtendedState(ICONIFIED);
-                    }
-                    guiControl.saveGuiLayout();
-                    guiControl.codeGeneration();
-                }
-            }
-        };
-        addWindowListener(winAdapt);
-    }
-
-    /**
-     * A fix since to make it work in Processing. Uses the images loaded during
-     * creation available for the dynamic elements e.g. icons in treeview and
-     * tab icons
-     */
-    private void getIcons() {
-        // Messy way to do it but stops error when used with Processing IDE
-        ToolIcon.addIcon(DApplication.class, btnWindow.getIcon());
-        ToolIcon.addIcon(DWindow.class, btnWindow.getIcon());
-        ToolIcon.addIcon(DPanel.class, btnPanel.getIcon());
-        ToolIcon.addIcon(DButton.class, btnButton.getIcon());
-        ToolIcon.addIcon(DLabel.class, btnLabel.getIcon());
-        ToolIcon.addIcon(DSlider.class, btnSlider.getIcon());
-        ToolIcon.addIcon(DTextField.class, btnTextfield.getIcon());
-        ToolIcon.addIcon(DCheckbox.class, btnCheckbox.getIcon());
-        ToolIcon.addIcon(DToggleGroup.class, btnOptGroup.getIcon());
-        ToolIcon.addIcon(DOption.class, btnOption.getIcon());
-        ToolIcon.addIcon(DTimer.class, btnTimer.getIcon());
-        ToolIcon.addIcon(DCustomSlider.class, btnCoolSlider.getIcon());
-        ToolIcon.addIcon(DImageButton.class, btnImgButton.getIcon());
-        ToolIcon.addIcon(DDropList.class, btnDropList.getIcon());
-        ToolIcon.addIcon(DKnob.class, btnKnob.getIcon());
-        ToolIcon.addIcon(DSketchPad.class, btnSketchPad.getIcon());
-        ToolIcon.addIcon(DSlider2D.class, btnSlider2D.getIcon());
-        ToolIcon.addIcon(DStick.class, btnStick.getIcon());
-        ToolIcon.addIcon(DImageToggleButton.class, btnImgTogButton.getIcon());
-
-        ToolIcon.addIcon("DL_DIALOG_ICON", new javax.swing.ImageIcon(getClass().getResource("/g4p/cbox_icon2.png")));
+	/**
+	 * Adds a key binding to show the GUI Builder window when the SHIFT+CTRL+F5 key 
+	 * combination is pressed.
+	 */
+	private void addKeyBinding(Editor theEditor){
+		InputMap inputMap = theEditor.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		ActionMap actionMap = theEditor.getRootPane().getActionMap(); 
+		KeyStroke ks = KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F5, java.awt.event.InputEvent.SHIFT_DOWN_MASK | java.awt.event.InputEvent.CTRL_DOWN_MASK);
+		inputMap.put(ks, "refreshGUI");
+		actionMap.put("refreshGUI",  new ShowBuilder());
+	}
 
 
-        // Load images from resource
-        try {
-            ToolImage.addImage("CB_ICON", ImageIO.read(getClass().getResource("/g4p/tick.png")));
-            ToolImage.addImage("OP_ICON", ImageIO.read(getClass().getResource("/g4p/pinhead.png")));
-            ToolImage.addImage("SPAD_ICON", ImageIO.read(getClass().getResource("/g4p/spad.jpg")));
-            ToolImage.addImage("IMG_TOG_BTN_ICON", ImageIO.read(getClass().getResource("/g4p/toggle.png")));
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
+	public class ShowBuilder extends AbstractAction {
 
-    private void initCustomComponents() {
-        getIcons();
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			refreshGUI();
+			guiControl.codeCapture();
+		}
+	}
 
-        treeSketchView = new CtrlSketchView();
-        tblPropView = new CtrlPropView();
-        tabWindows = new CtrlTabView();
+	// Refresh the GUI when the window is activated
+	private void refreshGUI(){
+		setVisible(true);
+		setExtendedState(NORMAL);
+		guiControl.setSketchSize(guiControl.getSketchSizeFromCode());
+		if (treeSketchView != null) { // the GUI is drawn safe to repaint
+			DBase sel = (DBase) treeSketchView.getLastSelectedPathComponent();
+			tblPropView.updateModelFor(sel);
+			treeSketchView.repaint();
+			tblPropView.repaint();
+			tabWindows.repaint();
+		}
+	}
 
-        spTop.setViewportView(treeSketchView);
-        spBot.setViewportView(tblPropView);
-        pnlWindowsView.setLayout(new BorderLayout());
-        pnlWindowsView.add(tabWindows, BorderLayout.CENTER);
+	private void createWindowAdapter() {
+		winAdapt = new WindowAdapter() {
+			/**
+			 * Invoked when a window is in the process of being closed. The
+			 * close operation can be overridden at this point.
+			 */
+			public void windowClosing(WindowEvent e) {
+				setVisible(false);
+				setExtendedState(ICONIFIED);
+			}
 
-        treeSketchView.setViewLinks(tabWindows, tblPropView);
-        tabWindows.setViewLinks(treeSketchView, tblPropView);
-        tblPropView.setViewLinks(tabWindows, treeSketchView);
-        tblPropView.setFillsViewportHeight(true);
+			/**
+			 * Invoked when a window has been closed.
+			 */
+			public void windowClosed(WindowEvent e) {
+			}
 
-        tabWindows.setGridSize(10);
-    }
+			/**
+			 * Invoked when a window is iconified.
+			 */
+			public void windowIconified(WindowEvent e) {
+			}
 
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
+			/**
+			 * Invoked when a window is de-iconified.
+			 */
+			public void windowDeiconified(WindowEvent e) {
+			}
+
+			/**
+			 * Invoked when a window is activated.
+			 */
+			public void windowActivated(WindowEvent e) {
+				refreshGUI();
+				guiControl.codeCapture();
+			}
+
+			/**
+			 * Invoked when a window is de-activated.
+			 */
+			public void windowDeactivated(WindowEvent e) {
+				if (!stayOpen) {
+					if (autoHide) {
+						setExtendedState(ICONIFIED);
+					}
+					guiControl.saveGuiLayout();
+					guiControl.codeGeneration();
+				}
+			}
+		};
+		addWindowListener(winAdapt);
+	}
+
+	/**
+	 * A fix since to make it work in Processing. Uses the images loaded during
+	 * creation available for the dynamic elements e.g. icons in treeview and
+	 * tab icons
+	 */
+	private void getIcons() {
+		// Messy way to do it but stops error when used with Processing IDE
+		ToolIcon.addIcon(DApplication.class, btnWindow.getIcon());
+		ToolIcon.addIcon(DWindow.class, btnWindow.getIcon());
+		ToolIcon.addIcon(DPanel.class, btnPanel.getIcon());
+		ToolIcon.addIcon(DButton.class, btnButton.getIcon());
+		ToolIcon.addIcon(DLabel.class, btnLabel.getIcon());
+		ToolIcon.addIcon(DSlider.class, btnSlider.getIcon());
+		ToolIcon.addIcon(DTextField.class, btnTextfield.getIcon());
+		ToolIcon.addIcon(DCheckbox.class, btnCheckbox.getIcon());
+		ToolIcon.addIcon(DToggleGroup.class, btnOptGroup.getIcon());
+		ToolIcon.addIcon(DOption.class, btnOption.getIcon());
+		ToolIcon.addIcon(DTimer.class, btnTimer.getIcon());
+		ToolIcon.addIcon(DCustomSlider.class, btnCoolSlider.getIcon());
+		ToolIcon.addIcon(DImageButton.class, btnImgButton.getIcon());
+		ToolIcon.addIcon(DDropList.class, btnDropList.getIcon());
+		ToolIcon.addIcon(DKnob.class, btnKnob.getIcon());
+		ToolIcon.addIcon(DSketchPad.class, btnSketchPad.getIcon());
+		ToolIcon.addIcon(DSlider2D.class, btnSlider2D.getIcon());
+		ToolIcon.addIcon(DStick.class, btnStick.getIcon());
+		ToolIcon.addIcon(DImageToggleButton.class, btnImgTogButton.getIcon());
+
+		ToolIcon.addIcon("DL_DIALOG_ICON", new javax.swing.ImageIcon(getClass().getResource("/g4p/cbox_icon2.png")));
+
+
+		// Load images from resource
+		try {
+			ToolImage.addImage("CB_ICON", ImageIO.read(getClass().getResource("/g4p/tick.png")));
+			ToolImage.addImage("OP_ICON", ImageIO.read(getClass().getResource("/g4p/pinhead.png")));
+			ToolImage.addImage("SPAD_ICON", ImageIO.read(getClass().getResource("/g4p/spad.jpg")));
+			ToolImage.addImage("IMG_TOG_BTN_ICON", ImageIO.read(getClass().getResource("/g4p/toggle.png")));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private void initCustomComponents() {
+		getIcons();
+
+		treeSketchView = new CtrlSketchView();
+		tblPropView = new CtrlPropView();
+		tabWindows = new CtrlTabView();
+
+		spTop.setViewportView(treeSketchView);
+		spBot.setViewportView(tblPropView);
+		pnlWindowsView.setLayout(new BorderLayout());
+		pnlWindowsView.add(tabWindows, BorderLayout.CENTER);
+
+		treeSketchView.setViewLinks(tabWindows, tblPropView);
+		tabWindows.setViewLinks(treeSketchView, tblPropView);
+		tblPropView.setViewLinks(tabWindows, treeSketchView);
+		tblPropView.setFillsViewportHeight(true);
+
+		tabWindows.setGridSize(10);
+	}
+
+	/**
+	 * This method is called from within the constructor to initialize the form.
+	 * WARNING: Do NOT modify this code. The content of this method is always
+	 * regenerated by the Form Editor.
+	 */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -308,6 +346,7 @@ public class GuiDesigner extends javax.swing.JFrame {
         btnLabel = new javax.swing.JButton();
         btnTextfield = new javax.swing.JButton();
         btnTextarea = new javax.swing.JButton();
+        btnPassword = new javax.swing.JButton();
         btnSlider = new javax.swing.JButton();
         btnCoolSlider = new javax.swing.JButton();
         btnSlider2D = new javax.swing.JButton();
@@ -334,7 +373,7 @@ public class GuiDesigner extends javax.swing.JFrame {
         setTitle("GUI Builder");
         setBackground(new java.awt.Color(255, 255, 255));
         setName("frmDesigner"); // NOI18N
-        setPreferredSize(new java.awt.Dimension(700, 500));
+        setPreferredSize(new java.awt.Dimension(780, 580));
 
         pnlToolBars.setBackground(new java.awt.Color(-16192,true));
         pnlToolBars.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 3, true));
@@ -416,9 +455,6 @@ public class GuiDesigner extends javax.swing.JFrame {
         cbxAutoHide1.setFocusable(false);
         cbxAutoHide1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         cbxAutoHide1.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
-        cbxAutoHide1.setMaximumSize(new java.awt.Dimension(97, 23));
-        cbxAutoHide1.setMinimumSize(new java.awt.Dimension(97, 23));
-        cbxAutoHide1.setPreferredSize(new java.awt.Dimension(97, 23));
         cbxAutoHide1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         cbxAutoHide1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -517,6 +553,7 @@ public class GuiDesigner extends javax.swing.JFrame {
         tbarComponents.add(btnTextfield);
 
         btnTextarea.setIcon(new javax.swing.ImageIcon(getClass().getResource("/g4p/toolTextArea.png"))); // NOI18N
+        btnTextarea.setToolTipText("Text area");
         btnTextarea.setFocusable(false);
         btnTextarea.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnTextarea.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -526,6 +563,18 @@ public class GuiDesigner extends javax.swing.JFrame {
             }
         });
         tbarComponents.add(btnTextarea);
+
+        btnPassword.setIcon(new javax.swing.ImageIcon(getClass().getResource("/g4p/toolPassword.png"))); // NOI18N
+        btnPassword.setToolTipText("Password");
+        btnPassword.setFocusable(false);
+        btnPassword.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnPassword.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnPassword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPasswordActionPerformed(evt);
+            }
+        });
+        tbarComponents.add(btnPassword);
 
         btnSlider.setIcon(new javax.swing.ImageIcon(getClass().getResource("/g4p/toolSlider.png"))); // NOI18N
         btnSlider.setToolTipText("Slider");
@@ -793,120 +842,124 @@ public class GuiDesigner extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
 	private void btnPanelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPanelActionPerformed
-            guiControl.addComponent(new DPanel());
+		guiControl.addComponent(new DPanel());
 	}//GEN-LAST:event_btnPanelActionPerformed
 
 	private void btnWindowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnWindowActionPerformed
-            guiControl.addComponent(new DWindow(false));
+		guiControl.addComponent(new DWindow(false));
 	}//GEN-LAST:event_btnWindowActionPerformed
 
 	private void btnButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnButtonActionPerformed
-            guiControl.addComponent(new DButton());
+		guiControl.addComponent(new DButton());
 	}//GEN-LAST:event_btnButtonActionPerformed
 
 	private void btnImgButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImgButtonActionPerformed
-            guiControl.addComponent(new DImageButton());
+		guiControl.addComponent(new DImageButton());
 	}//GEN-LAST:event_btnImgButtonActionPerformed
 
 	private void btnLabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLabelActionPerformed
-            guiControl.addComponent(new DLabel());
+		guiControl.addComponent(new DLabel());
 	}//GEN-LAST:event_btnLabelActionPerformed
 
 	private void btnTextfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTextfieldActionPerformed
-            guiControl.addComponent(new DTextField());
+		guiControl.addComponent(new DTextField());
 	}//GEN-LAST:event_btnTextfieldActionPerformed
 
 	private void btnSliderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSliderActionPerformed
-            guiControl.addComponent(new DSlider());
+		guiControl.addComponent(new DSlider());
 	}//GEN-LAST:event_btnSliderActionPerformed
 
 	private void btnCoolSliderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCoolSliderActionPerformed
-            guiControl.addComponent(new DCustomSlider());
+		guiControl.addComponent(new DCustomSlider());
 	}//GEN-LAST:event_btnCoolSliderActionPerformed
 
 	private void btnKnobActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKnobActionPerformed
-            guiControl.addComponent(new DKnob());
+		guiControl.addComponent(new DKnob());
 	}//GEN-LAST:event_btnKnobActionPerformed
 
 	private void btnCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCheckboxActionPerformed
-            guiControl.addComponent(new DCheckbox());
+		guiControl.addComponent(new DCheckbox());
 	}//GEN-LAST:event_btnCheckboxActionPerformed
 
 	private void btnOptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOptionActionPerformed
-            guiControl.addComponent(new DOption());
+		guiControl.addComponent(new DOption());
 	}//GEN-LAST:event_btnOptionActionPerformed
 
 	private void btnOptGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOptGroupActionPerformed
-            guiControl.addComponent(new DToggleGroup());
+		guiControl.addComponent(new DToggleGroup());
 	}//GEN-LAST:event_btnOptGroupActionPerformed
 
 	private void btnDropListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDropListActionPerformed
-            guiControl.addComponent(new DDropList());
+		guiControl.addComponent(new DDropList());
 	}//GEN-LAST:event_btnDropListActionPerformed
 
 	private void btnTimerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTimerActionPerformed
-            guiControl.addComponent(new DTimer());
+		guiControl.addComponent(new DTimer());
 	}//GEN-LAST:event_btnTimerActionPerformed
 
 	private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
-            guiControl.removeComponent();
+		guiControl.removeComponent();
 	}//GEN-LAST:event_btnRemoveActionPerformed
 
 	private void btnTextareaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTextareaActionPerformed
-            guiControl.addComponent(new DTextArea());
+		guiControl.addComponent(new DTextArea());
 	}//GEN-LAST:event_btnTextareaActionPerformed
 
 	private void btnSketchPadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSketchPadActionPerformed
-            guiControl.addComponent(new DSketchPad());
+		guiControl.addComponent(new DSketchPad());
 	}//GEN-LAST:event_btnSketchPadActionPerformed
 
 	private void btnSlider2DActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSlider2DActionPerformed
-            guiControl.addComponent(new DSlider2D());
+		guiControl.addComponent(new DSlider2D());
 	}//GEN-LAST:event_btnSlider2DActionPerformed
 
 	private void btnStickActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStickActionPerformed
-            guiControl.addComponent(new DStick());
+		guiControl.addComponent(new DStick());
 	}//GEN-LAST:event_btnStickActionPerformed
 
 	private void btnImgTogButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImgTogButtonActionPerformed
-            guiControl.addComponent(new DImageToggleButton());
+		guiControl.addComponent(new DImageToggleButton());
 	}//GEN-LAST:event_btnImgTogButtonActionPerformed
 
 	private void cbxShowGridActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxShowGridActionPerformed
-            guiControl.showGrid(((JCheckBox) evt.getSource()).isSelected());
+		guiControl.showGrid(((JCheckBox) evt.getSource()).isSelected());
 	}//GEN-LAST:event_cbxShowGridActionPerformed
 
 	private void btnSnapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSnapActionPerformed
-            guiControl.snapGrid(((JCheckBox) evt.getSource()).isSelected());
+		guiControl.snapGrid(((JCheckBox) evt.getSource()).isSelected());
 	}//GEN-LAST:event_btnSnapActionPerformed
 
 	private void sdrGridSizeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sdrGridSizeStateChanged
-            int gs = ((JSlider) evt.getSource()).getValue();
-            if (gs % 2 == 1) {
-                gs++;
-            }
-            if (gs < 10) {
-                lblGridSize.setText("  " + gs + " ");
-            } else {
-                lblGridSize.setText(" " + gs + " ");
-            }
-            guiControl.setGridSize(gs);
+		int gs = ((JSlider) evt.getSource()).getValue();
+		if (gs % 2 == 1) {
+			gs++;
+		}
+		if (gs < 10) {
+			lblGridSize.setText("  " + gs + " ");
+		} else {
+			lblGridSize.setText(" " + gs + " ");
+		}
+		guiControl.setGridSize(gs);
 	}//GEN-LAST:event_sdrGridSizeStateChanged
 
-    private void cbxAutoHide1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxAutoHide1ActionPerformed
-        autoHide = ((JCheckBox) evt.getSource()).isSelected();
-    }//GEN-LAST:event_cbxAutoHide1ActionPerformed
+	private void cbxAutoHide1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxAutoHide1ActionPerformed
+		autoHide = ((JCheckBox) evt.getSource()).isSelected();
+	}//GEN-LAST:event_cbxAutoHide1ActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new GuiDesigner().setVisible(true);
-            }
-        });
-    }
+	private void btnPasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPasswordActionPerformed
+		guiControl.addComponent(new DPassword());
+	}//GEN-LAST:event_btnPasswordActionPerformed
+
+	/**
+	 * @param args the command line arguments
+	 */
+	public static void main(String args[]) {
+		java.awt.EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				new GuiDesigner().setVisible(true);
+			}
+		});
+	}
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnButton;
     private javax.swing.JButton btnCheckbox;
@@ -919,6 +972,7 @@ public class GuiDesigner extends javax.swing.JFrame {
     private javax.swing.JButton btnOptGroup;
     private javax.swing.JButton btnOption;
     private javax.swing.JButton btnPanel;
+    private javax.swing.JButton btnPassword;
     private javax.swing.JButton btnRemove;
     private javax.swing.JButton btnSketchPad;
     private javax.swing.JButton btnSlider;
