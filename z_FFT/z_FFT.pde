@@ -1,9 +1,9 @@
-/**
- z_fft by zambari
- ** parts based on* Get Line In by Damien Di Fede.
+/*
+ * z_fft by zambari
+ * parts based on Get Line In by Damien Di Fede.
  *  
- 
- early, not very developed version
+ *
+ * early, not very developed version
  */
 import ddf.minim.analysis.*;
 import ddf.minim.*;
@@ -30,7 +30,7 @@ LFO lfo1;
 
 void setup()
 {  
-  size(1024, 576, OPENGL);
+  size(1024, 576, P3D);
   textFont(createFont("SanSerif", 27));
   minim = new Minim(this);
   minim2 = new Minim(this);
@@ -43,11 +43,11 @@ void setup()
   myCamera = new Zcam();
   lfo1=new LFO(6000); 
   /* addMouseWheelListener(new java.awt.event.MouseWheelListener() { 
-    public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) { 
-      mouseWheel(evt.getWheelRotation());
-    }
-  }
-  ); */ 
+   public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) { 
+   mouseWheel(evt.getWheelRotation());
+   }
+   }
+   ); */
 
   for (int i=0; i<fftHistSize; i++) { 
     logPos[i]=log(i)*40;
@@ -63,7 +63,7 @@ void draw()
   background(color(0, 0, 0, 15));
   stroke(255);
 
-  //   draw the waveforms
+  // draw the waveforms
   // for(int i = 0; i < in.bufferSize() - 1; i++)
   // {
   //   line(i, 50 + in.left.get(i)*50, i+1, 50 + in.left.get(i+1)*50);
@@ -88,7 +88,7 @@ void draw()
   // scene.beginDraw();
   float blendratio;
   for (int k=nrOfIterations-1; k>0; k--)
-    //          for(int i = 0; i < 172; i++) //buahahah dirty!!!
+    // for(int i = 0; i < 172; i++) //buahahah dirty!!!
     for (int i = 0; i < 272; i++) //buahahah dirty!!!
     {
       //   arrayCopy(fftHistory[k-1], fftHistory[k]);
@@ -101,7 +101,7 @@ void draw()
     blendratio=(i%fftRatio)/(fftRatio*1.0);
     fftHistory[0][n]=(fft2.getBand(i/(fftRatio))*(1-blendratio)+
       fft2.getBand(i/(fftRatio)+1)*(blendratio)); 
-    //   fftHistory[0][n]+=log(fftHistory[0][n])*10;  
+    //  fftHistory[0][n]+=log(fftHistory[0][n])*10;  
     fftHistory[0][n]=fft.getBand(i)*4;
     n++;
     //  fftHistory[0][i]=fft.getBand(floor(map(1/log(i),fftMin,fftMax,0,bufferSizeBig)))*9;
@@ -125,15 +125,15 @@ void draw()
     {         //      fftHistory[k][i]=fftHistory[k-1][i];  // there must be a quicker way // circular buffer bayve?
       //   line(i, -fftHistory[k-1][i],-k*30, i, -fftHistory[k][i],-k*20);  
       oldx=x;
-      //  x=log(i)*40.0;     
+      //   x=log(i)*40.0;     
       x=logPos[i];      
-      //                        line(x*20, -fftHistory[k][i],-k*50, (x+1)*20, -fftHistory[k][i+1],-k*50); 
+      //   line(x*20, -fftHistory[k][i],-k*50, (x+1)*20, -fftHistory[k][i+1],-k*50); 
       line(oldx*20, -fftHistory[k][i], -k*iterationDistance, x*20, -fftHistory[k][i+1], -k*iterationDistance); 
       if (i%10==235)
       {
-        // line(i*20,10,i*20,-20);
+        //   line(i*20,10,i*20,-20);
       }
-      //     if (i%10==0)
+      //   if (i%10==0)
       //   {               line(i*20, -fftHistory[k-1][i],-k*50, (i)*20, -fftHistory[k][i],-(k+1)*50); 
       //   }  
       if ((i%10==0)&&(k==1))
@@ -146,8 +146,8 @@ void draw()
   resetMatrix();
   text("FFt1 val " + "ddD", 5, 20);
   text("The window being used is: ", 5, 40);
-  //     fftLin.linAverages(30);
-  //  fftLog = new FFT(jingle.bufferSize(), jingle.sampleRate());
+  // fftLin.linAverages(30);
+  // fftLog = new FFT(jingle.bufferSize(), jingle.sampleRate());
   // calculate averages based on a miminum octave width of 22 Hz
   // split each octave into three bands
   // this should result in 30 averages
