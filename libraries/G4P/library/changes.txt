@@ -1,5 +1,16 @@
 G4P changes incorporated into version
 
+V4.0.5 (28)
+Fixes bug in GTextField where the scrolling text didn't keep up with a rapid typing rate or when a block of test was pasted in. (Ticket 13)
+
+V4.0.4 (27)
+Fixes bug in GTextArea when text is cleared and the control has focus (Ticket 12)
+
+GTextArea now fires GEvent.ENTERED event when the Return / Enter key is typed (Ticket 11)
+
+Sliders, knobs and scrollbars now respond to the mouse wheel (Ticket 10)
+
+
 V4.0.3 (26)
 Scrollbars improved visually
 

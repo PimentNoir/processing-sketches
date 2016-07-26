@@ -55,6 +55,7 @@ public abstract class GValueControl extends GAbstractControl {
 	protected int nbrTicks = 2;
 	protected boolean stickToTicks = false;
 	protected boolean showTicks = false;
+	protected float wheelDelta = WHEEL_DELTA;
 	
 	protected boolean limitsInvalid = true;
 	protected boolean valueInvalid = true;
@@ -367,17 +368,11 @@ public abstract class GValueControl extends GAbstractControl {
 		if(nbrTicks != noOfTicks){
 			nbrTicks = noOfTicks;
 			bufferInvalid = true;
-			if(stickToTicks)
+			if(stickToTicks){
+				wheelDelta = WHEEL_STICK_FACTOR / (nbrTicks - 1);
 				parametricTarget = findNearestTickValueTo(parametricPos);
+			}
 		}
-	}
-
-	/**
-	 * Is the value constrained to the tick marks?
-	 * @return the stickToTicks true if values constrained else false
-	 */
-	public boolean isStickToTicks() {
-		return stickToTicks;
 	}
 
 	/**
@@ -389,10 +384,23 @@ public abstract class GValueControl extends GAbstractControl {
 		this.stickToTicks = stickToTicks;
 		if(stickToTicks){
 			setShowTicks(true);
+			wheelDelta = WHEEL_STICK_FACTOR / (nbrTicks - 1);
 			parametricTarget = findNearestTickValueTo(parametricPos);
 			bufferInvalid = true;
 		}
+		else {
+			wheelDelta = WHEEL_DELTA;
+		}
 	}
+
+	/**
+	 * Is the value constrained to the tick marks?
+	 * @return the stickToTicks true if values constrained else false
+	 */
+	public boolean isStickToTicks() {
+		return stickToTicks;
+	}
+
 
 	/**
 	 * These are normalised values i.e. between 0.0 and 1.0 inclusive
@@ -403,6 +411,19 @@ public abstract class GValueControl extends GAbstractControl {
 		float tickSpace = 1.0f / (nbrTicks - 1);
 		int tn =  (int) (p / tickSpace + 0.5f);
 		return tickSpace * tn;
+	}
+	
+	/**
+	 * Calculate the correct value of the parametticTarget
+	 * 
+	 * @param pt the value to correct
+	 * @return the corrected value 0.0 - 1.0 incl
+	 */
+	protected float calcParametricTarget(float pt){
+		pt = pt < 0 ? 0 : pt > 1 ? 1 : pt;
+		if(stickToTicks)
+			pt = findNearestTickValueTo(pt);
+		return pt;
 	}
 	
 	/**

@@ -298,6 +298,13 @@ public class GKnob extends GValueControl {
 				takeFocus();
 			}
 			break;
+		case MouseEvent.WHEEL:
+			if(currSpot > -1 && z >= focusObjectZ()){
+				System.out.print(tag + "  " + parametricTarget + "  " + event.getCount() + "   " + wheelDelta + "     >>>  ");
+				parametricTarget = calcParametricTarget(parametricTarget + event.getCount() * wheelDelta * G4P.wheelForSlider);
+				System.out.println(parametricTarget);
+			}
+			break;
 		case MouseEvent.RELEASE:
 			if(focusIsWith == this){
 				loseFocus(null);

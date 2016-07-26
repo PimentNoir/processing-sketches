@@ -258,12 +258,12 @@ public final class GPassword extends GAbstractControl implements Focusable{
 			float max_ptx = caretX - tw + 2;
 			if(endTLHI != null){
 				if(ptx > caretX){ 								// Scroll to the left (text moves right)
-					ptx -= HORZ_SCROLL_RATE;
+					ptx -= localFont.getSize()/3;
 					if(ptx < 0) ptx = 0;
 					horzScroll = true;
 				}
 				else if(ptx < max_ptx){ 						// Scroll to the right (text moves left)?
-					ptx += HORZ_SCROLL_RATE;
+					ptx += localFont.getSize()/1.5f;
 					if(ptx > max_ptx) ptx = max_ptx;
 					horzScroll = true;
 				}

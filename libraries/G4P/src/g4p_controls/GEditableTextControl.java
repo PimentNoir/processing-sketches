@@ -30,6 +30,7 @@ import java.awt.Font;
 import java.awt.font.TextAttribute;
 import java.awt.font.TextHitInfo;
 import java.awt.geom.GeneralPath;
+import java.util.ArrayDeque;
 import java.util.LinkedList;
 
 import processing.core.PApplet;
@@ -80,6 +81,10 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 	/* Is the component enabled to generate mouse and keyboard events */
 	boolean textEditEnabled = true;
 
+	KeySpeedMeasurer ksm = new KeySpeedMeasurer(20);
+	float scrollAdvance = 4;
+	
+	
 	public GEditableTextControl(PApplet theApplet, float p0, float p1, float p2, float p3, int scrollbars) {
 		super(theApplet, p0, p1, p2, p3);
 		scrollbarPolicy = scrollbars;
@@ -108,11 +113,11 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 			cursorIsOver = null;
 		focusIsWith = grabber;
 		// If only blank text clear it out allowing default text (if any) to be displayed
-//		if(stext.length() > 0){
-//			int tl = stext.getPlainText().trim().length();
-//			if(tl == 0)
-//				stext.setText("", wrapWidth);
-//		}
+		//		if(stext.length() > 0){
+		//			int tl = stext.getPlainText().trim().length();
+		//			if(tl == 0)
+		//				stext.setText("", wrapWidth);
+		//		}
 		keepCursorInView = true;
 		bufferInvalid = true;
 	}
@@ -279,6 +284,7 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 	 */
 	public void setFont(Font font) {
 		if(font != null && font != localFont && buffer != null){
+			int s = font.getSize();
 			localFont = font;
 			ptx = pty = 0;
 			setScrollbarValues(ptx, pty);
@@ -574,7 +580,8 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 	// Enable polymorphism. 
 	protected void keyPressedProcess(int keyCode, char keyChar, boolean shiftDown, boolean ctrlDown) { }
 
-	protected void keyTypedProcess(int keyCode, char keyChar, boolean shiftDown, boolean ctrlDown){ }
+
+	protected void keyTypedProcess(int keyCode, char keyChar, boolean shiftDown, boolean ctrlDown){	}
 
 
 	// Only executed if text has changed
@@ -720,4 +727,88 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 		return true;
 	}
 
+	/**
+	 * Get the amount to scroll the text per frame when scrolling text to keep the 
+	 * insertion point on screen.
+	 * @return the amount to scroll in pixels.
+	 */
+	protected float getScrollAmount(){
+		float cps = ksm.calcCPS();
+		float f = PApplet.map(cps, 0.1f, 20, 1, cps * localFont.getSize());
+		f = PApplet.constrain(f, 4, cps * localFont.getSize());
+		return f;
+	}
 }
+
+/**
+ * Class to keep track of the last'n' number of key presses. Yhe purpose to to
+ * provide both aesthic scrolling of text when the type rate is slow but faster 
+ * scrolling to keep the the insertion point on screen at faster tying rates.
+ * 
+ * @author Peter Lager
+ *
+ */
+final class KeySpeedMeasurer {
+	KeyLog[] kts;
+	int next = 0;
+
+	KeySpeedMeasurer(int s) {
+		kts = new KeyLog[s];
+		next = 0;
+		long tstart = System.currentTimeMillis() - s * 1000;
+		for (int i = 0; i < s+2; i++) {
+			logKey(1, tstart + i * 1004);
+		}
+	}
+
+	void logKey(int nbrKeys) {
+		kts[next++]= new KeyLog(nbrKeys, System.currentTimeMillis());
+		next %=kts.length;
+	}
+
+	void logKey(int nbrKeys, long time) {
+		kts[next++]= new KeyLog(nbrKeys, time);
+		next %=kts.length;
+	}
+
+	float calcCPS() {
+		long currentTime = System.currentTimeMillis();
+		int  idx = (next + 1) % kts.length;
+		int nks = 0;
+		long interval = 0;
+		while (idx != next) {
+			// Ignore any logs over 5 seconds old
+			if (currentTime - kts[idx].timeTyped < 1000) {
+				int prev = (idx -1 + kts.length) % kts.length;
+				interval += kts[idx].timeTyped - kts[prev].timeTyped;
+				nks += kts[idx].nbrTyped;
+			}
+			idx = (idx + 1) % kts.length;
+		}
+		if(interval > 0)
+			return((float) nks * 1000) / interval;
+		else
+			return 0;
+	}
+}
+
+/**
+ * Used internally to represent a key being typed. It is also when a block of text is inserted,
+ * 
+ * @author Peter Lager
+ *
+ */
+final class KeyLog {
+	int nbrTyped = 1; // default value
+	long timeTyped = 0;
+
+	KeyLog(int nt, long tt) {
+		nbrTyped = nt;
+		timeTyped = tt;
+	}
+
+	public String toString() {
+		return "  " + nbrTyped + "\t" + timeTyped;
+	}
+}
+

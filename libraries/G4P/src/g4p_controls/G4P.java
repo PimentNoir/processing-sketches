@@ -93,14 +93,14 @@ public class G4P implements GConstants, PConstants {
 	 * return the pretty version of the library.
 	 */
 	public static String getPrettyVersion() {
-		return "4.0.3";
+		return "4.0.5";
 	}
 
 	/**
 	 * return the version of the library used by Processing
 	 */
 	public static String getVersion() {
-		return "26";
+		return "28";
 	}
 
 	static int globalColorScheme = GCScheme.BLUE_SCHEME;
@@ -131,6 +131,10 @@ public class G4P implements GConstants, PConstants {
 	static JColorChooser chooser = null;
 	static Color lastColor = Color.white; // White
 
+	// Mouse wheel direction
+	static int wheelForSlider = FORWARD;
+	static int wheelForScrollbar = FORWARD;
+	
 	/**
 	 * Register a GWindow so we can keep track of all GWindows in the application.
 	 * This will be needed for global transformations e.g. setGlobalAlpha(...)
@@ -287,7 +291,7 @@ public class G4P implements GConstants, PConstants {
 	static void announceG4P(){
 		if(!announced){
 			System.out.println("===================================================");
-			System.out.println("   G4P V4.0.3 created by Peter Lager");
+			System.out.println("   G4P V4.0.5 created by Peter Lager");
 			System.out.println("===================================================");
 			announced = true;
 		}
@@ -366,6 +370,28 @@ public class G4P implements GConstants, PConstants {
 		cursorChangeEnabled = enable;
 	}
 
+	/**
+	 * Determines how the direction of the mouse wheel rotation is interpreted
+	 * for sliders and knobs. This value applies to all sliders and knobs.<br/>
+	 * The default value is FORWARD
+	 * @param dir FORWARD or REVERSE, illegal values are ignored
+	 */
+	public static void mouseWheelDirection(int dir){
+		if(dir == FORWARD || dir == REVERSE)
+			wheelForSlider = dir;			
+	}
+	
+	/**
+	 * Determines how the direction of the mouse wheel rotation is interpreted
+	 * for sliders. This value applies to all sliders.<br/>
+	 * The default value is FORWARD
+	 * @param dir FORWARD or REVERSE, illegal values are ignored
+	 */
+	public static void mouseWheelScrollbarDirection(int dir){
+		if(dir == FORWARD || dir == REVERSE)
+			wheelForScrollbar = dir;			
+	}
+	
 	/**
 	 * @deprecated use setCursor(int)
 	 */

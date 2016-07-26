@@ -225,12 +225,12 @@ public class GTextField extends GEditableTextControl {
 			float max_ptx = caretX - tw + 2;
 			if(endTLHI != null){
 				if(ptx > caretX){ 								// Scroll to the left (text moves right)
-					ptx -= HORZ_SCROLL_RATE;
+					ptx -= getScrollAmount();
 					if(ptx < 0) ptx = 0;
 					horzScroll = true;
 				}
 				else if(ptx < max_ptx){ 						// Scroll to the right (text moves left)?
-					ptx += HORZ_SCROLL_RATE;
+					ptx += getScrollAmount();
 					if(ptx > max_ptx) ptx = max_ptx;
 					horzScroll = true;
 				}
@@ -372,6 +372,7 @@ public class GTextField extends GEditableTextControl {
 	}
 
 	protected void keyPressedProcess(int keyCode, char keyChar, boolean shiftDown, boolean ctrlDown){
+		ksm.logKey(1);
 		boolean validKeyCombo = true;
 
 		switch(keyCode){
@@ -408,6 +409,7 @@ public class GTextField extends GEditableTextControl {
 				String p = GClip.paste();
 				p.replaceAll("\n", "");
 				if(p.length() > 0){
+					ksm.logKey(p.length());
 					// delete selection and add 
 					if(hasSelection())
 						stext.deleteCharacters(pos, nbr);
@@ -432,6 +434,7 @@ public class GTextField extends GEditableTextControl {
 	}
 
 	protected void keyTypedProcess(int keyCode, char keyChar, boolean shiftDown, boolean ctrlDown){
+		ksm.logKey(1);
 		int ascii = (int)keyChar;
 		if(isDisplayable(ascii)){
 			if(hasSelection())
