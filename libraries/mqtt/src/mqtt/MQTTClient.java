@@ -21,8 +21,8 @@
  * Boston, MA  02111-1307  USA
  * 
  * @author      Joel Gaehwiler https://github.com/256dpi
- * @modified    12/20/2015
- * @version     1.6.0 (13)
+ * @modified    07/21/2016
+ * @version     1.6.1 (14)
  */
 
 package mqtt;
@@ -103,7 +103,7 @@ public class MQTTClient implements MqttCallback {
     parent.registerMethod("dispose", this);
     parent.registerMethod("draw", this);
     messageReceivedMethod = findCallback("messageReceived");
-    System.out.println("MQTT 1.6.0 by Joel Gaehwiler https://github.com/256dpi");
+    System.out.println("MQTT 1.6.1 by Joel Gaehwiler https://github.com/256dpi");
   }
 
   /**
@@ -184,13 +184,15 @@ public class MQTTClient implements MqttCallback {
         options.setWill(will.topic, will.payload, will.qos, will.retained);
       }
 
-      if (uri.getUserInfo()!=null) {
+      if (uri.getUserInfo() != null) {
         String[] auth = uri.getUserInfo().split(":");
+
         if(auth.length > 0) {
-          String user = auth[0];
-          String pass = auth[1];
-          options.setUserName(user);
-          options.setPassword(pass.toCharArray());
+          options.setUserName(auth[0]);
+
+          if(auth.length > 1) {
+            options.setPassword(auth[1].toCharArray());
+          }
         }
       }
 
