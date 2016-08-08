@@ -1,5 +1,5 @@
 //Copyright Miranda Jacoby 2014 All Rights Rserved
- 
+
 float x;
 float y;
 float wd;
@@ -9,14 +9,14 @@ float rFill;
 //float xDist;
 //float yDist;
 //float easingCoef
- 
+
 void setup () {
-size(400, 400);
-background(255);
+  size(400, 400);
+  background(255);
 }
- 
+
 void draw () {
-   
+
   x = mouseX;
   y = mouseY;
   wd = 50;
@@ -26,8 +26,7 @@ void draw () {
   fill(r);
   ellipse(x, y, r, r);
 }
- 
+
 void mousePressed () {
   background(255);
 }
-

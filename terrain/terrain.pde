@@ -15,7 +15,6 @@ void setup() {
   size(800, 600, P3D);
 
   terrain = new Terrain();
- 
 }
 
 void keyPressed() {
@@ -27,16 +26,16 @@ void keyPressed() {
 void draw() {
 
   background(0);
-  
+
   R = noise(frameCount/5000.0)*1400+200;
 
   pointLight(255, 250, 200, 0, 0, 1000);
   ambientLight(50, 60, 90);
 
 
-  camera(R*sin(frameCount/300.0), R*cos(frameCount/300.0), R,
-  (noise(frameCount/200.0,0,0)-0.5)*tras, (noise(0,frameCount/200.0,0)-0.5)*tras,(noise(0,0,frameCount/1000.0)-0.5)*tras,
-  0, 0, -1);
+  camera(R*sin(frameCount/300.0), R*cos(frameCount/300.0), R, 
+    (noise(frameCount/200.0, 0, 0)-0.5)*tras, (noise(0, frameCount/200.0, 0)-0.5)*tras, (noise(0, 0, frameCount/1000.0)-0.5)*tras, 
+    0, 0, -1);
 
 
   translate(-W/2, -H/2, -terrain.elevation/2);
@@ -69,7 +68,7 @@ class Terrain {
 
     normals = new ArrayList();
 
-    for (int i = 0 ; i < vec.size();i+=1) {
+    for (int i = 0; i < vec.size(); i+=1) {
 
       PVector me = (PVector)vec.get(i);
       PVector a = new PVector(me.x, me.y, me.z);
@@ -105,12 +104,12 @@ class Terrain {
       me.cross(d, a, cd);
 
       PVector result = new PVector();
- 
+
 
       result.x = (ca.x+cb.x+cc.x+cd.x)/4.0;
       result.y = (ca.y+cb.y+cc.y+cd.y)/4.0;
       result.z = (ca.z+cb.z+cc.z+cd.z)/4.0;
- 
+
 
 
 
@@ -122,8 +121,8 @@ class Terrain {
     vec = new ArrayList();
 
     // noiseSeed(seed);
-    for (int y=  0; y < W;y+=grid) {
-      for (int x=  0; x < H;x+=grid) {
+    for (int y=  0; y < W; y+=grid) {
+      for (int x=  0; x < H; x+=grid) {
         vec.add(new PVector(x, y, (noise(x/sc, y/sc))*elevation));
       }
     }
@@ -131,7 +130,7 @@ class Terrain {
 
   void drawVec() {
     noStroke();
-    for (int i = 0 ; i < vec.size()-W/grid-1;i+=1) {
+    for (int i = 0; i < vec.size()-W/grid-1; i+=1) {
       fill(255);
       if (i % (W/grid) != W/grid-1) {
 
@@ -159,22 +158,20 @@ class Terrain {
         vertex(v4.x, v4.y, v4.z, norm(v4.x, 0, W), norm(v4.y, 0, H));
         endShape(CLOSE);
 
-        /*
-        stroke(#00ff00);
-         float mul = 30.0;
-         
-         line(v1.x,v1.y,v1.z,v1.x+n1.x*mul,v1.y+n1.y*mul,v1.z+n1.z*mul);
-         
-         line(v2.x,v2.y,v2.z,v2.x+n2.x*mul,v2.y+n2.y*mul,v2.z+n2.z*mul);
-         
-         line(v3.x,v3.y,v3.z,v3.x+n3.x*mul,v3.y+n3.y*mul,v3.z+n3.z*mul);
-         
-         line(v4.x,v4.y,v4.z,v4.x+n4.x*mul,v4.y+n4.y*mul,v4.z+n4.z*mul);
-         
-         noStroke();
-         */
+
+        /* stroke(#00ff00);
+        float mul = 30.0;
+
+        line(v1.x, v1.y, v1.z, v1.x+n1.x*mul, v1.y+n1.y*mul, v1.z+n1.z*mul);
+
+        line(v2.x, v2.y, v2.z, v2.x+n2.x*mul, v2.y+n2.y*mul, v2.z+n2.z*mul);
+
+        line(v3.x, v3.y, v3.z, v3.x+n3.x*mul, v3.y+n3.y*mul, v3.z+n3.z*mul);
+
+        line(v4.x, v4.y, v4.z, v4.x+n4.x*mul, v4.y+n4.y*mul, v4.z+n4.z*mul);
+
+        noStroke(); */
       }
     }
   }
 }
-

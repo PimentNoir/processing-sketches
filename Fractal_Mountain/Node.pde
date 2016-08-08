@@ -5,7 +5,7 @@ class Node
   Node nodeA, nodeB, nodeC, nodeD;
   int depth;
   color colorNode;// = color((int)random(255), (int)random(255), (int)random(255));
- 
+
   Node(PVector p_A, PVector p_B, PVector p_C, PVector p_D, int p_depth)
   {
     A = p_A;

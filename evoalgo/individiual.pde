@@ -1,5 +1,5 @@
 // An individual has both a genotype and a phenotype
- 
+
 class Individual implements Comparable
 {
   Genotype m_genotype;
@@ -16,8 +16,7 @@ class Individual implements Comparable
     Individual b = (Individual) obj_b;
     if (m_fitness > b.m_fitness) {
       return 1;
-    }
-    else if (m_fitness < b.m_fitness) {
+    } else if (m_fitness < b.m_fitness) {
       return -1;
     }
     return 0;
@@ -31,13 +30,12 @@ class Individual implements Comparable
     m_fitness = m_phenotype.evaluate();
   }
 }
- 
+
 Individual breed(Individual a, Individual b)
 {
   Individual c = new Individual();
-  c.m_genotype = crossover(a.m_genotype,b.m_genotype);
+  c.m_genotype = crossover(a.m_genotype, b.m_genotype);
   c.m_genotype.mutate();
   c.m_phenotype = new Phenotype(c.m_genotype);
   return c;
 }
-

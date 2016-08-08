@@ -4,7 +4,7 @@
  * For each tile, a Tree is built. It will hold all the nodes for this tile.
  * In the draw() method, each Tree will be browsed to display only the leaf nodes
  **/
- 
+
 final int NB_TILES_SIDE = 6;
 final int NB_POINTS_SIDE = NB_TILES_SIDE+1;
 final float TILE_SIZE = 110;
@@ -16,13 +16,13 @@ float deltaH;//used to vertically translate the mountain3 in order to have it ro
 Tree[][] trees;//trees that will hold the nodes, one tree per tile
 PVector[][] randomPoints;//add some randomness in the original points[][]
 PVector[][] points;//original points of the tiling
- 
+
 void setup()
 {
   size(800, 600, P3D);
   initPointsAndTrees();
 }
- 
+
 void initPointsAndTrees()
 {
   deltaH = 0;
@@ -39,12 +39,12 @@ void initPointsAndTrees()
   {
     for (int j = 0; j < NB_POINTS_SIDE; j++)
     {
-      points[i][j] = new PVector(i*TILE_SIZE - TILE_SIZE*NB_TILES_SIDE/2 + randomPoints[i][j].x,
-      j*TILE_SIZE - TILE_SIZE*NB_TILES_SIDE/2 + randomPoints[i][j].y,
-      random(HEIGHT_H));
+      points[i][j] = new PVector(i*TILE_SIZE - TILE_SIZE*NB_TILES_SIDE/2 + randomPoints[i][j].x, 
+        j*TILE_SIZE - TILE_SIZE*NB_TILES_SIDE/2 + randomPoints[i][j].y, 
+        random(HEIGHT_H));
     }
   }
- 
+
   trees = new Tree[NB_TILES_SIDE][NB_TILES_SIDE];
   for (int i = 0; i < NB_TILES_SIDE; i++)
   {
@@ -53,7 +53,7 @@ void initPointsAndTrees()
       trees[i][j] = new Tree(points[i][j], points[i+1][j], points[i+1][j+1], points[i][j+1]);
     }
   }
- 
+
   for (int i = 0; i < NB_TILES_SIDE; i++)
   {
     for (int j = 0; j < NB_TILES_SIDE; j++)
@@ -63,7 +63,7 @@ void initPointsAndTrees()
   }
   deltaH /= (NB_TILES_SIDE*NB_TILES_SIDE);
 }
- 
+
 void draw()
 {
   translate(width/2, height/2);
@@ -78,14 +78,13 @@ void draw()
     }
   }
 }
- 
+
 void drawTree(Node p_node)
 {
   if (p_node.depth == MAX_DEPTH)
   {
     drawTriangles(p_node);
-  }
-  else
+  } else
   {
     drawTree(p_node.nodeA);
     drawTree(p_node.nodeB);
@@ -93,7 +92,7 @@ void drawTree(Node p_node)
     drawTree(p_node.nodeD);
   }
 }
- 
+
 void drawTriangles(Node p_node)
 {
   PVector A = p_node.A;
@@ -119,9 +118,8 @@ void drawTriangles(Node p_node)
   vertex(A.x, A.y, A.z-deltaH); 
   endShape(CLOSE);
 }
- 
+
 void mousePressed()
 {
   initPointsAndTrees();
 }
-

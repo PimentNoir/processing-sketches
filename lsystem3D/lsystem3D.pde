@@ -58,7 +58,7 @@ boolean enteringRule = false;
 String bigString = "";
 char F = 'F', minus = '-', plus = '+', a = 'a', zee = 'z', openBracket = '[', closeBracket = ']';
 //
-void setup(){
+void setup() {
   size(500, 500, P3D);
   bigString = iterate(depth);
   colorMode(HSB);
@@ -71,16 +71,15 @@ void draw() {
   if (mousePressed) {
     if (zooming) {
       zoom = zoom_start + (mouseY - y_start) / height * 500;
-    } 
-    else {
+    } else {
       xrot = xrot_start + ((float)(mouseX)- x_start) / width * 360;
       yrot = yrot_start + -1 * ((float)(mouseY) - y_start) / height * 360;
     }
   } 
   background(0);
   updateText();
-  translate(width/2,height/2);
-  translate(0,0,zoom);
+  translate(width/2, height/2);
+  translate(0, 0, zoom);
   rotateY(radians(xrot));
   rotateX(radians(yrot));
   lights();
@@ -91,21 +90,20 @@ void draw() {
 void updateText() {
   fill(255);
   text("rule:", 10, 15);
-  text(rule, 100,15);
+  text(rule, 100, 15);
   text("current angle:", 10, 35);
   text(angle, 100, 35); 
   text("angle step:", 10, 55);
   text(angleStep, 100, 55);
   text("depth:", 10, 75);
-  text(depth, 100,75);
+  text(depth, 100, 75);
 }
 void mousePressed() {
   if (keyPressed && keyCode==SHIFT) {
     zooming = true;
     zoom_start = zoom;
     y_start = mouseY;
-  } 
-  else {
+  } else {
     zooming = false;
     y_start = mouseY;
     yrot_start = yrot;
@@ -128,11 +126,11 @@ void keyPressed() {
   }
   if ((key == 'a') && (depth < 9)) {
     depth++;
-    bigString = iterate(depth); 
+    bigString = iterate(depth);
   }
   if ((key == 'z') && (depth > 1)) {
     depth--;
-    bigString = iterate(depth); 
+    bigString = iterate(depth);
   }
   if (key == 'n') {
     generateRandomRule();
@@ -165,7 +163,7 @@ void keyPressed() {
     bigString = iterate(depth);
     drawIt();
   }
-    if (key == '3') {
+  if (key == '3') {
     reset();
     rule = "F[+F][--F][aF][zzF]"; //asymmetree
     angle = 198;
@@ -187,7 +185,7 @@ void keyPressed() {
     bigString = iterate(depth);
     drawIt();
   }
- // new rule entry
+  // new rule entry
   if (key == 'e') {
     enteringRule = true;
     rule = "";
@@ -224,9 +222,9 @@ void keyPressed() {
   }
 } 
 void validateRule() {
-  String[] openBrackets = split(rule,openBracket);
+  String[] openBrackets = split(rule, openBracket);
   int nOpen = openBrackets.length - 1;
-  String[] closeBrackets = split(rule,closeBracket);
+  String[] closeBrackets = split(rule, closeBracket);
   int nClose = closeBrackets.length - 1;
   if (nOpen != nClose) {
     rule = "number of [ and ] must match.  Press e to try again.";
@@ -258,7 +256,7 @@ void generateRandomRule() {
   String temp  = "";
   for (int i=0; i<len; i++) {
     char newSymbol = symbolSet[int(random(numSymbols))];
-    if ((numSymbols == numNoCloseBracket) && (newSymbol == openBracket)){
+    if ((numSymbols == numNoCloseBracket) && (newSymbol == openBracket)) {
       numSymbols = numWithCloseBracket;
     }
     if (newSymbol == openBracket) {
@@ -303,35 +301,29 @@ void generateRandomRule() {
 void drawIt() {
   float jitter = .0001;
   for (int i = 0; i<bigString.length(); i++) {
-    if(bigString.charAt(i) == F){
+    if (bigString.charAt(i) == F) {
       float newhue = float(i)/bigString.length()*255; 
       fill(color(newhue, 255, 255));
       //translate(0,0,distance/2);
       //box(distance/4+(jitter*i%100),distance/4+(jitter*i%100),distance+(jitter*i%100));
       //translate(0,0,distance/2);
-      translate(0,distance/-2,0);
-      box(distance/4+(jitter*i%100),distance+(jitter*i%100),distance/4+(jitter*i%100));
-      translate(0,distance/-2,0);
-    }
-    else if(bigString.charAt(i) == minus){
+      translate(0, distance/-2, 0);
+      box(distance/4+(jitter*i%100), distance+(jitter*i%100), distance/4+(jitter*i%100));
+      translate(0, distance/-2, 0);
+    } else if (bigString.charAt(i) == minus) {
       rotateX(radians(-angle));
-    }
-    else if(bigString.charAt(i) == plus){
+    } else if (bigString.charAt(i) == plus) {
       rotateX(radians(angle));
-    }
-    else if(bigString.charAt(i) == zee){
+    } else if (bigString.charAt(i) == zee) {
       rotateZ(radians(angle));
-    }
-    else if(bigString.charAt(i) == a){
+    } else if (bigString.charAt(i) == a) {
       rotateZ(radians(-angle));
-    }
-    else if (bigString.charAt(i) == openBracket) {
+    } else if (bigString.charAt(i) == openBracket) {
       pushMatrix();  
-      distance = distance * scaleFactor;    
-    }
-    else if (bigString.charAt(i) == closeBracket) {
+      distance = distance * scaleFactor;
+    } else if (bigString.charAt(i) == closeBracket) {
       popMatrix();    
-      distance = distance / scaleFactor;  
+      distance = distance / scaleFactor;
     }
   }
 }
@@ -340,15 +332,14 @@ String rewrite(String s) {
   for (int i = 0; i<s.length(); i++) {
     if (s.charAt(i) == F) {
       temp += rule;
-    }
-    else {
+    } else {
       temp += str(s.charAt(i));
     }
   }
   return (temp);
 }
 String iterate(int n) {
-  String[] fs = split(rule,F);
+  String[] fs = split(rule, F);
   int A = fs.length - 1;
   int B = rule.length() - A;
   int num = n;
@@ -360,10 +351,10 @@ String iterate(int n) {
   println("A: " + A + " B: " + B);
   println("predicted length: " + predictedLength);
   println("actual length: " + output.length());
-/*  println("segments: " + pow(A, num));
-  if (predictedLength < 1000) {
-     println(output);
-  }
-  */
+  /*  println("segments: " + pow(A, num));
+   if (predictedLength < 1000) {
+   println(output);
+   }
+   */
   return(output);
 }

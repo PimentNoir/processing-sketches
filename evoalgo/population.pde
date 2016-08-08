@@ -20,7 +20,7 @@ class Population
   {
     Individual a = select();
     Individual b = select();
-    Individual x = breed(a,b);
+    Individual x = breed(a, b);
     x.evaluate();
     m_pop[0] = x;
     Arrays.sort(m_pop);
@@ -28,8 +28,7 @@ class Population
   Individual select()
   {
     // Selection requires some form of bias to fitter individuals,
-    int which = (int) floor((121 - 1e-6) * (1.0 - sq(random(0,1))));
+    int which = (int) floor((121 - 1e-6) * (1.0 - sq(random(0, 1))));
     return m_pop[which];
   }
 }
-
