@@ -92,7 +92,7 @@ void mousePressed()
 }
 //-----------------------	
 void mouseDragged() { 
-  //  statements
+  //statements
   // text((-myCamera.camXmouse+mouseX)/100.0,200,200);
   // text(myCamera.camYmouse-mouseY,200,300);
 

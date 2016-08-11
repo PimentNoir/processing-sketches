@@ -5,9 +5,11 @@
  *
  * early, not very developed version
  */
+import processing.opengl.*;
+
 import ddf.minim.analysis.*;
 import ddf.minim.*;
-import processing.opengl.*;
+import javax.sound.sampled.*;
 
 PFont fontA;
 Minim minim;
@@ -36,19 +38,21 @@ void setup()
   minim2 = new Minim(this);
   minim.debugOn();
   minim2.debugOn();
+  Mixer.Info[] mixerInfo;
+  mixerInfo = AudioSystem.getMixerInfo(); 
+  for (int i = 0; i < mixerInfo.length; i++) {
+    println(i + ": " + mixerInfo[i].getName());
+  } 
+  // 0 is pulseaudio mixer on GNU/Linux
+  Mixer mixer = AudioSystem.getMixer(mixerInfo[0]); 
+  minim2.setInputMixer(mixer); 
   in = minim.getLineIn(Minim.STEREO, bufferSizeBig);
   in2 = minim2.getLineIn(Minim.STEREO, bufferSizeSmall);
   fft = new FFT(in.bufferSize(), in.sampleRate());
   fft2 = new FFT(in2.bufferSize(), in2.sampleRate());
   myCamera = new Zcam();
   lfo1=new LFO(6000); 
-  /* addMouseWheelListener(new java.awt.event.MouseWheelListener() { 
-   public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) { 
-   mouseWheel(evt.getWheelRotation());
-   }
-   }
-   ); */
-
+  
   for (int i=0; i<fftHistSize; i++) { 
     logPos[i]=log(i)*40;
   };
@@ -122,7 +126,7 @@ void draw()
   {
     stroke(255-255*k/nrOfIterations);
     for (int i = 0; i < n-1; i++)
-    {         //      fftHistory[k][i]=fftHistory[k-1][i];  // there must be a quicker way // circular buffer bayve?
+    { //   fftHistory[k][i]=fftHistory[k-1][i];  // there must be a quicker way // circular buffer ?
       //   line(i, -fftHistory[k-1][i],-k*30, i, -fftHistory[k][i],-k*20);  
       oldx=x;
       //   x=log(i)*40.0;     
@@ -131,7 +135,7 @@ void draw()
       line(oldx*20, -fftHistory[k][i], -k*iterationDistance, x*20, -fftHistory[k][i+1], -k*iterationDistance); 
       if (i%10==235)
       {
-        //   line(i*20,10,i*20,-20);
+      //   line(i*20,10,i*20,-20);
       }
       //   if (i%10==0)
       //   {               line(i*20, -fftHistory[k-1][i],-k*50, (i)*20, -fftHistory[k][i],-(k+1)*50); 
@@ -139,7 +143,7 @@ void draw()
       if ((i%10==0)&&(k==1))
         text(i, x*20, 10);
     }
-    //              line(i*20, -fftHistory[k][i],-k*30, i*20, -fftHistory[k][i+1],-k*30);
+    //      line(i*20, -fftHistory[k][i],-k*30, i*20, -fftHistory[k][i+1],-k*30);
   } 
 
   fill(255);
@@ -158,6 +162,7 @@ void stop()
 {
   //original comment : always close Minim audio classes when you are done with them
   in.close();
+  in2.close();
   minim.stop();
 
   super.stop();
