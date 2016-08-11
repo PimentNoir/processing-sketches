@@ -50,7 +50,6 @@ void draw() {
   //println (tm2);
 
   bold = createFont("Arial Bold", 18);
-  ;
   reg = createFont("Arial", 18);
 
   textSize(50);

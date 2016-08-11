@@ -26,6 +26,8 @@ int bufferSizeBig=bufferSizeSmall*fftRatio;
 int fftHistSize=512;  
 float[] logPos=new float[fftHistSize];
 float[][] fftHistory=new float[nrOfIterations][fftHistSize];
+float fftMin;
+float fftMax; 
 int nextBuffer=0;
 Zcam myCamera; 
 LFO lfo1;  
@@ -45,6 +47,7 @@ void setup()
   } 
   // 0 is pulseaudio mixer on GNU/Linux
   Mixer mixer = AudioSystem.getMixer(mixerInfo[0]); 
+  minim.setInputMixer(mixer);
   minim2.setInputMixer(mixer); 
   in = minim.getLineIn(Minim.STEREO, bufferSizeBig);
   in2 = minim2.getLineIn(Minim.STEREO, bufferSizeSmall);
@@ -56,8 +59,8 @@ void setup()
   for (int i=0; i<fftHistSize; i++) { 
     logPos[i]=log(i)*40;
   };
-  float fftMin=log(1);
-  float fftMax=1/log(bufferSizeBig);
+  fftMin=log(1);
+  fftMax=1/log(bufferSizeBig);
 }
 
 void draw()
@@ -84,7 +87,6 @@ void draw()
 
   fft.forward(in.mix);
   fft2.forward(in2.mix);
-  //fft2.forward(in2.mix);
   //void logAverages(int minBandwidth, int bandsPerOctave)
   //fft.logAverages(10, 2); //use once??
 
@@ -95,7 +97,7 @@ void draw()
     // for(int i = 0; i < 172; i++) //buahahah dirty!!!
     for (int i = 0; i < 272; i++) //buahahah dirty!!!
     {
-      //   arrayCopy(fftHistory[k-1], fftHistory[k]);
+      // arrayCopy(fftHistory[k-1], fftHistory[k]);
       fftHistory[k][i]=fftHistory[k][i]*0.5+fftHistory[k-1][i]*0.5;
     }  
 
@@ -103,14 +105,13 @@ void draw()
   for (int i = 1; i <fftHistSize; i++)
   {          
     blendratio=(i%fftRatio)/(fftRatio*1.0);
-    fftHistory[0][n]=(fft2.getBand(i/(fftRatio))*(1-blendratio)+
-      fft2.getBand(i/(fftRatio)+1)*(blendratio)); 
-    //  fftHistory[0][n]+=log(fftHistory[0][n])*10;  
+    //fftHistory[0][n]=(fft2.getBand(i/(fftRatio))*(1-blendratio) + fft2.getBand(i/(fftRatio)+1)*(blendratio)); 
+    //fftHistory[0][n]+=log(fftHistory[0][n])*10;  
     fftHistory[0][n]=fft.getBand(i)*4;
     n++;
-    //  fftHistory[0][i]=fft.getBand(floor(map(1/log(i),fftMin,fftMax,0,bufferSizeBig)))*9;
-    //  fftHistory[0][i]=fft.getBand(i)*2;
-    //  line(i*20,(int)-fft.getBand(i)*4,(i+1)*20,(int)-fft.getBand(i+1)*4);
+    //fftHistory[0][i]=fft.getBand(floor(map(1/log(i),fftMin,fftMax,0,bufferSizeBig)))*9;
+    //fftHistory[0][i]=fft.getBand(i)*2;
+    //line(i*20,(int)-fft.getBand(i)*4,(i+1)*20,(int)-fft.getBand(i+1)*4);
     if (i>50) i++;  
     if (i>100) i++;  
     if (i>200) i++;  
@@ -118,7 +119,7 @@ void draw()
     if (i>400) i++;  
     if (i>500) i++;
   }        
-  println(frameRate);
+  println(frameRate + " fps");
 
   float x=0;
   float oldx=0;
@@ -148,13 +149,8 @@ void draw()
 
   fill(255);
   resetMatrix();
-  text("FFt1 val " + "ddD", 5, 20);
+  text("FFT1 val " + "ddD", 5, 20);
   text("The window being used is: ", 5, 40);
-  // fftLin.linAverages(30);
-  // fftLog = new FFT(jingle.bufferSize(), jingle.sampleRate());
-  // calculate averages based on a miminum octave width of 22 Hz
-  // split each octave into three bands
-  // this should result in 30 averages
 }
 
 
