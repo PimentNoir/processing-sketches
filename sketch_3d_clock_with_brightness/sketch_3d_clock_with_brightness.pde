@@ -4,7 +4,7 @@ import processing.opengl.*;  // importa o processador de gráficos openGL para o
 void setup() {     // define a funçao void setup que armazena as configurações gerais do programa
 
   smooth();     // suaviza o desenho, anti aliasing
-  size(600, 600, OPENGL); // define o tamanho da janela para 600x600
+  size(600, 600, P3D); // define o tamanho da janela para 600x600
 }               // fecho da funçao void setup
 void draw() {    // abertura da funçao de desenho void draw
 

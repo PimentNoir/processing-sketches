@@ -13,7 +13,7 @@ double tt = 1;
 double inoise(double x, double y, double z) {
   final int mult = 1<<16;
   //Keep the same behaviour as the processing perlin noise() function, return values in [0,1] range. 
-  return (1 + ((double)(perlininoise.noise((int)(x*mult), (int)(y*mult), (int)(z*mult))) / mult)) / 2.0d;
+  return (1 + ((double)(INoise.noise((int)(x*mult), (int)(y*mult), (int)(z*mult))) / mult)) / 2.0d;
 }
 
 // Mimic the processing FBM in noise() and off by one the FBM amplification
@@ -91,7 +91,7 @@ double SimplexNoise (double x, double y, double z) {
   double amp = 1.0;
   for (int l = 0; l < octave; l++) {
     //Keep the same behaviour as the processing perlin noise() function, return values in [0,1] range. 
-    rc += ((1 + simplexnoise.noise(frequency * x, frequency * y, frequency * z))/2)*amp;
+    rc += ((1 + SimplexNoise.noise(frequency * x, frequency * y, frequency * z))/2)*amp;
     amp *= persistence;
     frequency *= lacunarity;
   }

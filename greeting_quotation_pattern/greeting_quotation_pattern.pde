@@ -96,7 +96,7 @@ class Branch {
   }
 }
 
-//w: change the weight of line(1-3)
+//[1, 2, 3]: change the weight of line (w = [1-3])
 //space: reset the greeting card
 void keyPressed() {
   if (key == '1' || frameCount < 500) {

@@ -28,11 +28,12 @@ void draw() {
   // comment out this section to run
 
   int m = minute(); 
-  int s = second();
+  //int s = second();
 
   // comment out this section to test (change the values to test)
 
-  // int m = 20; 
+  // int m = 20;
+  // int s = second();
 
   int tm2 = m%10;
   int tm1 = (m-tm2)/10;

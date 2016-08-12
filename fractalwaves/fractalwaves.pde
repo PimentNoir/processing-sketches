@@ -17,7 +17,7 @@ void setup() {
 float inoise(float i, float j, float k) {
   final int mult = 1<<16;
   //Keep the same behaviour as the processing perlin noise() function, return values in [0,1] range
-  return (1 + ((float)(perlininoise.noise((int)(i*mult), (int)(j*mult), (int)(k*mult))) / mult)) / 2.0f;
+  return (1 + ((float)(INoise.noise((int)(i*mult), (int)(j*mult), (int)(k*mult))) / mult)) / 2.0f;
 }
 
 float perlininoise(float i, float j, float k)
@@ -50,7 +50,7 @@ float perlinnoise(float i, float j, float k)
   float amp = 0.5;
   for (int l = 0; l < octave; l++) {
     //Keep the same behaviour as the processing perlin noise() function: return values in [0,1] range. 
-    rc += ((1 + (float)perlinnoise.noise((double)(frequency*i), (double)(frequency*j), (double)(frequency*k))) / 2.0f) * amp;
+    rc += ((1 + (float)ImprovedNoise.noise((double)(frequency*i), (double)(frequency*j), (double)(frequency*k))) / 2.0f) * amp;
     maxamp += amp;
     amp *= persistence;
     frequency *= lacunarity;
@@ -68,7 +68,7 @@ float simplexnoise(float i, float j, float k) {
   float amp = 1.0;
   for (int l = 0; l < octave; l++) {
     //Keep the same behaviour as the processing perlin noise() function, return values in [0,1] range.
-    rc += (((float)simplexnoise.noise((double)(frequency * i), (double)(frequency * j), (double)(frequency * k)) + 1) / 2.0f) * amp;
+    rc += (((float)SimplexNoise.noise((double)(frequency * i), (double)(frequency * j), (double)(frequency * k)) + 1) / 2.0f) * amp;
     amp *= persistence;
     frequency *= lacunarity;
   }
