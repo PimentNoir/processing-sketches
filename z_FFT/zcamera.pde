@@ -119,7 +119,7 @@ class LFO {
   public float period;
   LFO(float per) { // constructor
     m = millis();
-    period=per;
+    period = per;
   }
   float val() // return function
   {
