@@ -25,7 +25,7 @@ int visualization_type;
 boolean isDebug;
 boolean isZeroNaN;
 
-PFont fontA;
+//PFont fontA;
 Minim minim;
 Minim minim2;
 FFT fft;
@@ -33,12 +33,13 @@ FFT fft2;
 WindowFunction fftWindow;
 AudioInput in; // For the big buffering
 AudioInput in2; // For the small buffering
-int nrOfIterations = 50;
-int iterationDistance = 80;
+int nrOfIterations = 75;
+int iterationDistance = 55;
 int fftForwardCount;
 int bufferSizeSmall = 512;
-int fftRatio = 16; // How many times bigger is the big buffer for detailed analysis
-int bufferSizeBig = bufferSizeSmall*fftRatio;
+//int fftRatio = 16; // How many times bigger is the big buffer for detailed analysis?
+int fftRatio = 4; // How many times bigger is the big buffer for detailed analysis?
+int bufferSizeBig = bufferSizeSmall * fftRatio;
 int fftHistBufferCount;
 int fftHistSize;
 float[] logPos;
@@ -73,7 +74,7 @@ void setup()
   for (int i = 0; i < mixerInfo.length; i++) {
     debug.prStr(i + ": " + mixerInfo[i].getName());
   } 
-  // 0 is pulseaudio mixer on GNU/Linux
+  // index = 0 is pulseaudio mixer on GNU/Linux
   Mixer mixer = AudioSystem.getMixer(mixerInfo[0]); 
   minim.setInputMixer(mixer);
   minim2.setInputMixer(mixer); 
@@ -88,7 +89,7 @@ void setup()
   fft2.window(fftWindow);
   fftForwardCount = 0;
   //fftHistBufferCount = 0;
-  fftHistSize = fft.specSize(); // Give the FFT history buffer the number of FFT values. 
+  fftHistSize = fft.specSize(); // Give the FFT history buffer size for a fixed index the number of FFT values. 
   fftHistory = new float[nrOfIterations][fftHistSize]; // We keep nrOfIterations of all FFT values at a given point in time.
   fft_history_filter = 1;
   visualization_type = 0;
@@ -178,7 +179,7 @@ void keyPressed() {
 
 void keyReleased()
 {
-  if (key == 'h')
+  if (key == 'f')
     keys[0] = false;
   if (key == 'v')
     keys[1] = false;
@@ -198,6 +199,50 @@ void keyReleased()
     keys[8] = false;
 } 
 
+// How to fill the FFT history at histIndex with values?
+// FIXME?: Pass the filter type as an argument
+void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue) {
+  switch(fft_history_filter) {
+  case 0:
+    // Build the FTT history values with an Exponential Moving Average aka EMA filter with smooth factor = 0.5f on fft.getBand(fftIndex) values
+    fftHistory[histIndex][fftIndex]=fftHistory[histIndex][fftIndex]*0.5+fftValue*0.5;
+    //debug.prStrOnce("FFT history filter : fftHistory[fftHistBufferCount][i]=fftHistory[fftHistBufferCount][i]*0.5+fftHistory[fftHistBufferCount-1][i]*0.5"); 
+    break;
+  case 1:
+    // Build the FTT history values with a log decay with decay = 0.5f on fft.getBand(fftIndex) values
+    fftHistory[histIndex][fftIndex] = max(fftHistory[histIndex][fftIndex] * 0.5, log(1 + fftValue)); 
+    break;
+  case 2:
+    float blendratio=(fftIndex%fftRatio)/(fftRatio*1.0);
+    debug.prStr("blendratio = " + blendratio);
+    fftHistory[histIndex][fftIndex]=(fft.getBand(fftIndex/(fftRatio))*(1-blendratio) + fft.getBand(fftIndex/(fftRatio)+1)*(blendratio)); 
+    break;
+  case 3: 
+    /* if (fftHistBufferCount == 0 && fftForwardCount == 0) {
+     fftHistory[histIndex][fftIndex]=fft.getBand(fftIndex);
+     } else if (fftHistBufferCount == 0 && fftForwardCount != 0) {
+     // Do nothing
+     } else { */
+    if (fftIndex > 0) { 
+      fftHistory[histIndex][fftIndex]+=fftValue+log(fftHistory[histIndex-1][fftIndex])*10;
+    }
+    /* } */
+    break;
+  case 4:
+    fftHistory[histIndex][fftIndex]=fft.getBand(floor(map(1/log(fftIndex), fftMin, fftMax, 0, bufferSizeBig)));
+    break;
+  case 5:
+    // Build the history with a mutltiplicator of the values of fft.getBand(fftIndex)
+    fftHistory[histIndex][fftIndex]=fft.getBand(fftIndex)*8;
+    //debug.prStrOnce("FFT history filter : fft.getBand(fftIndex) values with a multiplicator");
+    break;
+  default: 
+    // Build the history without any alteration in the values of fft.getBand(fftIndex)
+    fftHistory[histIndex][fftIndex]=fft.getBand(fftIndex);
+    //debug.prStrOnce("Default FFT history filter : fft.getBand(fftIndex) values with no alteration");
+  }
+}
+
 void draw()
 {  
   myCamera.placeCam();
@@ -205,7 +250,6 @@ void draw()
   background(color(0, 0, 0, 15));
   stroke(255);
 
-  // We count the number of forward iteration, starting at index = 0
   fft.forward(in.mix);
   fft2.forward(in2.mix);
 
@@ -219,72 +263,50 @@ void draw()
   }
   popMatrix();
 
-  // Build the FFT history values given a forward on the mix buffer is done
-  // Bound the history to nrOfIterations
-  // FFT history index = 0 or index % nrOfIterations special case
-  if (fftForwardCount % nrOfIterations == 0 || fftForwardCount == 0) {
-    fftHistBufferCount = 0;
-    debug.prStr("fftHistBufferCount = " + fftHistBufferCount +" (special case : index = 0 or index % nrOfIterations)");
-  } else {
-    debug.prStr("fftHistBufferCount = " + fftHistBufferCount + " before incrementation");
-    fftHistBufferCount++;
-    debug.prStr("fftHistBufferCount = " + fftHistBufferCount + " after incrementation" );
-    arrayCopy(fftHistory[fftHistBufferCount], fftHistory[fftHistBufferCount-1]);
+  // Init the FFT history given a forward on the mix buffer is done
+  // Bound the history array to nrOfIterations
+  while (fftForwardCount < nrOfIterations) {
+    // Do something with the FFT values - use filter here -
+    for (int i = 0; i < fftHistSize; i++) {
+      fill_fft_history_filter(fftForwardCount, i, fft.getBand(i));
+    }
+    // Do a forward on the mix buffer
+    fft.forward(in.mix);
+    // We count the number of forward iteration, starting at index = 0
+    debug.prStr("fftForwardCount = " + fftForwardCount + " before incrementation");
+    fftForwardCount++;
+    debug.prStr("fftForwardCount = " + fftForwardCount + " after incrementation");
   }
+
+  // Now we have an FFT history of nrOfIterations size
+  // Each time a forward on the mix buffer is done, add the new filtered values to the FFT history and discard index = 0 FFT values in the history.  
+
+  // FFT history index = 0 or index % nrOfIterations special case
+  /* if (fftForwardCount == 0) {
+   fftHistBufferCount = 0;
+   debug.prStr("fftHistBufferCount = " + fftHistBufferCount +" (special case : index = 0 or index % nrOfIterations)");
+   } else {
+   debug.prStr("fftHistBufferCount = " + fftHistBufferCount + " before incrementation");
+   fftHistBufferCount++;
+   debug.prStr("fftHistBufferCount = " + fftHistBufferCount + " after incrementation" );
+   //arrayCopy(fftHistory[fftHistBufferCount], fftHistory[fftHistBufferCount-1]);
+   fftHistory[fftHistBufferCount] = fftHistory[fftHistBufferCount-1];
+   } */
 
   for (int i = 0; i < fftHistSize; i++)
   {
     fftHistory[fftHistBufferCount][i] = ZeroNaNValue(fftHistory[fftHistBufferCount][i]);
-    switch(fft_history_filter) {
-    case 0:
-      // Build the FTT history values with an Exponential Moving Average aka EMA filter with smooth factor = 0.5f
-
-      fftHistory[fftHistBufferCount][i]=fftHistory[fftHistBufferCount][i]*0.5+fft.getBand(i)*0.5;
-
-      //debug.prStrOnce("FFT history filter : fftHistory[fftHistBufferCount][i]=fftHistory[fftHistBufferCount][i]*0.5+fftHistory[fftHistBufferCount-1][i]*0.5"); 
-      break;
-    case 1:
-      // Build the history without any alterations in the values of fft.getBand(i)
-      fftHistory[fftHistBufferCount][i]=fft.getBand(i);
-      //debug.prStr("Get band value " + i + fft.getBand(i)*4);
-      //debug.prStrOnce("FFT history filter : No alteration"); 
-      break;
-    case 2:
-      float blendratio=(i%fftRatio)/(fftRatio*1.0);
-      fftHistory[fftHistBufferCount][i]=(fft.getBand(i/(fftRatio))*(1-blendratio) + fft.getBand(i/(fftRatio)+1)*(blendratio)); 
-      break;
-    case 3: 
-      if (fftHistBufferCount == 0 && fftForwardCount == 0) {
-        fftHistory[fftHistBufferCount][i]=fft.getBand(i);
-      } else if (fftHistBufferCount == 0 && fftForwardCount != 0) {
-        // Do nothing
-      } else {  
-        fftHistory[fftHistBufferCount][i]+=log(fftHistory[fftHistBufferCount-1][i])*10;
-      }
-      break;
-    case 4:
-      fftHistory[fftHistBufferCount][i]=fft.getBand(i);
-      break;
-    case 5:
-      fftHistory[fftHistBufferCount][i]=fft.getBand(floor(map(1/log(i), fftMin, fftMax, 0, bufferSizeBig)));
-      break;
-    case 6:
-      fftHistory[fftHistBufferCount][i]=fft.getBand(i);
-      break;
-    default: 
-      // Build the history without any alterations in the values of fft.getBand(i)
-      fftHistory[fftHistBufferCount][i]=fft.getBand(i);
-      //debug.prStrOnce("FFT history filter : No alteration");
-    }
   }
-  //debug.prStr("fftHistory[" + fftHistBufferCount + "] content: " + Arrays.toString(fftHistory[fftHistBufferCount]));
+  // We count the number of forward iteration, starting at index = 0
   debug.prStr("fftForwardCount = " + fftForwardCount + " before incrementation");
   fftForwardCount++;
   debug.prStr("fftForwardCount = " + fftForwardCount + " after incrementation");
+  //debug.prStr("fftHistory[" + fftHistBufferCount + "] content: " + Arrays.toString(fftHistory[fftHistBufferCount]));
+
   // Now draw something from the FFT filter history values
   float x=0;
   float oldx=0;
-  for (int k = 1; k < nrOfIterations; k++) // FIXME: Should start at index 0 !
+  for (int k = fftHistBufferCount; k == 0; k--) // FIXME: Should start or end at index 0 !
   {
     stroke(255-255*k/nrOfIterations);
     for (int i = 0; i < fftHistSize - 1; i++)
@@ -307,7 +329,7 @@ void draw()
     }
     //      line(i*20, -fftHistory[fftHistBufferCount][i],-k*30, i*20, -fftHistory[fftHistBufferCount][i+1],-k*30);
   } 
-  //debug.prStr(frameRate + " fps");
+  debug.prStr(frameRate + " fps");
   // Last call to a debug.prStrOnce() function in the processing runtime.
   debug.DonePrinting();
   fill(255);

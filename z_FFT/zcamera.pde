@@ -1,3 +1,4 @@
+// -------- CAMERA BEGIN
 
 class Zcam {
   public PVector camOrigin, camOriginNext, camUp, camOrbit, camOriginCurrent, camAngle, camAngleVel, camAngleNext, camOriginVel;
@@ -61,7 +62,6 @@ class Zcam {
     temp=camAngleVel.get();           
     temp.mult(camAngleSpeed);
     camAngle.add(temp);     
-
     // new camera angle + velocity end
 
     //camOriginCurrent.x=camOrigin.x;
