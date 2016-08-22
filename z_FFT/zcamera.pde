@@ -35,31 +35,31 @@ class Zcam {
     camUp.x=0;
     camUp.y=1;
     camUp.z=0;
-    camOrigin.x=width/2.0;
-    camOrigin.x=height/2.0;
     camOrigin.x=0;
+    camOrigin.y=height*0.5f;
+    camOrigin.z=0;
   }
 
   public void placeCam()
   {  
     // new camera position + velocity begin
-    temp=camOriginNext.get();
+    temp=camOriginNext.copy();
     temp.sub(camOrigin); //
     temp.mult(camOriginBounce); // increase velocity factor!
     camOriginVel.add(temp);
     camOriginVel.mult(camOriginDumping);
-    temp=camOriginVel.get();
+    temp=camOriginVel.copy();
     temp.mult(camOriginSpeed);
     camOrigin.add(temp);
     // new camera position + velocity end
 
     // new camera angle + velocity begin
-    temp=camAngleNext.get();
+    temp=camAngleNext.copy();
     temp.sub(camAngle); // get the difference between desired and current
     temp.mult(camAngleBounce);
     camAngleVel.add(temp);
     camAngleVel.mult(camAngleDumping);
-    temp=camAngleVel.get();           
+    temp=camAngleVel.copy();           
     temp.mult(camAngleSpeed);
     camAngle.add(temp);     
     // new camera angle + velocity end
