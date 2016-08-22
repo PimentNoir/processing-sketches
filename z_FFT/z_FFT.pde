@@ -113,7 +113,7 @@ void draw()
 
   fft.forward(in.mix);
   fft2.forward(in2.mix);
- 
+
   for (int k=nrOfIterations-1; k>0; k--) {
     for (int i = 0; i < fftHistSize; i++)
     {
@@ -136,7 +136,7 @@ void draw()
     }
   }
 
-  
+
   int n=0;
   float blendratio;
   for (int i = 1; i < fftHistSize; i++)
@@ -172,8 +172,10 @@ void draw()
     if (i>400) i++;  
     if (i>500) i++;
   }
-  //}
+
   debug.prStr(frameRate + " fps");
+  // Last call to a debug.prStrOnce() function in the processing runtime.
+  debug.DonePrinting();
 
   float x=0;
   float oldx=0;
@@ -199,15 +201,11 @@ void draw()
         text(i, x*20, 10);
     }
     //      line(i*20, -fftHistory[k][i],-k*30, i*20, -fftHistory[k][i+1],-k*30);
-
-
-    fill(255);
-    resetMatrix();
-    text("FFT1 val " + "ddD", 5, 20);
-    text("The window being used is: ", 5, 40);
-    // Last call to a debug.prStrOnce() function in the processing runtime.
-    debug.DonePrinting();
   }
+  fill(255);
+  resetMatrix();
+  text("FFT1 val " + "ddD", 5, 20);
+  text("The window being used is: ", 5, 40);
 }
 
 void stop()
