@@ -25,14 +25,10 @@ int visualization_type;
 boolean isDebug;
 boolean isZeroNaN;
 
-//PFont fontA;
 Minim minim;
-Minim minim2;
 FFT fft;
-FFT fft2;
 WindowFunction fftWindow;
-AudioInput in; // For the big buffering
-AudioInput in2; // For the small buffering
+AudioInput in;
 int nrOfIterations = 75;
 int iterationDistance = 55;
 int fftForwardCount;
@@ -64,10 +60,8 @@ void setup()
   isDebug = true;
   debug = new Debug(isDebug);
   minim = new Minim(this);
-  minim2 = new Minim(this);
   if (isDebug) {
     minim.debugOn();
-    minim2.debugOn();
   }
   Mixer.Info[] mixerInfo;
   mixerInfo = AudioSystem.getMixerInfo(); 
@@ -76,19 +70,13 @@ void setup()
   } 
   // index = 0 is pulseaudio mixer on GNU/Linux
   Mixer mixer = AudioSystem.getMixer(mixerInfo[0]); 
-  minim.setInputMixer(mixer);
-  minim2.setInputMixer(mixer); 
+  minim.setInputMixer(mixer); 
   in = minim.getLineIn(Minim.STEREO, bufferSizeBig); 
-  in2 = minim2.getLineIn(Minim.STEREO, bufferSizeSmall);
   fft = new FFT(in.bufferSize(), in.sampleRate());
-  fft2 = new FFT(in2.bufferSize(), in2.sampleRate());
   fft.noAverages();
-  fft2.noAverages();
   fftWindow = FFT.HAMMING;
   fft.window(fftWindow);
-  fft2.window(fftWindow);
   fftForwardCount = 0;
-  //fftHistBufferCount = 0;
   fftHistSize = fft.specSize(); // Give the FFT history buffer size for a fixed index the number of FFT values. 
   fftHistory = new float[nrOfIterations][fftHistSize]; // We keep nrOfIterations of all FFT values at a given point in time.
   fft_history_filter = 1;
@@ -251,15 +239,14 @@ void draw()
   stroke(255);
 
   fft.forward(in.mix);
-  fft2.forward(in2.mix);
 
-  // Draw the waveforms of fft2 (small buffering) 
+  // Draw the waveforms of fft
   pushMatrix();
   scale(4);
-  for (int i = 0; i < fft2.specSize(); i++)
+  for (int i = 0; i < fft.specSize(); i++)
   {
-    line(i, 200+50 + in2.left.get(i)*50, i+1, 200+60 + in2.left.get(i+1)*50);
-    line(i, 200+80 + in2.right.get(i)*50, i+1, 200+90 + in2.right.get(i+1)*50);
+    line(i, 200+50 + in.left.get(i)*50, i+1, 200+60 + in.left.get(i+1)*50);
+    line(i, 200+80 + in.right.get(i)*50, i+1, 200+90 + in.right.get(i+1)*50);
   }
   popMatrix();
 
@@ -380,9 +367,8 @@ void draw()
 
 void stop()
 {
-  //original comment : always close Minim audio classes when you are done with them
+  // original comment : always close Minim audio classes when you are done with them
   in.close();
-  in2.close();
   minim.stop();
 
   super.stop();
