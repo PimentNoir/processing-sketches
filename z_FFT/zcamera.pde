@@ -31,7 +31,7 @@ class Zcam {
     camAngle= new PVector();
     camAngleNext= new PVector();
     camAngleVel= new PVector();
-    camDistance=300;
+    camDistance=1000;
     camUp.x=0;
     camUp.y=1;
     camUp.z=0;
@@ -42,6 +42,7 @@ class Zcam {
 
   public void placeCam()
   {  
+    // FIXME: camDistance should also be handled here
     // new camera position + velocity begin
     temp=camOriginNext.copy();
     temp.sub(camOrigin); //
@@ -80,9 +81,14 @@ class Zcam {
 
 
 //-----------------------	
-void mouseWheel(int delta) {
-  //println(delta); 
-  myCamera.camOriginNext.z+=delta*200;
+void mouseWheel(MouseEvent msEvent) {  
+  float delta = msEvent.getCount();
+  if (delta > 0) {
+    myCamera.camDistance += delta*2;
+  }
+  if (delta < 0) {
+    myCamera.camDistance += delta*2;
+  }
 }
 //-----------------------	
 void mousePressed()
