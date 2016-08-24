@@ -1,3 +1,4 @@
+// -------- CAMERA BEGIN
 
 class Zcam {
   public PVector camOrigin, camOriginNext, camUp, camOrbit, camOriginCurrent, camAngle, camAngleVel, camAngleNext, camOriginVel;
@@ -30,38 +31,38 @@ class Zcam {
     camAngle= new PVector();
     camAngleNext= new PVector();
     camAngleVel= new PVector();
-    camDistance=300;
+    camDistance=1000;
     camUp.x=0;
     camUp.y=1;
     camUp.z=0;
-    camOrigin.x=width/2.0;
-    camOrigin.x=height/2.0;
     camOrigin.x=0;
+    camOrigin.y=height*0.5f;
+    camOrigin.z=0;
   }
 
   public void placeCam()
   {  
+    // FIXME: camDistance should also be handled here
     // new camera position + velocity begin
-    temp=camOriginNext.get();
+    temp=camOriginNext.copy();
     temp.sub(camOrigin); //
     temp.mult(camOriginBounce); // increase velocity factor!
     camOriginVel.add(temp);
     camOriginVel.mult(camOriginDumping);
-    temp=camOriginVel.get();
+    temp=camOriginVel.copy();
     temp.mult(camOriginSpeed);
     camOrigin.add(temp);
     // new camera position + velocity end
 
     // new camera angle + velocity begin
-    temp=camAngleNext.get();
+    temp=camAngleNext.copy();
     temp.sub(camAngle); // get the difference between desired and current
     temp.mult(camAngleBounce);
     camAngleVel.add(temp);
     camAngleVel.mult(camAngleDumping);
-    temp=camAngleVel.get();           
+    temp=camAngleVel.copy();           
     temp.mult(camAngleSpeed);
     camAngle.add(temp);     
-
     // new camera angle + velocity end
 
     //camOriginCurrent.x=camOrigin.x;
@@ -80,9 +81,14 @@ class Zcam {
 
 
 //-----------------------	
-void mouseWheel(int delta) {
-  //println(delta); 
-  myCamera.camOriginNext.z+=delta*200;
+void mouseWheel(MouseEvent msEvent) {  
+  float delta = msEvent.getCount();
+  if (delta > 0) {
+    myCamera.camDistance += delta*4;
+  }
+  if (delta < 0) {
+    myCamera.camDistance += delta*4;
+  }
 }
 //-----------------------	
 void mousePressed()
@@ -119,7 +125,7 @@ class LFO {
   public float period;
   LFO(float per) { // constructor
     m = millis();
-    period=per;
+    period = per;
   }
   float val() // return function
   {
