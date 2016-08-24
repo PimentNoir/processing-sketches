@@ -35,8 +35,8 @@ WindowFunction fftWindow;
 AudioInput in;
 int nrOfIterations = 100;
 int iterationDistance = 40;
-int bufferSize = 2048;
-int fftHistSize, fftForwardCount;
+int bufferSize;
+int fftHistSize, fftForwardCount, valueMultiplicator;
 float[] logPos;
 float[][] fftHistory;
 Zcam myCamera; 
@@ -46,7 +46,7 @@ void setup()
 {  
   size(1024, 576, P3D);
   textFont(createFont("SanSerif", 27));
-  keys = new boolean[16]; // Number of keys to track
+  keys = new boolean[17]; // Number of keys state to track
   for (int i = 0; i < keys.length; i++ )
   {
     keys[i] = false;
@@ -68,6 +68,7 @@ void setup()
   // index = 0 is pulseaudio mixer on GNU/Linux
   Mixer mixer = AudioSystem.getMixer(mixerInfo[0]); 
   minim.setInputMixer(mixer); 
+  bufferSize = 2048;
   in = minim.getLineIn(Minim.STEREO, bufferSize); 
   fft = new FFT(in.bufferSize(), in.sampleRate());
   fft.noAverages();
@@ -76,7 +77,7 @@ void setup()
   fftHistSize = fft.specSize(); // Give the FFT history buffer size for a fixed first index the number of FFT values. 
   fftHistory = new float[nrOfIterations][fftHistSize]; // We keep nrOfIterations of all FFT values at a given point in time.
   fftForwardCount = 0;
-  fft_history_filter = 0;
+  fft_history_filter = 1;
   // Log decay FFT filter, better on clean sound source such as properly mixed songs in the time domain.
   // In the frequency domain, it's a visual smoother.
   decay = 0.97f;
@@ -84,6 +85,7 @@ void setup()
   // In the frequency domain, it's also a very simple and efficient visual smoother. 
   // Adjust the default smooth factor for a visual rendering very smooth for the human eyes.
   smooth_factor = 0.97f;
+  valueMultiplicator = 6;
   visualization_type = 0;
   logPos = new float[fftHistSize];
   for (int i = 0; i < fftHistSize; i++) { 
@@ -142,6 +144,9 @@ void keyPressed() {
   if (key == 'd') {
     keys[15] = true;
   }
+  if (key == 'm') {
+    keys[16] = true;
+  }
   if (keys[12] && keys[0]) {
     fft_history_filter = 0; 
     debug.UndoPrinting();
@@ -199,6 +204,14 @@ void keyPressed() {
     decay += inc;
     debug.UndoPrinting();
   }
+  if (keys[16] && keys[10]) {
+    valueMultiplicator--;
+    debug.UndoPrinting();
+  }
+  if (keys[16] && keys[11]) {
+    valueMultiplicator++;
+    debug.UndoPrinting();
+  }
 }
 
 void keyReleased()
@@ -235,6 +248,8 @@ void keyReleased()
     keys[14] = false;
   if (key == 'd')
     keys[15] = false;
+  if (key == 'm')
+    keys[16] = false;
 }
 
 float ZeroNaNValue(float Value) {
@@ -265,7 +280,7 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int Mu
     break;
   case 1:
     // Build the FTT history values with a log decay on fftValue values
-    fftHistory[histIndex][fftIndex] = max(fftHistory[histIndex][fftIndex] * decay, log(1 + Multiplicator*fftValue));
+    fftHistory[histIndex][fftIndex] = max(fftHistory[histIndex][fftIndex] * decay, Multiplicator*(float)Math.log(1 + fftValue));
     //debug.prStrOnce("FFT history filter : Log decay with decay = " + decay);
     break;
   case 2:
@@ -303,7 +318,7 @@ void draw()
     int indexCount = (nrOfIterations - 1) - fftForwardCount;
     debug.prStr("indexCount = " + indexCount + " in FFT history init loop");
     for (int i = 0; i < fftHistSize; i++) {
-      fill_fft_history_filter(indexCount, i, fft.getBand(i), 4);
+      fill_fft_history_filter(indexCount, i, fft.getBand(i), valueMultiplicator);
     }
     // We count the number of forward iteration, starting at index = 0
     debug.prStr("fftForwardCount = " + fftForwardCount + " before incrementation (in FFT history init loop)");
@@ -313,6 +328,7 @@ void draw()
   } // Now we have an FFT history of nrOfIterations size, last values at index = 0 on the first dimension
 
   debug.prStrOnce("fftForwardCount = " + fftForwardCount + " at the end of the FFT history init loop");
+  debug.prStrOnce("Value Multiplicator = " + valueMultiplicator + ", EMA smooth factor = " + smooth_factor + ", Log decay = " + decay);
   // Last call to a debug.prStrOnce() function in the processing runtime.
   debug.DonePrinting();
   fft.forward(in.mix);
@@ -333,7 +349,7 @@ void draw()
     if (fftHistBufferCount == 0) {
       // Fill the FFT history buffer with new values from the FFT forward on the mix buffer 
       for (int i = 0; i < fftHistSize; i++) {
-        fill_fft_history_filter(fftHistBufferCount, i, fft.getBand(i), 4);
+        fill_fft_history_filter(fftHistBufferCount, i, fft.getBand(i), valueMultiplicator);
       }
     }
   }
@@ -357,7 +373,7 @@ void draw()
       for (int i = 0; i < fftHistSize - 1; i++)
       {   
         oldx=x;   
-        x=logPos[i]; // Log base 10 scale on the FFT index, why ?      
+        x=logPos[i]; // Log base 10 scale on the FFT index in order to center artificially the frequencies bands where things happen. Frequency weighting is probably better.      
         line(oldx*80, -fftHistory[fftHistBufferCount][i], -fftHistBufferCount*iterationDistance, x*80, -fftHistory[fftHistBufferCount][i+1], -fftHistBufferCount*iterationDistance);
         // FIXME: build the log base 10 scale displaying with some smart skipping 
         //if ((i%10==0)&&(fftHistBufferCount==0))
@@ -396,7 +412,7 @@ void draw()
       line(i*20, -fftHistory[0][i], (i+1)*20, -fftHistory[0][i+1]);
     }
   }
-  debug.prStr(frameRate + " fps");
+  //debug.prStr(frameRate + " fps");
 } 
 
 void stop()
