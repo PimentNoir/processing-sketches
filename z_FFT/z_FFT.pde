@@ -34,7 +34,7 @@ FFT fft;
 WindowFunction fftWindow;
 AudioInput in;
 int nrOfIterations = 100;
-int iterationDistance = 80;
+int iterationDistance = 40;
 int bufferSize = 2048;
 int fftHistSize, fftForwardCount;
 float[] logPos;
@@ -52,7 +52,7 @@ void setup()
     keys[i] = false;
   }
   // Zero NaN FFT values to avoid display glitches
-  isZeroNaN = false;
+  isZeroNaN = true;
   // Debug for now.
   isDebug = true;
   debug = new Debug(isDebug);
@@ -301,7 +301,7 @@ void draw()
       fft.forward(in.mix);
     }
     int indexCount = (nrOfIterations - 1) - fftForwardCount;
-    debug.prStr("IndexCount = " + indexCount + " in FFT history init loop");
+    debug.prStr("indexCount = " + indexCount + " in FFT history init loop");
     for (int i = 0; i < fftHistSize; i++) {
       fill_fft_history_filter(indexCount, i, fft.getBand(i), 4);
     }
