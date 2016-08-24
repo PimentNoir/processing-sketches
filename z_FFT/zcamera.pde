@@ -84,10 +84,10 @@ class Zcam {
 void mouseWheel(MouseEvent msEvent) {  
   float delta = msEvent.getCount();
   if (delta > 0) {
-    myCamera.camDistance += delta*2;
+    myCamera.camDistance += delta*4;
   }
   if (delta < 0) {
-    myCamera.camDistance += delta*2;
+    myCamera.camDistance += delta*4;
   }
 }
 //-----------------------	
