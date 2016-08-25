@@ -78,15 +78,15 @@ void setup()
   fftHistSize = fft.specSize(); // Give the FFT history buffer size for a fixed first index the number of FFT values. 
   fftHistory = new float[nrOfIterations][fftHistSize]; // We keep nrOfIterations of all FFT values at a given point in time.
   fftForwardCount = 0;
-  fft_history_filter = 1;
+  fft_history_filter = 0;
   // Log decay FFT filter, better on clean sound source such as properly mixed songs in the time domain.
   // In the frequency domain, it's a visual smoother.
-  decay = 0.97f;
+  decay = 0.93f;
   // Exponential Moving Average aka EMA FFT filter, better on unclean sound source in the time domain, it's a low pass filter.
   // In the frequency domain, it's also a very simple and efficient visual smoother. 
   // Adjust the default smooth factor for a visual rendering very smooth for the human eyes.
-  smooth_factor = 0.97f;
-  valueMultiplicator = 6;
+  smooth_factor = 0.93f;
+  valueMultiplicator = 10;
   visualization_type = 0;
   logPos = new float[fftHistSize];
   for (int i = 0; i < fftHistSize; i++) { 
@@ -334,7 +334,7 @@ void draw()
   } // Now we have an FFT history of nrOfIterations size, last values at index = 0 on the first dimension
 
   debug.prStrOnce("fftForwardCount = " + fftForwardCount + " at the end of the FFT history init loop");
-  debug.prStrOnce("Value Multiplicator = " + valueMultiplicator + ", EMA smooth factor = " + smooth_factor + ", Log decay = " + decay);
+  debug.prStrOnce("Value multiplicator = " + valueMultiplicator + ", EMA smooth factor = " + smooth_factor + ", Log decay = " + decay);
   // Last call to a debug.prStrOnce() function in the processing runtime.
   debug.DonePrinting();
   fft.forward(in.mix);
@@ -343,6 +343,7 @@ void draw()
   // - add the new filtered values to the FFT history; 
   // - discard last index = 0 FFT values in the history. 
   for (int fftHistBufferCount = nrOfIterations - 1; fftHistBufferCount >= 0; fftHistBufferCount--) {
+    // FIXME: Optimize the NaN values removal  (One in the FFT history init loop, and only the newly added values afterwhile)
     for (int i = 0; i < fftHistSize; i++)
     {
       // Zero NaN values in FFT history
