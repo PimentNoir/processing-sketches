@@ -7,7 +7,8 @@
  * v + [0-9] = Change the visualization
  * With EMA filter : s + {-,+} = Increase or decrease the EMA smooth factor
  * With log decay filter : d + {-,+} = Increase or decrease the decay
- * 
+ * m + {-,+} = Increment or decrement the FFT values integer multiplicator
+ *
  */
 
 import ddf.minim.analysis.*;
@@ -46,7 +47,7 @@ void setup()
 {  
   size(1024, 576, P3D);
   textFont(createFont("SanSerif", 27));
-  keys = new boolean[17]; // Number of keys state to track
+  keys = new boolean[18]; // Number of keys state to track
   for (int i = 0; i < keys.length; i++ )
   {
     keys[i] = false;
@@ -132,83 +133,86 @@ void keyPressed() {
   if (key == '+') {
     keys[11] = true;
   }
-  if (key == 'f') {
+  if (key == 't') {
     keys[12] = true;
   }
-  if (key == 'v') {
+  if (key == 'f') {
     keys[13] = true;
   }
-  if (key == 's') {
+  if (key == 'v') {
     keys[14] = true;
   }
-  if (key == 'd') {
+  if (key == 's') {
     keys[15] = true;
   }
-  if (key == 'm') {
+  if (key == 'd') {
     keys[16] = true;
   }
-  if (keys[12] && keys[0]) {
+  if (key == 'm') {
+    keys[17] = true;
+  }
+  if (keys[13] && keys[0]) {
     fft_history_filter = 0; 
     debug.UndoPrinting();
   }
-  if (keys[12] && keys[1]) {
+  if (keys[13] && keys[1]) {
     fft_history_filter = 1;
     debug.UndoPrinting();
   }
-  if (keys[12] && keys[2]) {
+  if (keys[13] && keys[2]) {
     fft_history_filter = 2;
     debug.UndoPrinting();
   }
-  if (keys[12] && keys[3]) {
+  if (keys[13] && keys[3]) {
     fft_history_filter = 3;
     debug.UndoPrinting();
   }
-  if (keys[12] && keys[4]) {
+  if (keys[13] && keys[4]) {
     fft_history_filter = 4;
     debug.UndoPrinting();
   }
-  if (keys[12] && keys[5]) {
+  if (keys[13] && keys[5]) {
     fft_history_filter = 5;
     debug.UndoPrinting();
   }
-  if (keys[12] && keys[6]) {
+  if (keys[13] && keys[6]) {
     fft_history_filter = 6;
     debug.UndoPrinting();
   }
-  if (keys[13] && keys[0]) {
+  if (keys[14] && keys[0]) {
     visualization_type = 0; 
     debug.UndoPrinting();
   }
-  if (keys[13] && keys[1]) {
+  if (keys[14] && keys[1]) {
     visualization_type = 1;
     debug.UndoPrinting();
   }
-  if (keys[13] && keys[2]) {
+  if (keys[14] && keys[2]) {
     visualization_type = 2;
     debug.UndoPrinting();
   }
   float inc = 0.01f;
-  if (keys[14] && keys[10] && smooth_factor > inc && fft_history_filter == 0) {
+  if (keys[15] && keys[10] && smooth_factor > inc && fft_history_filter == 0) {
     smooth_factor -= inc;
     debug.UndoPrinting();
   }
-  if (keys[14] && keys[11] && smooth_factor < 1 - inc && fft_history_filter == 0) {
+  if (keys[15] && keys[11] && smooth_factor < 1 - inc && fft_history_filter == 0) {
     smooth_factor += inc;
     debug.UndoPrinting();
   }
-  if (keys[15] && keys[10] && decay > inc && fft_history_filter == 1) {
+  if (keys[16] && keys[10] && decay > inc && fft_history_filter == 1) {
     decay -= inc;
     debug.UndoPrinting();
   }
-  if (keys[15] && keys[11] && decay < 1 - inc && fft_history_filter == 1) {
+  if (keys[16] && keys[11] && decay < 1 - inc && fft_history_filter == 1) {
     decay += inc;
     debug.UndoPrinting();
   }
-  if (keys[16] && keys[10]) {
+  if (keys[17] && keys[10]) {
     valueMultiplicator--;
     debug.UndoPrinting();
   }
-  if (keys[16] && keys[11]) {
+  if (keys[17] && keys[11]) {
     valueMultiplicator++;
     debug.UndoPrinting();
   }
@@ -240,16 +244,18 @@ void keyReleased()
     keys[10] = false;
   if (key == '+')
     keys[11] = false;
-  if (key == 'f')
+  if (key == 't')
     keys[12] = false;
-  if (key == 'v')
+  if (key == 'f')
     keys[13] = false;
-  if (key == 's')
+  if (key == 'v')
     keys[14] = false;
-  if (key == 'd')
+  if (key == 's')
     keys[15] = false;
-  if (key == 'm')
+  if (key == 'd')
     keys[16] = false;
+  if (key == 'm')
+    keys[17] = false;
 }
 
 float ZeroNaNValue(float Value) {
