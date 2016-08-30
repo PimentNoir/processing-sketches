@@ -1,5 +1,5 @@
-/* //<>//
- * z_FFT by zambari and Jérôme Benoit <jerome.benoit@piment-noir.org
+/* 
+ * z_FFT by zambari and Jérôme Benoit <jerome.benoit@piment-noir.org>
  * parts based on Get Line In by Damien Di Fede.
  *   
  * Key bindings : 
