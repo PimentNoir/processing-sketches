@@ -9,28 +9,30 @@
  */
 
 public static final class Debug {
+  private static int printCount = 0;
   private static boolean enableDebug = false;
-  private static int printCount = 0; 
 
   public Debug(boolean enableDebug) {
     Debug.enableDebug = enableDebug;
-  }  
+  }
 
-  public void DonePrinting() {
+  public static void DonePrinting() {
     printCount = 1;
   }
 
-  public void UndoPrinting() {
-    if (enableDebug) printCount = 0;
+  public static void UndoPrinting() {
+    if (enableDebug) { 
+      printCount = 0;
+    }
   }
 
-  public void prStr(String string) {
+  public static void prStr(String string) {
     if (enableDebug) { 
       println(string);
     }
   }
 
-  public void prStrOnce(String string) {
+  public static void prStrOnce(String string) {
     if (printCount == 0 && enableDebug) { 
       println(string);
     }

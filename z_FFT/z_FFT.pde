@@ -1,4 +1,4 @@
-/*
+/* //<>//
  * z_FFT by zambari and Jérôme Benoit <jerome.benoit@piment-noir.org
  * parts based on Get Line In by Damien Di Fede.
  *   
@@ -64,7 +64,7 @@ void setup()
   Mixer.Info[] mixerInfo;
   mixerInfo = AudioSystem.getMixerInfo(); 
   for (int i = 0; i < mixerInfo.length; i++) {
-    debug.prStr(i + ": " + mixerInfo[i].getName());
+    Debug.prStr(i + ": " + mixerInfo[i].getName());
   } 
   // index = 0 is pulseaudio mixer on GNU/Linux
   Mixer mixer = AudioSystem.getMixer(mixerInfo[0]); 
@@ -153,68 +153,68 @@ void keyPressed() {
   }
   if (keys[13] && keys[0]) {
     fft_history_filter = 0; 
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
   if (keys[13] && keys[1]) {
     fft_history_filter = 1;
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
   if (keys[13] && keys[2]) {
     fft_history_filter = 2;
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
   if (keys[13] && keys[3]) {
     fft_history_filter = 3;
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
   if (keys[13] && keys[4]) {
     fft_history_filter = 4;
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
   if (keys[13] && keys[5]) {
     fft_history_filter = 5;
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
   if (keys[13] && keys[6]) {
     fft_history_filter = 6;
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
   if (keys[14] && keys[0]) {
     visualization_type = 0; 
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
   if (keys[14] && keys[1]) {
     visualization_type = 1;
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
   if (keys[14] && keys[2]) {
     visualization_type = 2;
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
   float inc = 0.01f;
   if (keys[15] && keys[10] && smooth_factor > inc && fft_history_filter == 0) {
     smooth_factor -= inc;
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
   if (keys[15] && keys[11] && smooth_factor < 1 - inc && fft_history_filter == 0) {
     smooth_factor += inc;
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
   if (keys[16] && keys[10] && decay > inc && fft_history_filter == 1) {
     decay -= inc;
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
   if (keys[16] && keys[11] && decay < 1 - inc && fft_history_filter == 1) {
     decay += inc;
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
   if (keys[17] && keys[10]) {
     valueMultiplicator--;
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
   if (keys[17] && keys[11]) {
     valueMultiplicator++;
-    debug.UndoPrinting();
+    Debug.UndoPrinting();
   }
 }
 
@@ -282,12 +282,12 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int Mu
   case 0:
     // Build the FTT history values with an Exponential Moving Average aka EMA filter on fftValue values
     fftHistory[histIndex][fftIndex]=fftHistory[histIndex][fftIndex]*smooth_factor+Multiplicator*fftValue*(1 - smooth_factor);
-    //debug.prStrOnce("FFT history filter : EMA with smooth factor = " + smooth_factor); 
+    //Debug.prStrOnce("FFT history filter : EMA with smooth factor = " + smooth_factor);
     break;
   case 1:
     // Build the FTT history values with a log decay on fftValue values
     fftHistory[histIndex][fftIndex] = max(fftHistory[histIndex][fftIndex] * decay, Multiplicator*(float)Math.log(1 + fftValue));
-    //debug.prStrOnce("FFT history filter : Log decay with decay = " + decay);
+    //Debug.prStrOnce("FFT history filter : Log decay with decay = " + decay);
     break;
   case 2:
     // Do nothing for now, was an EMA filter with some useless index skipping and automatic changing of the smooth factor value
@@ -301,19 +301,18 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int Mu
   case 5:
     // Build the history with a multiplicator of the values of fftValue
     fftHistory[histIndex][fftIndex]=Multiplicator*fftValue;
-    //debug.prStrOnce("FFT history filter : fftValue values with a multiplicator = " + Multiplicator);
+    //Debug.prStrOnce("FFT history filter : fftValue values with a multiplicator = " + Multiplicator);
     break;
   default: 
     // Build the history without any alteration in the values of fftValue
     fftHistory[histIndex][fftIndex]=fftValue;
-    //debug.prStrOnce("Default FFT history filter : fftValue values with no alteration");
+    //Debug.prStrOnce("Default FFT history filter : fftValue values with no alteration");
   }
 }
 
 void draw()
 {  
   myCamera.placeCam();
-  background(color(0, 0, 0, 15));
 
   // Init the FFT history given a forward on the mix buffer is done
   // Bound the history array to nrOfIterations on the first dimension
@@ -322,33 +321,28 @@ void draw()
       fft.forward(in.mix);
     }
     int indexCount = (nrOfIterations - 1) - fftForwardCount;
-    debug.prStr("indexCount = " + indexCount + " in FFT history init loop");
+    Debug.prStr("indexCount = " + indexCount + " in FFT history init loop");
     for (int i = 0; i < fftHistSize; i++) {
-      fill_fft_history_filter(indexCount, i, fft.getBand(i), valueMultiplicator);
+      fill_fft_history_filter(indexCount, i, ZeroNaNValue(fft.getBand(i)), valueMultiplicator);
     }
     // We count the number of forward iteration, starting at index = 0
-    debug.prStr("fftForwardCount = " + fftForwardCount + " before incrementation (in FFT history init loop)");
+    Debug.prStr("fftForwardCount = " + fftForwardCount + " before incrementation (in FFT history init loop)");
     fft.forward(in.mix);
     fftForwardCount++;
-    debug.prStr("fftForwardCount = " + fftForwardCount + " after incrementation (in FFT history init loop)");
+    Debug.prStr("fftForwardCount = " + fftForwardCount + " after incrementation (in FFT history init loop)");
   } // Now we have an FFT history of nrOfIterations size, last values at index = 0 on the first dimension
 
-  debug.prStrOnce("fftForwardCount = " + fftForwardCount + " at the end of the FFT history init loop");
-  debug.prStrOnce("Value multiplicator = " + valueMultiplicator + ", EMA smooth factor = " + smooth_factor + ", Log decay = " + decay);
+  Debug.prStrOnce("fftForwardCount = " + fftForwardCount + " at the end of the FFT history init loop");
+  Debug.prStrOnce("FFT values multiplicator = " + valueMultiplicator + ", EMA smooth factor = " + smooth_factor + ", Log decay = " + decay);
   // Last call to a debug.prStrOnce() function in the processing runtime.
-  debug.DonePrinting();
+  Debug.DonePrinting();
+
   fft.forward(in.mix);
 
   // Each time a forward on the mix buffer is done, 
   // - add the new filtered values to the FFT history; 
   // - discard last index = 0 FFT values in the history. 
   for (int fftHistBufferCount = nrOfIterations - 1; fftHistBufferCount >= 0; fftHistBufferCount--) {
-    // FIXME: Optimize the NaN values removal  (One in the FFT history init loop, and only the newly added values afterwhile)
-    for (int i = 0; i < fftHistSize; i++)
-    {
-      // Zero NaN values in FFT history
-      fftHistory[fftHistBufferCount][i] = ZeroNaNValue(fftHistory[fftHistBufferCount][i]);
-    }
     // Rotate the FFT history values on the first index
     if (fftHistBufferCount < nrOfIterations - 1) {
       arrayCopy(fftHistory[fftHistBufferCount], fftHistory[fftHistBufferCount+1]);
@@ -356,7 +350,7 @@ void draw()
     if (fftHistBufferCount == 0) {
       // Fill the FFT history buffer with new values from the FFT forward on the mix buffer 
       for (int i = 0; i < fftHistSize; i++) {
-        fill_fft_history_filter(fftHistBufferCount, i, fft.getBand(i), valueMultiplicator);
+        fill_fft_history_filter(fftHistBufferCount, i, ZeroNaNValue(fft.getBand(i)), valueMultiplicator);
       }
     }
   }
@@ -364,6 +358,7 @@ void draw()
   // Now draw something from the FFT history filtered values
   switch(visualization_type) {   
   case 0:
+    background(color(0, 0, 0, 15));
     // Draw the waveforms of fft
     stroke(255);
     for (int i = 0; i < fft.specSize(); i++)
@@ -382,13 +377,14 @@ void draw()
         oldx=x;   
         x=logPos[i]; // Log base 10 scale on the FFT index in order to center artificially the frequencies bands where things happen. Frequency weighting is probably better.      
         line(oldx*80, -fftHistory[fftHistBufferCount][i], -fftHistBufferCount*iterationDistance, x*80, -fftHistory[fftHistBufferCount][i+1], -fftHistBufferCount*iterationDistance);
-        // FIXME: build the log base 10 scale displaying with some smart skipping 
+        // FIXME: build the log base 10 scale index displaying with some smart skipping 
         //if ((i%10==0)&&(fftHistBufferCount==0))
         //  text(i, x*80, 27);
       }
     }
     break;
   case 1:
+    background(color(0, 0, 0, 15));
     // Draw the waveforms of fft
     stroke(255);
     for (int i = 0; i < fft.specSize(); i++)
@@ -409,17 +405,19 @@ void draw()
     }
     break;
   case 2:
+    background(color(0, 0, 0, 15));
     stroke(255);
     for (int i = 0; i < fftHistSize - 1; i++) {
       line(i*20, -fftHistory[0][i], (i+1)*20, -fftHistory[0][i+1]);
     }
   default:
+    background(color(0, 0, 0, 15));
     stroke(255);
     for (int i = 0; i < fftHistSize - 1; i++) {
       line(i*20, -fftHistory[0][i], (i+1)*20, -fftHistory[0][i+1]);
     }
   }
-  //debug.prStr(frameRate + " fps");
+  //Debug.prStr(frameRate + " fps");
 } 
 
 void stop()
