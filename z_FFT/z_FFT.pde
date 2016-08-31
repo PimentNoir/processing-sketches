@@ -38,7 +38,7 @@ int iterationDistance = 40;
 int bufferSize;
 int fftHistSize, fftForwardCount, valueMultiplicator;
 float[] logPos;
-float[][] fftHistory;
+float[][] fftHistory, fftFreqHistory;
 float[] angle;
 float[] y, x;
 Zcam myCamera;   
@@ -77,6 +77,7 @@ void setup()
   fft.window(fftWindow);
   fftHistSize = fft.specSize(); // Give the FFT history buffer size for a fixed first index the number of FFT values. 
   fftHistory = new float[nrOfIterations][fftHistSize]; // We keep nrOfIterations of all FFT values at a given point in time.
+  fftFreqHistory = new float[nrOfIterations][fftHistSize];
   fftForwardCount = 0;
   fft_history_filter = 0;
   // Log decay FFT filter, better on clean sound source such as properly mixed songs in the time domain.
@@ -283,16 +284,18 @@ float dB(float x) {
 // How to fill the FFT history at histIndex with values?
 // FIXME?: Pass the filter type as an argument
 // FIXME: Pass as arguments the bidimensional array class with the boundaries 
-void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int Multiplicator) {
+void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int fftValueMultiplicator, float fftFreqValue, float fftFreqValueMultiplicator) {
   switch(fft_history_filter) {
   case 0:
     // Build the FTT history values with an Exponential Moving Average aka EMA filter on fftValue values
-    fftHistory[histIndex][fftIndex]=fftHistory[histIndex][fftIndex]*smooth_factor+Multiplicator*fftValue*(1 - smooth_factor);
+    fftHistory[histIndex][fftIndex]=fftHistory[histIndex][fftIndex]*smooth_factor+fftValueMultiplicator*fftValue*(1 - smooth_factor);
+    fftFreqHistory[histIndex][fftIndex]=fftFreqHistory[histIndex][fftIndex]*smooth_factor+fftFreqValueMultiplicator*fftFreqValue*(1 - smooth_factor); 
     //Debug.prStrOnce("FFT history filter : EMA with smooth factor = " + smooth_factor);
     break;
   case 1:
     // Build the FTT history values with a log decay on fftValue values
-    fftHistory[histIndex][fftIndex] = max(fftHistory[histIndex][fftIndex] * decay, Multiplicator*(float)Math.log(1 + fftValue));
+    fftHistory[histIndex][fftIndex] = max(fftHistory[histIndex][fftIndex] * decay, fftValueMultiplicator*(float)Math.log(1 + fftValue));
+    fftFreqHistory[histIndex][fftIndex] = max(fftFreqHistory[histIndex][fftIndex] * decay, fftValueMultiplicator*(float)Math.log(1 + fftValue));
     //Debug.prStrOnce("FFT history filter : Log decay with decay = " + decay);
     break;
   case 2:
@@ -306,12 +309,14 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int Mu
     break;
   case 5:
     // Build the history with a multiplicator of the values of fftValue
-    fftHistory[histIndex][fftIndex]=Multiplicator*fftValue;
+    fftHistory[histIndex][fftIndex]=fftValueMultiplicator*fftValue;
+    fftFreqHistory[histIndex][fftIndex]=fftFreqValueMultiplicator*fftValue;
     //Debug.prStrOnce("FFT history filter : fftValue values with a multiplicator = " + Multiplicator);
     break;
   default: 
     // Build the history without any alteration in the values of fftValue
     fftHistory[histIndex][fftIndex]=fftValue;
+    fftFreqHistory[histIndex][fftIndex]=fftFreqValue;
     //Debug.prStrOnce("Default FFT history filter : fftValue values with no alteration");
   }
 }
@@ -365,7 +370,7 @@ void draw()
     int indexCount = (nrOfIterations - 1) - fftForwardCount;
     Debug.prStr("indexCount = " + indexCount + " in FFT history init loop");
     for (int i = 0; i < fftHistSize; i++) {
-      fill_fft_history_filter(indexCount, i, ZeroNaNValue(fft.getBand(i)), valueMultiplicator);
+      fill_fft_history_filter(indexCount, i, ZeroNaNValue(fft.getBand(i)), valueMultiplicator, ZeroNaNValue(fft.getFreq(i)), valueMultiplicator);
     }
     // We count the number of forward iteration, starting at index = 0
     Debug.prStr("fftForwardCount = " + fftForwardCount + " before incrementation (in FFT history init loop)");
@@ -388,11 +393,12 @@ void draw()
     // Rotate the FFT history values on the first index
     if (fftHistBufferCount < nrOfIterations - 1) {
       arrayCopy(fftHistory[fftHistBufferCount], fftHistory[fftHistBufferCount+1]);
+      arrayCopy(fftFreqHistory[fftHistBufferCount], fftFreqHistory[fftHistBufferCount+1]);
     }
     if (fftHistBufferCount == 0) {
       // Fill the FFT history buffer with new values from the FFT forward on the mix buffer 
       for (int i = 0; i < fftHistSize; i++) {
-        fill_fft_history_filter(fftHistBufferCount, i, ZeroNaNValue(fft.getBand(i)), valueMultiplicator);
+        fill_fft_history_filter(fftHistBufferCount, i, ZeroNaNValue(fft.getBand(i)), valueMultiplicator, ZeroNaNValue(fft.getFreq(i)), valueMultiplicator);
       }
     }
   }
