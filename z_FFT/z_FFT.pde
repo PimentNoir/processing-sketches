@@ -295,7 +295,7 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
   case 1:
     // Build the FTT history values with a log decay on fftValue values
     fftHistory[histIndex][fftIndex] = max(fftHistory[histIndex][fftIndex] * decay, fftValueMultiplicator*(float)Math.log(1 + fftValue));
-    fftFreqHistory[histIndex][fftIndex] = max(fftFreqHistory[histIndex][fftIndex] * decay, fftValueMultiplicator*(float)Math.log(1 + fftValue));
+    fftFreqHistory[histIndex][fftIndex] = max(fftFreqHistory[histIndex][fftIndex] * decay, fftFreqValueMultiplicator*(float)Math.log(1 + fftFreqValue));
     //Debug.prStrOnce("FFT history filter : Log decay with decay = " + decay);
     break;
   case 2:
@@ -310,7 +310,7 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
   case 5:
     // Build the history with a multiplicator of the values of fftValue
     fftHistory[histIndex][fftIndex]=fftValueMultiplicator*fftValue;
-    fftFreqHistory[histIndex][fftIndex]=fftFreqValueMultiplicator*fftValue;
+    fftFreqHistory[histIndex][fftIndex]=fftFreqValueMultiplicator*fftFreqValue;
     //Debug.prStrOnce("FFT history filter : fftValue values with a multiplicator = " + Multiplicator);
     break;
   default: 
