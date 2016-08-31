@@ -25,7 +25,6 @@ int fft_history_filter;
 int visualization_type;
 float smooth_factor, decay;
 
-
 // Non runtime booleans.
 boolean isDebug;
 boolean isZeroNaN;
@@ -40,8 +39,9 @@ int bufferSize;
 int fftHistSize, fftForwardCount, valueMultiplicator;
 float[] logPos;
 float[][] fftHistory;
-Zcam myCamera; 
-LFO lfo1;  
+float[] angle;
+float[] y, x;
+Zcam myCamera;   
 
 void setup()
 {  
@@ -87,13 +87,15 @@ void setup()
   // Adjust the default smooth factor for a visual rendering very smooth for the human eyes.
   smooth_factor = 0.93f;
   valueMultiplicator = 10;
-  visualization_type = 0;
+  visualization_type = 3;
+  y = new float[fftHistSize];
+  x = new float[fftHistSize];
+  angle = new float[fftHistSize];
   logPos = new float[fftHistSize];
   for (int i = 0; i < fftHistSize; i++) { 
     logPos[i] = (float)Math.log10(i)*10; // It's like the dB log scale
   };
   myCamera = new Zcam();
-  lfo1 = new LFO(6000);
 }
 
 void keyPressed() { 
@@ -189,6 +191,10 @@ void keyPressed() {
   }
   if (keys[14] && keys[2]) {
     visualization_type = 2;
+    Debug.UndoPrinting();
+  }
+  if (keys[14] && keys[3]) {
+    visualization_type = 3;
     Debug.UndoPrinting();
   }
   float inc = 0.01f;
@@ -310,6 +316,42 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int Mu
   }
 }
 
+void doubleAtomicSprocket() {
+  noStroke();
+  pushMatrix();
+  translate(width/2, height/2);
+  for (int i = 0; i < fftHistSize; i++) {
+    y[i] = y[i] + fft.getBand(i)/100;
+    x[i] = x[i] + fft.getFreq(i)/100;
+    angle[i] = angle[i] + fft.getFreq(i)/2000;
+    rotateX(sin(angle[i]/2));
+    rotateY(cos(angle[i]/2));
+    //stroke(fft.getFreq(i)*2,0,fft.getBand(i)*2);
+    fill(fft.getFreq(i)*2, 0, fft.getBand(i)*2);
+    pushMatrix();
+    translate((x[i]+50)%width/3, (y[i]+50)%height/3);
+    box(fft.getBand(i)/20+fft.getFreq(i)/15);
+    popMatrix();
+  }
+  popMatrix();
+  pushMatrix();
+  translate(width/2, height/2, 0);
+  for (int i = 0; i < fftHistSize; i++) {
+    y[i] = y[i] + fft.getBand(i)/1000;
+    x[i] = x[i] + fft.getFreq(i)/1000;
+    angle[i] = angle[i] + fft.getFreq(i)/100000;
+    rotateX(sin(angle[i]/2));
+    rotateY(cos(angle[i]/2));
+    //stroke(fft.getFreq(i)*2,0,fft.getBand(i)*2);
+    fill(0, 255-fft.getFreq(i)*2, 255-fft.getBand(i)*2);
+    pushMatrix();
+    translate((x[i]+250)%width, (y[i]+250)%height);
+    box(fft.getBand(i)/20+fft.getFreq(i)/15);
+    popMatrix();
+  }
+  popMatrix();
+}
+
 void draw()
 {  
   myCamera.placeCam();
@@ -410,6 +452,12 @@ void draw()
     for (int i = 0; i < fftHistSize - 1; i++) {
       line(i*20, -fftHistory[0][i], (i+1)*20, -fftHistory[0][i+1]);
     }
+    break;
+  case 3:
+    background(0);
+    // FIXME: Make use of the fftHistory[][] array as an argument
+    doubleAtomicSprocket();
+    break;
   default:
     background(color(0, 0, 0, 15));
     stroke(255);
