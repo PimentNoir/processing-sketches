@@ -19,7 +19,7 @@ String axiom = "F";
 //String rule = "-F++[aFz]"; //shaman
 //String rule = "zFz-F"; //flowerish
 //String rule = "Fz+FzFF"; //turkey...
-//String rule = "F[-zF[zF]]"; //a nice tree
+String rule = "F[-zF[zF]]"; //a nice tree
 //String rule = "aFaF[z[+F]]"; //freaky tree
 //String rule = "F+z+F"; // mandala
 //String rule = "+FFz[-z-F]"; //thorn bush
@@ -31,7 +31,7 @@ String axiom = "F";
 //String rule = "F[+F][--F][aF][zzF]"; //asymmetree (awesome)
 //String rule = "[-aF]FFFa"; //freakstarfishcake
 //String rule = "FaF-"; //geode ashtray
-String rule = "[F-F]FFa"; //star
+//String rule = "[F-F]FFa"; //star
 //String rule = "F+FaF-FzF";
 //String rule = "a+FzFFzF+"; //a 90 d 3 s .5 
 //String rule = "F[FF]z+a-a+F[+Fzaaz]"; //thornwheel
@@ -46,7 +46,7 @@ float scaleFactor = .7;
 float angleStep = 1;
 float zoom = 0;
 float xrot = 0;
-float yrot=0;
+float yrot = 0;
 boolean zooming = false;
 float zoom_start = 0;
 float x_start = 0;
@@ -65,7 +65,7 @@ void setup() {
   noStroke();
   PFont arial = loadFont("ArialMT-12.vlw");
   textFont(arial);
-  textMode(SCREEN);
+  //textMode(SCREEN);
 }
 void draw() {
   if (mousePressed) {
