@@ -321,37 +321,37 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
   }
 }
 
-void doubleAtomicSprocket() {
+void doubleAtomicSprocket(float[] fftValues, float[] fftFreqValues) {
   noStroke();
   pushMatrix();
   translate(width/2, height/2);
-  for (int i = 0; i < fftHistSize; i++) {
-    y[i] = y[i] + fft.getBand(i)/100;
-    x[i] = x[i] + fft.getFreq(i)/100;
-    angle[i] = angle[i] + fft.getFreq(i)/2000;
+  for (int i = 0; i < fftValues.length; i++) {
+    y[i] = y[i] + fftValues[i]/100;
+    x[i] = x[i] + fftFreqValues[i]/100;
+    angle[i] = angle[i] + fftFreqValues[i]/2000;
     rotateX(sin(angle[i]/2));
     rotateY(cos(angle[i]/2));
-    //stroke(fft.getFreq(i)*2,0,fft.getBand(i)*2);
-    fill(fft.getFreq(i)*2, 0, fft.getBand(i)*2);
+    //stroke(fftFreqValues[i]*2,0,fftValues[i]*2);
+    fill(fftFreqValues[i]*2, 0, fftValues[i]*2);
     pushMatrix();
     translate((x[i]+50)%width/3, (y[i]+50)%height/3);
-    box(fft.getBand(i)/20+fft.getFreq(i)/15);
+    box(fftValues[i]/20+fftFreqValues[i]/15);
     popMatrix();
   }
   popMatrix();
   pushMatrix();
   translate(width/2, height/2, 0);
-  for (int i = 0; i < fftHistSize; i++) {
-    y[i] = y[i] + fft.getBand(i)/1000;
-    x[i] = x[i] + fft.getFreq(i)/1000;
-    angle[i] = angle[i] + fft.getFreq(i)/100000;
+  for (int i = 0; i < fftValues.length; i++) {
+    y[i] = y[i] + fftValues[i]/1000;
+    x[i] = x[i] + fftFreqValues[i]/1000;
+    angle[i] = angle[i] + fftFreqValues[i]/100000;
     rotateX(sin(angle[i]/2));
     rotateY(cos(angle[i]/2));
-    //stroke(fft.getFreq(i)*2,0,fft.getBand(i)*2);
-    fill(0, 255-fft.getFreq(i)*2, 255-fft.getBand(i)*2);
+    //stroke(fftFreqValues[i]*2,0,fftValues[i]*2);
+    fill(0, 255-fftFreqValues[i]*2, 255-fftValues[i]*2);
     pushMatrix();
     translate((x[i]+250)%width, (y[i]+250)%height);
-    box(fft.getBand(i)/20+fft.getFreq(i)/15);
+    box(fft.getBand(i)/20+fftFreqValues[i]/15);
     popMatrix();
   }
   popMatrix();
@@ -462,7 +462,7 @@ void draw()
   case 3:
     background(0);
     // FIXME: Make use of the fftHistory[][] array as an argument
-    doubleAtomicSprocket();
+    doubleAtomicSprocket(fftHistory[0], fftFreqHistory[0]);
     break;
   default:
     background(color(0, 0, 0, 15));

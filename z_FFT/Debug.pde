@@ -9,8 +9,8 @@
  */
 
 public static final class Debug {
-  private static int printCount = 0;
   private static boolean enableDebug = false;
+  private static int printCount = 0;
 
   public Debug(boolean enableDebug) {
     Debug.enableDebug = enableDebug;
