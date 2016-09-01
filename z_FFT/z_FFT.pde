@@ -299,7 +299,10 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
     //Debug.prStrOnce("FFT history filter : Log decay with decay = " + decay);
     break;
   case 2:
-    // Do nothing for now, was an EMA filter with some useless index skipping and automatic changing of the smooth factor value
+    // Build the FFT history values with a Simple Moving Average aka SMA with window = nrOfIterations
+    // FIXME: Init the SMA properly at the beginning
+    // fftHistory[histIndex][fftIndex] = (fftHistory[histIndex][fftIndex]* (histIndex - 1) + fftValue)/histIndex; 
+    fftHistory[histIndex][fftIndex] = fftHistory[histIndex][fftIndex] + (fftValue - fftHistory[histIndex][fftIndex])/(fftHistory.length - 1);
     break;
   case 3: 
     // Do nothing for now
@@ -311,13 +314,13 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
     // Build the history with a multiplicator of the values of fftValue
     fftHistory[histIndex][fftIndex]=fftValueMultiplicator*fftValue;
     fftFreqHistory[histIndex][fftIndex]=fftFreqValueMultiplicator*fftFreqValue;
-    //Debug.prStrOnce("FFT history filter : fftValue values with a multiplicator = " + Multiplicator);
+    //Debug.prStrOnce("FFT history filter : fft values with a multiplicator = " + fftValueMultiplicator);
     break;
   default: 
     // Build the history without any alteration in the values of fftValue
     fftHistory[histIndex][fftIndex]=fftValue;
     fftFreqHistory[histIndex][fftIndex]=fftFreqValue;
-    //Debug.prStrOnce("Default FFT history filter : fftValue values with no alteration");
+    //Debug.prStrOnce("Default FFT history filter : fft values with no alteration");
   }
 }
 
@@ -351,7 +354,7 @@ void doubleAtomicSprocket(float[] fftValues, float[] fftFreqValues) {
     fill(0, 255-fftFreqValues[i]*2, 255-fftValues[i]*2);
     pushMatrix();
     translate((x[i]+250)%width, (y[i]+250)%height);
-    box(fft.getBand(i)/20+fftFreqValues[i]/15);
+    box(fftValues[i]/20+fftFreqValues[i]/15);
     popMatrix();
   }
   popMatrix();
@@ -409,17 +412,21 @@ void draw()
     background(color(0, 0, 0, 15));
     // Draw the waveforms of fft
     stroke(255);
+
+    pushMatrix();
     for (int i = 0; i < fft.specSize(); i++)
-    {
+    {     
       line(i, 200+50 + in.left.get(i)*50, i+1, 200+60 + in.left.get(i+1)*50);
       line(i, 200+80 + in.right.get(i)*50, i+1, 200+90 + in.right.get(i+1)*50);
     }
+    popMatrix();
 
     float x=0;
     float oldx=0;
     for (int fftHistBufferCount = 0; fftHistBufferCount < nrOfIterations; fftHistBufferCount++)
     {
       stroke(255-255*(fftHistBufferCount)/(nrOfIterations-1));
+      pushMatrix();
       for (int i = 0; i < fftHistSize - 1; i++)
       {   
         oldx=x;   
@@ -429,47 +436,55 @@ void draw()
         //if ((i%10==0)&&(fftHistBufferCount==0))
         //  text(i, x*80, 27);
       }
+      popMatrix();
     }
     break;
   case 1:
     background(color(0, 0, 0, 15));
     // Draw the waveforms of fft
     stroke(255);
+    pushMatrix();
     for (int i = 0; i < fft.specSize(); i++)
     {
       line(i, 200+50 + in.left.get(i)*50, i+1, 200+60 + in.left.get(i+1)*50);
       line(i, 200+80 + in.right.get(i)*50, i+1, 200+90 + in.right.get(i+1)*50);
     }
+    popMatrix();
 
     for (int fftHistBufferCount = 0; fftHistBufferCount < nrOfIterations; fftHistBufferCount++)
     {
       stroke(255-255*(fftHistBufferCount)/(nrOfIterations-1));
+      pushMatrix();
       for (int i = 0; i < fftHistSize - 1; i++)
       {   
         line(i*10, -fftHistory[fftHistBufferCount][i], -fftHistBufferCount*iterationDistance, (i+1)*10, -fftHistory[fftHistBufferCount][i+1], -fftHistBufferCount*iterationDistance);
         if ((i%10==0)&&(fftHistBufferCount==0))
           text(i, i*10, 27);
       }
+      popMatrix();
     }
     break;
   case 2:
     background(color(0, 0, 0, 15));
     stroke(255);
+    pushMatrix();
     for (int i = 0; i < fftHistSize - 1; i++) {
       line(i*20, -fftHistory[0][i], (i+1)*20, -fftHistory[0][i+1]);
     }
+    popMatrix();
     break;
   case 3:
     background(0);
-    // FIXME: Make use of the fftHistory[][] array as an argument
     doubleAtomicSprocket(fftHistory[0], fftFreqHistory[0]);
     break;
   default:
     background(color(0, 0, 0, 15));
     stroke(255);
+    pushMatrix();
     for (int i = 0; i < fftHistSize - 1; i++) {
       line(i*20, -fftHistory[0][i], (i+1)*20, -fftHistory[0][i+1]);
     }
+    popMatrix();
   }
   //Debug.prStr(frameRate + " fps");
 } 
