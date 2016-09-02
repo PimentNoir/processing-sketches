@@ -88,7 +88,7 @@ void setup()
   // Adjust the default smooth factor for a visual rendering very smooth for the human eyes.
   smooth_factor = 0.93f;
   valueMultiplicator = 10;
-  visualization_type = 3;
+  visualization_type = 0;
   y = new float[fftHistSize];
   x = new float[fftHistSize];
   angle = new float[fftHistSize];
@@ -168,6 +168,7 @@ void keyPressed() {
   }
   if (keys[13] && keys[3]) {
     fft_history_filter = 3;
+    SMAFirstRun = false;
     Debug.UndoPrinting();
   }
   if (keys[13] && keys[4]) {
@@ -281,10 +282,11 @@ float dB(float x) {
   }
 }
 
+boolean SMAFirstRun = true;
 // How to fill the FFT history at histIndex with values?
 // FIXME?: Pass the filter type as an argument
 // FIXME: Pass as arguments the bidimensional array class with the boundaries 
-void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int fftValueMultiplicator, float fftFreqValue, float fftFreqValueMultiplicator) {
+void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int fftValueMultiplicator, float fftFreqValue, int fftFreqValueMultiplicator) {
   switch(fft_history_filter) {
   case 0:
     // Build the FTT history values with an Exponential Moving Average aka EMA filter on fftValue values
@@ -300,9 +302,16 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
     break;
   case 2:
     // Build the FFT history values with a Simple Moving Average aka SMA with window = nrOfIterations
-    // FIXME: Init the SMA properly at the beginning
-    // fftHistory[histIndex][fftIndex] = (fftHistory[histIndex][fftIndex]* (histIndex - 1) + fftValue)/histIndex; 
-    fftHistory[histIndex][fftIndex] = fftHistory[histIndex][fftIndex] + (fftValue - fftHistory[histIndex][fftIndex])/(fftHistory.length - 1);
+    if (SMAFirstRun) {
+      float Sum = 0.0f;
+      for (int indexHist = 0; indexHist < nrOfIterations; indexHist++) {
+        Sum += fftHistory[indexHist][fftIndex];
+      }
+      float SMAvg = Sum/nrOfIterations;
+      fftHistory[histIndex][fftIndex] = SMAvg;
+      SMAFirstRun = false;
+    }
+    fftHistory[histIndex][fftIndex] = fftHistory[histIndex][fftIndex] + (fftValue - fftHistory[nrOfIterations-1][fftIndex])/(fftHistory.length - 1);
     break;
   case 3: 
     // Do nothing for now
@@ -425,7 +434,7 @@ void draw()
     float oldx=0;
     for (int fftHistBufferCount = 0; fftHistBufferCount < nrOfIterations; fftHistBufferCount++)
     {
-      stroke(255-255*(fftHistBufferCount)/(nrOfIterations-1));
+      stroke(255-255*(fftHistBufferCount)/(nrOfIterations));
       pushMatrix();
       for (int i = 0; i < fftHistSize - 1; i++)
       {   
@@ -453,7 +462,7 @@ void draw()
 
     for (int fftHistBufferCount = 0; fftHistBufferCount < nrOfIterations; fftHistBufferCount++)
     {
-      stroke(255-255*(fftHistBufferCount)/(nrOfIterations-1));
+      stroke(255-255*(fftHistBufferCount)/(nrOfIterations));
       pushMatrix();
       for (int i = 0; i < fftHistSize - 1; i++)
       {   
