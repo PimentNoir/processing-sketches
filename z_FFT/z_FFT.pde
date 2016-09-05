@@ -168,7 +168,6 @@ void keyPressed() {
   }
   if (keys[13] && keys[3]) {
     fft_history_filter = 3;
-    SMAFirstRun = false;
     Debug.UndoPrinting();
   }
   if (keys[13] && keys[4]) {
@@ -282,7 +281,7 @@ float dB(float x) {
   }
 }
 
-boolean SMAFirstRun = true;
+boolean SMAFirstrun = true;
 // How to fill the FFT history at histIndex with values?
 // FIXME?: Pass the filter type as an argument
 // FIXME: Pass as arguments the bidimensional array class with the boundaries 
@@ -301,17 +300,27 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
     //Debug.prStrOnce("FFT history filter : Log decay with decay = " + decay);
     break;
   case 2:
-    // Build the FFT history values with a Simple Moving Average aka SMA with window = nrOfIterations
-    if (SMAFirstRun) {
-      float Sum = 0.0f;
-      for (int indexHist = 0; indexHist < nrOfIterations; indexHist++) {
-        Sum += fftHistory[indexHist][fftIndex];
-      }
-      float SMAvg = Sum/nrOfIterations;
-      fftHistory[histIndex][fftIndex] = SMAvg;
-      SMAFirstRun = false;
+    // Build the FFT history values with a Simple Moving Average aka SMA with window = nrOfIterations on the first index
+    if (nrOfIterations < 1) { 
+      Debug.prStr("nrOfIterations doit être supérieur à zéro"); 
+      exit();
     }
-    fftHistory[histIndex][fftIndex] = fftHistory[histIndex][fftIndex] + (fftValue - fftHistory[nrOfIterations-1][fftIndex])/(fftHistory.length - 1);
+    if (SMAFirstrun) {
+      float[] SMAAvg = new float[fftHistSize];
+      for (int i = 0; i < fftHistSize; i++) {
+        SMAAvg[i] = 0;
+      }
+      for (int ffIndex = 0; ffIndex < fftHistSize; ffIndex++) {
+        SMAAvg[ffIndex] = SMAAvg[ffIndex] + fftHistory[histIndex][ffIndex];
+        if (ffIndex == fftHistSize - 1) {
+          SMAAvg[ffIndex] = SMAAvg[fftIndex] / SMAAvg.length;
+          fftHistory[histIndex][ffIndex] = SMAAvg[fftIndex];
+        }
+      }
+      SMAFirstrun = false;
+    } else {   
+      fftHistory[histIndex][fftIndex] = fftHistory[histIndex][fftIndex] + (fftValueMultiplicator * fftValue - fftHistory[nrOfIterations - 1][fftIndex])/(nrOfIterations);
+    }
     break;
   case 3: 
     // Do nothing for now
@@ -371,6 +380,8 @@ void doubleAtomicSprocket(float[] fftValues, float[] fftFreqValues) {
 
 void draw()
 {  
+  // FIXME: Should be per visualization 
+  colorMode(RGB, 255);
   myCamera.placeCam();
 
   // Init the FFT history given a forward on the mix buffer is done
