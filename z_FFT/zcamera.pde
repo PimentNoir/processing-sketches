@@ -79,47 +79,6 @@ class Zcam {
 
 // -------- CAMERA END
 
-
-//-----------------------	
-void mouseWheel(MouseEvent msEvent) {  
-  float delta = msEvent.getCount();
-  if (delta > 0) {
-    myCamera.camDistance += delta*4;
-  }
-  if (delta < 0) {
-    myCamera.camDistance += delta*4;
-  }
-}
-//-----------------------	
-void mousePressed()
-{
-  myCamera.camXmouse=mouseX;
-  myCamera.camYmouse=mouseY;
-}
-//-----------------------	
-void mouseDragged() { 
-  //statements
-  // text((-myCamera.camXmouse+mouseX)/100.0,200,200);
-  // text(myCamera.camYmouse-mouseY,200,300);
-
-  if (mouseButton == RIGHT) {
-    myCamera.camAngleNext.y+=(-myCamera.camXmouse+mouseX)/100.0;
-    myCamera.camAngleNext.x+=(myCamera.camYmouse-mouseY)/100.0;
-  } 
-
-  if (mouseButton == LEFT)
-  {
-    myCamera.camOriginNext.x+=(myCamera.camXmouse-mouseX);
-    myCamera.camOriginNext.y+=(myCamera.camYmouse-mouseY);
-  }
-
-  myCamera.camXmouse=mouseX;
-  myCamera.camYmouse=mouseY;
-}
-
-
-//-----------------------
-
 class LFO {
   float m;
   public float period;
