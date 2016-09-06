@@ -73,6 +73,7 @@ void keyPressed() {
   }
   if (keys[13] && keys[3]) {
     fft_history_filter = 3;
+    if (!WMAFirstrun) WMAFirstrun = true;
     Debug.UndoPrinting();
   }
   if (keys[13] && keys[4]) {
