@@ -46,7 +46,7 @@ void setup()
 {  
   size(1024, 576, P3D);
   textFont(createFont("SanSerif", 27));
-  keys = new boolean[18]; // Number of keys state to track
+  keys = new boolean[nrKeys];
   for (int i = 0; i < keys.length; i++ )
   {
     keys[i] = false;
@@ -139,20 +139,29 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
       exit();
     }
     if (SMAFirstrun) {
-      float[] SMAAvg = new float[fftHistSize];
-      for (int i = 0; i < fftHistSize; i++) {
-        SMAAvg[i] = 0;
+      float[] SMAFFTAvg = new float[nrOfIterations];
+      float[] SMAFreqAvg = new float[nrOfIterations];
+      // Init the two local arrays
+      for (int i = 0; i < nrOfIterations; i++) {
+        SMAFFTAvg[i] = 0;
+        SMAFreqAvg[i] = 0;
       }
-      for (int ffIndex = 0; ffIndex < fftHistSize; ffIndex++) {
-        SMAAvg[ffIndex] = SMAAvg[ffIndex] + fftHistory[histIndex][ffIndex];
-        if (ffIndex == fftHistSize - 1) {
-          SMAAvg[ffIndex] = SMAAvg[fftIndex] / SMAAvg.length;
-          fftHistory[histIndex][ffIndex] = SMAAvg[fftIndex];
+      // The FFT values history has been properly initialized, so calculate the very first SMA values by band
+      for (int HIndex = 0; HIndex < nrOfIterations; HIndex++) {
+        SMAFFTAvg[HIndex] += fftValueMultiplicator * fftHistory[HIndex][fftIndex];
+        SMAFreqAvg[HIndex] += fftFreqValueMultiplicator * fftFreqHistory[HIndex][fftIndex];
+        if (HIndex == nrOfIterations - 1) {
+          SMAFFTAvg[HIndex] = SMAFFTAvg[HIndex] / SMAFFTAvg.length;
+          SMAFreqAvg[HIndex] = SMAFreqAvg[HIndex] / SMAFreqAvg.length;
+          fftHistory[HIndex][fftIndex] = SMAFFTAvg[fftIndex];
+          fftFreqHistory[HIndex][fftIndex] = SMAFreqAvg[fftIndex];
         }
       }
       SMAFirstrun = false;
-    } else {   
+    } else {
+      // Use recursive SMA formula afterwards 
       fftHistory[histIndex][fftIndex] = fftHistory[histIndex][fftIndex] + (fftValueMultiplicator * fftValue - fftHistory[nrOfIterations - 1][fftIndex])/(nrOfIterations);
+      fftFreqHistory[histIndex][fftIndex] = fftFreqHistory[histIndex][fftIndex] + (fftFreqValueMultiplicator * fftFreqValue - fftFreqHistory[nrOfIterations - 1][fftIndex])/(nrOfIterations);
     }
     break;
   case 3: 
@@ -190,6 +199,7 @@ void doubleAtomicSprocket(float[] fftValues, float[] fftFreqValues) {
     pushMatrix();
     translate((x[i]+50)%width/3, (y[i]+50)%height/3);
     box(fftValues[i]/20+fftFreqValues[i]/15);
+    //sphere(fftValues[i]/20+fftFreqValues[i]/15);
     popMatrix();
   }
   popMatrix();
@@ -206,6 +216,7 @@ void doubleAtomicSprocket(float[] fftValues, float[] fftFreqValues) {
     pushMatrix();
     translate((x[i]+250)%width, (y[i]+250)%height);
     box(fftValues[i]/20+fftFreqValues[i]/15);
+    //sphere(fftValues[i]/20+fftFreqValues[i]/15);
     popMatrix();
   }
   popMatrix();
@@ -247,12 +258,13 @@ void draw()
   // - discard last index = 0 FFT values in the history. 
   for (int fftHistBufferCount = nrOfIterations - 1; fftHistBufferCount >= 0; fftHistBufferCount--) {
     // Rotate the FFT history values on the first index
-    if (fftHistBufferCount < nrOfIterations - 1) {
+    if (fftHistBufferCount < nrOfIterations - 1) { 
       arrayCopy(fftHistory[fftHistBufferCount], fftHistory[fftHistBufferCount+1]);
       arrayCopy(fftFreqHistory[fftHistBufferCount], fftFreqHistory[fftHistBufferCount+1]);
     }
+    // histIndex = 0 is a special case
     if (fftHistBufferCount == 0) {
-      // Fill the FFT history buffer with new values from the FFT forward on the mix buffer 
+      // Fill the FFT history buffer with new values from the FFT forward on the mix buffer (histIndex = 0)
       for (int i = 0; i < fftHistSize; i++) {
         fill_fft_history_filter(fftHistBufferCount, i, ZeroNaNValue(fft.getBand(i)), valueMultiplicator, ZeroNaNValue(fft.getFreq(i)), valueMultiplicator);
       }
@@ -311,8 +323,10 @@ void draw()
       for (int i = 0; i < fftHistSize - 1; i++)
       {   
         line(i*10, -fftHistory[fftHistBufferCount][i], -fftHistBufferCount*iterationDistance, (i+1)*10, -fftHistory[fftHistBufferCount][i+1], -fftHistBufferCount*iterationDistance);
-        if ((i%10==0)&&(fftHistBufferCount==0))
+        if ((i%10==0)&&(fftHistBufferCount==0)) {
+          fill(255);
           text(i, i*10, 27);
+        }
       }
       popMatrix();
     }

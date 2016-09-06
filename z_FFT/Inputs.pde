@@ -1,4 +1,6 @@
 
+// Number of keys state to track
+int nrKeys = 18;
 boolean[] keys;
 
 void keyPressed() { 
