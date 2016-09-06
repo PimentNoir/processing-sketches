@@ -114,7 +114,7 @@ float dB(float x) {
   }
 }
 
-boolean SMAFirstrun = true;
+boolean WMAFirstrun = true, SMAFirstrun = true;
 // How to fill the FFT history at histIndex with values?
 // FIXME?: Pass the filter type as an argument
 // FIXME: Pass as arguments the bidimensional array class with the boundaries 
@@ -165,7 +165,27 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
     }
     break;
   case 3: 
-    // Do nothing for now
+    if (WMAFirstrun) {
+      float[] WMAFFTAvg = new float[nrOfIterations];
+      for (int i = 0; i < nrOfIterations; i++) {
+        WMAFFTAvg[i] = 0;
+        //WMAFreqAvg[i] = 0;
+      }
+      for (int HIndex = 0; HIndex < nrOfIterations; HIndex++) {
+        WMAFFTAvg[HIndex] += fftValueMultiplicator * (HIndex + 1) * fftHistory[HIndex][fftIndex];
+        //WMAFreqAvg[HIndex] += fftFreqValueMultiplicator * fftFreqHistory[HIndex][fftIndex];
+        if (HIndex == nrOfIterations - 1) {
+          WMAFFTAvg[HIndex] = (2 * WMAFFTAvg[HIndex]) / (WMAFFTAvg.length * (WMAFFTAvg.length + 1));
+          //WMAFreqAvg[HIndex] = WMAFreqAvg[HIndex] / WMAFreqAvg.length;
+          fftHistory[HIndex][fftIndex] = WMAFFTAvg[HIndex];
+          //fftFreqHistory[HIndex][fftIndex] = WMAFreqAvg[HIndex];
+        }
+      }
+      WMAFirstrun = false;
+    } else {
+      // Build the FFT history values with a Weighted Moving Average (special case : weight is the aritmetic suite)
+      fftHistory[histIndex][fftIndex] = (2 * fftValueMultiplicator * fftValue) / (nrOfIterations + 1) + fftHistory[histIndex][fftIndex];
+    }
     break;
   case 4:
     // Do nothing for now
