@@ -68,7 +68,7 @@ void keyPressed() {
   }
   if (keys[13] && keys[2]) {
     fft_history_filter = 2;
-    SMAFirstrun = true;
+    if (!SMAFirstrun) SMAFirstrun = true;
     Debug.UndoPrinting();
   }
   if (keys[13] && keys[3]) {

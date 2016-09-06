@@ -146,15 +146,15 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
         SMAFFTAvg[i] = 0;
         SMAFreqAvg[i] = 0;
       }
-      // The FFT values history has been properly initialized, so calculate the very first SMA values by band
+      // The FFT values history has been properly initialized, so calculate the very first SMA values
       for (int HIndex = 0; HIndex < nrOfIterations; HIndex++) {
         SMAFFTAvg[HIndex] += fftValueMultiplicator * fftHistory[HIndex][fftIndex];
         SMAFreqAvg[HIndex] += fftFreqValueMultiplicator * fftFreqHistory[HIndex][fftIndex];
         if (HIndex == nrOfIterations - 1) {
           SMAFFTAvg[HIndex] = SMAFFTAvg[HIndex] / SMAFFTAvg.length;
           SMAFreqAvg[HIndex] = SMAFreqAvg[HIndex] / SMAFreqAvg.length;
-          fftHistory[HIndex][fftIndex] = SMAFFTAvg[fftIndex];
-          fftFreqHistory[HIndex][fftIndex] = SMAFreqAvg[fftIndex];
+          fftHistory[HIndex][fftIndex] = SMAFFTAvg[HIndex];
+          fftFreqHistory[HIndex][fftIndex] = SMAFreqAvg[HIndex];
         }
       }
       SMAFirstrun = false;
