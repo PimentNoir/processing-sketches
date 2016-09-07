@@ -134,6 +134,7 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
     break;
   case 2:
     // Build the FFT history values with a Simple Moving Average aka SMA with window = nrOfIterations on the first index
+    // FIXME: Formulas are buggy
     if (nrOfIterations < 1) { 
       Debug.prStr("nrOfIterations doit être supérieur à zéro"); 
       exit();
@@ -164,14 +165,16 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
       fftFreqHistory[histIndex][fftIndex] = fftFreqHistory[histIndex][fftIndex] + (fftFreqValueMultiplicator * fftFreqValue - fftFreqHistory[nrOfIterations - 1][fftIndex])/(nrOfIterations);
     }
     break;
-  case 3: 
+  case 3:
+    // Build the FFT history values with a Weighted Moving Average (special case : weight is the arithmetic suite)
     if (WMAFirstrun) {
       float[] WMAFFTAvg = new float[nrOfIterations];
       for (int i = 0; i < nrOfIterations; i++) {
         WMAFFTAvg[i] = 0;
         //WMAFreqAvg[i] = 0;
       }
-      for (int HIndex = 0; HIndex < nrOfIterations; HIndex++) {
+      // 
+      for (int HIndex = nrOfIterations - 1; HIndex >= 0; HIndex--) {
         WMAFFTAvg[HIndex] += fftValueMultiplicator * (HIndex + 1) * fftHistory[HIndex][fftIndex];
         //WMAFreqAvg[HIndex] += fftFreqValueMultiplicator * fftFreqHistory[HIndex][fftIndex];
         if (HIndex == nrOfIterations - 1) {
@@ -183,12 +186,14 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
       }
       WMAFirstrun = false;
     } else {
-      // Build the FFT history values with a Weighted Moving Average (special case : weight is the aritmetic suite)
       fftHistory[histIndex][fftIndex] = (2 * fftValueMultiplicator * fftValue) / (nrOfIterations + 1) + fftHistory[histIndex][fftIndex];
     }
     break;
   case 4:
-    // Do nothing for now
+    // Build the FFT history values with a Modified Moving Average aka MMA (or Smoothed Moving Average aka SMA)
+    // MMA is a special case EMA : smooth_factor = 1 / window_size. 
+    fftHistory[histIndex][fftIndex] = ((nrOfIterations -1) * fftHistory[histIndex][fftIndex] + fftValueMultiplicator * fftValue) / nrOfIterations;
+    fftFreqHistory[histIndex][fftIndex] = ((nrOfIterations -1) * fftFreqHistory[histIndex][fftIndex] + fftFreqValueMultiplicator * fftFreqValue) / nrOfIterations; 
     break;
   case 5:
     // Build the history with a multiplicator of the values of fftValue
