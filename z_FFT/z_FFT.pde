@@ -134,7 +134,6 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
     break;
   case 2:
     // Build the FFT history values with a Simple Moving Average aka SMA with window = nrOfIterations on the first index
-    // FIXME: Formulas are buggy
     if (nrOfIterations < 1) { 
       Debug.prStr("nrOfIterations doit être supérieur à zéro"); 
       exit();
@@ -167,6 +166,7 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
     break;
   case 3:
     // Build the FFT history values with a Weighted Moving Average (special case : weight is the arithmetic suite)
+    // FIXME: Formulas are buggy
     if (WMAFirstrun) {
       float[] WMAFFTAvg = new float[nrOfIterations];
       for (int i = 0; i < nrOfIterations; i++) {
