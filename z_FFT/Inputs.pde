@@ -86,8 +86,9 @@ void keyPressed() {
   }
   if (keys[13] && keys[6]) {
     fft_history_filter = 6;
+    if (!SMMFirstrun) SMMFirstrun = true;
     Debug.UndoPrinting();
-  }
+  } 
   if (keys[14] && keys[0]) {
     visualization_type = 0; 
     Debug.UndoPrinting();
