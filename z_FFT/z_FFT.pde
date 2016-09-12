@@ -169,22 +169,22 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
     break;
   case 3:
     // Build the FFT history values with a Weighted Moving Average (special case : weight is the arithmetic progression)
-    // FIXME: Formula are buggy
     if (WMAFirstrun && !inInit) {
       float[] WMAFFTAvg = new float[nrOfIterations];
+      float[] WMAFreqAvg = new float[nrOfIterations];
       for (int i = 0; i < nrOfIterations; i++) {
         WMAFFTAvg[i] = 0;
-        //WMAFreqAvg[i] = 0;
+        WMAFreqAvg[i] = 0;
       }
       // 
       for (int HIndex = nrOfIterations - 1; HIndex >= 0; HIndex--) {
-        WMAFFTAvg[HIndex] += fftValueMultiplicator * (HIndex + 1) * fftHistory[HIndex][fftIndex];
-        //WMAFreqAvg[HIndex] += fftFreqValueMultiplicator * fftFreqHistory[HIndex][fftIndex];
-        if (HIndex == nrOfIterations - 1) {
+        WMAFFTAvg[HIndex] += fftValueMultiplicator * (nrOfIterations - HIndex) * fftHistory[HIndex][fftIndex];
+        WMAFreqAvg[HIndex] += fftFreqValueMultiplicator * (nrOfIterations - HIndex) * fftFreqHistory[HIndex][fftIndex];
+        if (HIndex == 0) {
           WMAFFTAvg[HIndex] = (2 * WMAFFTAvg[HIndex]) / (WMAFFTAvg.length * (WMAFFTAvg.length + 1));
-          //WMAFreqAvg[HIndex] = WMAFreqAvg[HIndex] / WMAFreqAvg.length;
+          WMAFreqAvg[HIndex] = (2 * WMAFreqAvg[HIndex]) / (WMAFreqAvg.length * (WMAFreqAvg.length + 1));
           fftHistory[HIndex][fftIndex] = WMAFFTAvg[HIndex];
-          //fftFreqHistory[HIndex][fftIndex] = WMAFreqAvg[HIndex];
+          fftFreqHistory[HIndex][fftIndex] = WMAFreqAvg[HIndex];
         }
       }
       WMAFirstrun = false;
@@ -192,7 +192,8 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
       fftHistory[histIndex][fftIndex] = fftValueMultiplicator * fftValue;
       fftFreqHistory[histIndex][fftIndex] = fftFreqValueMultiplicator * fftFreqValue;
     } else {
-      fftHistory[histIndex][fftIndex] = (2 * fftValueMultiplicator * fftValue) / (nrOfIterations + 1) + fftHistory[histIndex][fftIndex];
+      fftHistory[histIndex][fftIndex] = ((fftValueMultiplicator * fftValue) * 2 + fftHistory[histIndex][fftIndex] * (nrOfIterations - 1)) / (nrOfIterations + 1);
+      fftFreqHistory[histIndex][fftIndex] = ((fftFreqValueMultiplicator * fftFreqValue) * 2 + fftFreqHistory[histIndex][fftIndex] * (nrOfIterations - 1)) / (nrOfIterations + 1);
     }
     break;
   case 4:
