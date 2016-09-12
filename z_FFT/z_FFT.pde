@@ -1,4 +1,4 @@
-/* 
+/*  //<>//
  * z_FFT by zambari and Jérôme Benoit <jerome.benoit@piment-noir.org>
  * parts based on Get Line In by Damien Di Fede.
  *   
@@ -118,7 +118,7 @@ boolean SMAFirstrun = true, SMMFirstrun = true, WMAFirstrun = true;
 // How to fill the FFT history at histIndex with values?
 // FIXME?: Pass the filter type as an argument
 // FIXME: Pass as arguments the bidimensional array class with the boundaries 
-void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int fftValueMultiplicator, float fftFreqValue, int fftFreqValueMultiplicator) {
+void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int fftValueMultiplicator, float fftFreqValue, int fftFreqValueMultiplicator, boolean inInit) {
   switch(fft_history_filter) {
   case 0:
     // Build the FTT history values with an Exponential Moving Average aka EMA filter on fftValue values
@@ -138,10 +138,10 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
       Debug.prStr("nrOfIterations doit être supérieur à zéro"); 
       exit();
     }
-    if (SMAFirstrun) {
+    if (SMAFirstrun && !inInit) {
       float[] SMAFFTAvg = new float[nrOfIterations];
       float[] SMAFreqAvg = new float[nrOfIterations];
-      // Init the two local arrays
+      // Initialize the two local arrays
       for (int i = 0; i < nrOfIterations; i++) {
         SMAFFTAvg[i] = 0;
         SMAFreqAvg[i] = 0;
@@ -158,6 +158,9 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
         }
       }
       SMAFirstrun = false;
+    } else if (inInit) {
+      fftHistory[histIndex][fftIndex] = fftValueMultiplicator * fftValue;
+      fftFreqHistory[histIndex][fftIndex] = fftFreqValueMultiplicator * fftFreqValue;
     } else {
       // Use recursive SMA formula afterwards 
       fftHistory[histIndex][fftIndex] = fftHistory[histIndex][fftIndex] + (fftValueMultiplicator * fftValue - fftHistory[nrOfIterations - 1][fftIndex])/(nrOfIterations);
@@ -165,9 +168,9 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
     }
     break;
   case 3:
-    // Build the FFT history values with a Weighted Moving Average (special case : weight is the arithmetic suite)
+    // Build the FFT history values with a Weighted Moving Average (special case : weight is the arithmetic progression)
     // FIXME: Formula are buggy
-    if (WMAFirstrun) {
+    if (WMAFirstrun && !inInit) {
       float[] WMAFFTAvg = new float[nrOfIterations];
       for (int i = 0; i < nrOfIterations; i++) {
         WMAFFTAvg[i] = 0;
@@ -185,15 +188,18 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
         }
       }
       WMAFirstrun = false;
+    } else if (inInit) {
+      fftHistory[histIndex][fftIndex] = fftValueMultiplicator * fftValue;
+      fftFreqHistory[histIndex][fftIndex] = fftFreqValueMultiplicator * fftFreqValue;
     } else {
       fftHistory[histIndex][fftIndex] = (2 * fftValueMultiplicator * fftValue) / (nrOfIterations + 1) + fftHistory[histIndex][fftIndex];
     }
     break;
   case 4:
     // Build the FFT history values with a Modified Moving Average aka MMA (or Smoothed Moving Average aka SMA)
-    // MMA is a special case EMA : smooth_factor = 1 / window_size. 
-    fftHistory[histIndex][fftIndex] = ((nrOfIterations -1) * fftHistory[histIndex][fftIndex] + fftValueMultiplicator * fftValue) / nrOfIterations;
-    fftFreqHistory[histIndex][fftIndex] = ((nrOfIterations -1) * fftFreqHistory[histIndex][fftIndex] + fftFreqValueMultiplicator * fftFreqValue) / nrOfIterations; 
+    // MMA is a special case EMA with smooth_factor = 1 / window_size. 
+    fftHistory[histIndex][fftIndex] = ((nrOfIterations - 1) * fftHistory[histIndex][fftIndex] + fftValueMultiplicator * fftValue) / nrOfIterations;
+    fftFreqHistory[histIndex][fftIndex] = ((nrOfIterations - 1) * fftFreqHistory[histIndex][fftIndex] + fftFreqValueMultiplicator * fftFreqValue) / nrOfIterations; 
     break;
   case 5:
     // Build the history with a multiplicator of the values of fftValue
@@ -202,20 +208,26 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
     //Debug.prStrOnce("FFT history filter : fft values with a multiplicator = " + fftValueMultiplicator);
     break;
   case 6:
+    if (nrOfIterations < 1) { 
+      Debug.prStr("nrOfIterations doit être supérieur à zéro"); 
+      exit();
+    }
+
     // Build the FFT history values with a Simple Moving Median aka SMM
     // In order the avoid a full recomputing of the median each time, we will make use of the median estimation recursive formula of Jeff McClintock
     float[][] fftMeanHistory = new float[nrOfIterations][fftHistSize];
     float[][] fftFreqMeanHistory = new float[nrOfIterations][fftHistSize];
-    if (SMMFirstrun) {
+    if (SMMFirstrun && !inInit) {
       for (int i = 0; i < nrOfIterations; i++) {
         for (int j = 0; j < fftHistSize; j++) {
           fftMeanHistory[i][j] = fftHistory[i][j];
           fftFreqMeanHistory[i][j] = fftFreqHistory[i][j];
         }
       }
+
       float[] SMAFFTAvg = new float[nrOfIterations];
       float[] SMAFreqAvg = new float[nrOfIterations];
-      // Init the two local arrays
+      // Initialize the two local arrays
       for (int i = 0; i < nrOfIterations; i++) {
         SMAFFTAvg[i] = 0;
         SMAFreqAvg[i] = 0;
@@ -231,12 +243,36 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
           fftFreqMeanHistory[HIndex][fftIndex] = SMAFreqAvg[HIndex];
         }
       }
-      // The FFT values history has been properly initialized, so calculate the very first SMM values
-      // TODO
+
+      float[] SMMFFTMed = new float[nrOfIterations];
+      float[] SMMFreqMed = new float[nrOfIterations];
+      for (int HIndex = 0; HIndex < nrOfIterations; HIndex++) {
+        // Initialize the two local arrays
+        SMMFFTMed[HIndex] = fftValueMultiplicator * fftHistory[HIndex][fftIndex];
+        SMMFreqMed[HIndex] = fftFreqValueMultiplicator * fftFreqHistory[HIndex][fftIndex];
+        // The FFT values history has been properly initialized, so calculate the very first SMM values
+        Arrays.sort(SMMFFTMed);
+        Arrays.sort(SMMFreqMed);
+        if (SMMFFTMed.length % 2 == 0) {
+          SMMFFTMed[HIndex] = (SMMFFTMed[SMMFFTMed.length/2] + SMMFFTMed[SMMFFTMed.length/2 - 1])/2;
+          SMMFreqMed[HIndex] = (SMMFreqMed[SMMFreqMed.length/2] + SMMFreqMed[SMMFreqMed.length/2 - 1])/2;
+        } else {
+          SMMFFTMed[HIndex] = SMMFFTMed[SMMFFTMed.length/2];
+          SMMFreqMed[HIndex] = SMMFreqMed[SMMFreqMed.length/2];
+        }
+        fftHistory[HIndex][fftIndex] = SMMFFTMed[HIndex];
+        fftFreqHistory[HIndex][fftIndex] = SMMFreqMed[HIndex];
+      }
+
       SMMFirstrun = false;
+    } else if (inInit) {
+      fftHistory[histIndex][fftIndex] = fftValueMultiplicator * fftValue;
+      fftFreqHistory[histIndex][fftIndex] = fftFreqValueMultiplicator * fftFreqValue;
     } else {
-      fftMeanHistory[histIndex][fftIndex] += (fftValueMultiplicator * fftValue - fftMeanHistory[histIndex][fftIndex]) * 0.1f; // rough running average.
+      fftMeanHistory[histIndex][fftIndex] += (fftValueMultiplicator * fftValue - fftMeanHistory[histIndex][fftIndex]) * 0.1f; // rough running average
+      fftFreqMeanHistory[histIndex][fftIndex] += (fftFreqValueMultiplicator * fftFreqValue - fftFreqMeanHistory[histIndex][fftIndex]) * 0.1f; // rough running average
       fftHistory[histIndex][fftIndex] += Math.copySign(fftMeanHistory[histIndex][fftIndex]* 0.01f, fftValueMultiplicator * fftValue -  fftHistory[histIndex][fftIndex]);
+      fftFreqHistory[histIndex][fftIndex] += Math.copySign(fftFreqMeanHistory[histIndex][fftIndex]* 0.01f, fftFreqValueMultiplicator * fftFreqValue -  fftFreqHistory[histIndex][fftIndex]);
     }
     break;
   default: 
@@ -300,7 +336,7 @@ void draw()
     int indexCount = (nrOfIterations - 1) - fftForwardCount;
     Debug.prStr("indexCount = " + indexCount + " in FFT history init loop");
     for (int i = 0; i < fftHistSize; i++) {
-      fill_fft_history_filter(indexCount, i, ZeroNaNValue(fft.getBand(i)), valueMultiplicator, ZeroNaNValue(fft.getFreq(i)), valueMultiplicator);
+      fill_fft_history_filter(indexCount, i, ZeroNaNValue(fft.getBand(i)), valueMultiplicator, ZeroNaNValue(fft.getFreq(i)), valueMultiplicator, true);
     }
     // We count the number of forward iteration, starting at index = 0
     Debug.prStr("fftForwardCount = " + fftForwardCount + " before incrementation (in FFT history init loop)");
@@ -329,7 +365,7 @@ void draw()
     if (fftHistBufferCount == 0) {
       // Fill the FFT history buffer with new values from the FFT forward on the mix buffer (histIndex = 0)
       for (int i = 0; i < fftHistSize; i++) {
-        fill_fft_history_filter(fftHistBufferCount, i, ZeroNaNValue(fft.getBand(i)), valueMultiplicator, ZeroNaNValue(fft.getFreq(i)), valueMultiplicator);
+        fill_fft_history_filter(fftHistBufferCount, i, ZeroNaNValue(fft.getBand(i)), valueMultiplicator, ZeroNaNValue(fft.getFreq(i)), valueMultiplicator, false);
       }
     }
   }
