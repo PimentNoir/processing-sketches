@@ -176,7 +176,6 @@ void fill_fft_history_filter(int histIndex, int fftIndex, float fftValue, int ff
         WMAFFTAvg[i] = 0;
         WMAFreqAvg[i] = 0;
       }
-      // 
       for (int HIndex = nrOfIterations - 1; HIndex >= 0; HIndex--) {
         WMAFFTAvg[HIndex] += fftValueMultiplicator * (nrOfIterations - HIndex) * fftHistory[HIndex][fftIndex];
         WMAFreqAvg[HIndex] += fftFreqValueMultiplicator * (nrOfIterations - HIndex) * fftFreqHistory[HIndex][fftIndex];
