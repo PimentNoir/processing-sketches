@@ -1,0 +1,8 @@
+name=L-Systems
+category=Math
+authorList=[Martin Prout](http://martinpblogformasswritingproject.blogspot.co.uk/) and [Jérôme Benoit](http://blog.piment-noir.org)
+url=https://github.com/PimentNoir/l-system-utilities
+sentence=A utility for exploring Lindenmayer systems or l-systems.
+paragraph=Provides simple, stochastic and context sensitive grammars, and many worked examples.
+version=@VERSION@
+prettyVersion=@PRETTYVERSION@
