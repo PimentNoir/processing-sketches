@@ -131,7 +131,7 @@ public class GuiControl implements TFileConstants, TDataConstants {
 	 * Get the size of the sketch from the code
 	 * @return null if no size found
 	 */
-	public SketchSizeType getSketchSizeFromCode(){		
+	public SketchSizeType getSketchSizeFromCode(){
 		SketchSizeType s = null;
 		Sketch sketch = editor.getSketch();
 		SketchCode curr =  sketch.getCurrentCode();

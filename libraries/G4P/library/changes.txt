@@ -1,5 +1,8 @@
 G4P changes incorporated into version
 
+V4.1 (29)
+There is now greater control of the positioning of the icon and the ability to create animated icons for GButton, GLabel, GCheckbox and GOption. See the guides at http://lagers.org.uk/g4p/guides/g01-overview.html for more details.
+
 V4.0.5 (28)
 Fixes bug in GTextField where the scrolling text didn't keep up with a rapid typing rate or when a block of test was pasted in. (Ticket 13)
 

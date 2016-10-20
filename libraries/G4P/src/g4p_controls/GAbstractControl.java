@@ -132,7 +132,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	protected float ox, oy;
 
 	/** Simple tag that can be used by the user */
-	public String tag;
+	public String tag = "";
 
 	/** Allows user to specify a number for this component */
 	public int tagNo;
@@ -159,36 +159,6 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	protected String eventHandlerMethodName;
 
 	protected int registeredMethods = 0;
-
-	/*
-	 * Specify the PImage that contains the image{s} to be used for the button's state. <br>
-	 * This image may be a composite of 1 to 3 images tiled horizontally. 
-	 * @param img
-	 * @param nbrImages in the range 1 - 3
-	 */
-	//	static PImage[] loadImages(PImage img, int nbrImages){
-	//		if(img == null || nbrImages <= 0 || nbrImages > 3)
-	//			return null;
-	//		PImage[] bimage = new PImage[3];
-	//		int iw = img.width / nbrImages;
-	//		for(int i = 0; i < nbrImages;  i++){
-	//			bimage[i] = new PImage(iw, img.height, ARGB);
-	//			bimage[i].copy(img, 
-	//					i * iw, 0, iw, img.height,
-	//					0, 0, iw, img.height);
-	//		}
-	//		// If less than 3 images reuse last image in set
-	//		for(int i = nbrImages; i < 3; i++)
-	//			bimage[i] = bimage[nbrImages - 1];
-	//		return bimage;
-	//	}
-
-	//	public static String getFocusName(){
-	//		if(focusIsWith == null)
-	//			return "null";
-	//		else
-	//			return focusIsWith.toString();
-	//	}
 
 	/**
 	 * Base constructor for ALL control ctors that do not have a visible UI but require 
@@ -224,7 +194,6 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 			break;
 		}
 	}
-
 
 	/**
 	 * Base constructor for ALL control ctors that have a visible UI. It will set the 
@@ -342,16 +311,19 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * <b>This is for emergency use only!!!! </b><br>
+	 * <b>This is for emergency use only!!!! </b>
+	 * <br/>
 	 * In this version of the library a visual controls is drawn to off-screen buffer
 	 * and then drawn to the screen by copying the buffer. This means that the 
 	 * computationally expensive routines needed to draw the control (especially text 
 	 * controls) are only done when a change has been noted. This means that single
-	 * changes need not trigger a full redraw to buffer. <br>
+	 * changes need not trigger a full redraw to buffer. 
+	 * <br/>
 	 * It does mean that an error in the library code could result in the buffer not
 	 * being updated after changes. If this happens then in draw() call this method
-	 * on the affected control, and report it as an issue <a href = 'http://code.google.com/p/gui4processing/issues/list'>
-	 * here</a><br>
+	 * on the affected control, and report it as an issue 
+	 * <a href = 'https://sourceforge.net/p/g4p/tickets/?source=navbar'>here</a>
+	 * <br/>
 	 * Thanks
 	 */
 	public void forceBufferUpdate(){

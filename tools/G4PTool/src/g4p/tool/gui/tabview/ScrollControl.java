@@ -222,15 +222,18 @@ public class ScrollControl extends JPanel implements IScrollAreaUser, TGuiConsta
 				case OVER_HORZ:
 					setCursor(Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
 					selInfo.comp._0826_width = snapValue(selInfo.orgW + deltaX);
+					tabCtrl.componentChangedInGUI(selInfo.comp, RESIZED);
 					break;
 				case OVER_VERT:
 					setCursor(Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR));
 					selInfo.comp._0827_height = snapValue(selInfo.orgH + deltaY);
+					tabCtrl.componentChangedInGUI(selInfo.comp, RESIZED);
 					break;
 				case OVER_DIAG:
 					setCursor(Cursor.getPredefinedCursor(Cursor.NW_RESIZE_CURSOR));
 					selInfo.comp._0826_width = snapValue(selInfo.orgW + deltaX);
 					selInfo.comp._0827_height = snapValue(selInfo.orgH + deltaY);
+					tabCtrl.componentChangedInGUI(selInfo.comp, RESIZED);
 					break;
 				}
 			}
@@ -238,8 +241,9 @@ public class ScrollControl extends JPanel implements IScrollAreaUser, TGuiConsta
 				setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 				selInfo.comp._0820_x = snapValue(selInfo.orgX + deltaX);
 				selInfo.comp._0821_y = snapValue(selInfo.orgY + deltaY);
+				tabCtrl.componentChangedInGUI(selInfo.comp, MOVED);
 			}
-			tabCtrl.componentChangedInGUI(selInfo.comp);
+//			tabCtrl.componentChangedInGUI(selInfo.comp);
 			repaint();
 		}
 	}

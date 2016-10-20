@@ -1,5 +1,6 @@
 package g4p.tool.controls;
 
+import g4p.tool.G;
 import g4p.tool.ToolMessages;
 import g4p.tool.gui.ToolImage;
 
@@ -46,16 +47,15 @@ public class DSketchPad extends DBase {
 	}
 
 	public void draw(Graphics2D g, AffineTransform paf, DBase selected){
-		AffineTransform af = new AffineTransform(paf);
-		af.translate(_0820_x, _0821_y);
-		g.setTransform(af);
-		
+		G.pushMatrix(g);
+		g.translate(_0820_x, _0821_y);
+
 		g.setColor(DBase.globalJpalette[6]);
 		g.fillRect(0, 0, _0826_width, _0827_height);
 		g.drawImage(icon, 0, 0, _0826_width, _0827_height, null);
 		g.setStroke(stdStroke);
 
-		super.draw(g, paf, selected);
+		super.draw(g, selected);
 		
 		if(this == selected)
 			drawSelector(g);
@@ -64,7 +64,7 @@ public class DSketchPad extends DBase {
 			g.setStroke(dashed);
 			g.drawRect(0, 0, _0826_width, _0827_height);		
 		}
-		g.setTransform(paf);
+		G.popMatrix(g);
 	}
 
 	protected void read(){

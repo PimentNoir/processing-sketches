@@ -1,12 +1,12 @@
 package g4p.tool.controls;
 
+import g4p.tool.G;
 import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.EditorBase;
 import g4p.tool.gui.propertygrid.EditorJComboBox;
 import g4p.tool.gui.propertygrid.Validator;
 
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
@@ -110,17 +110,15 @@ public class DKnob extends DValue1D {
 		return s;
 	}
 
-	public void draw(Graphics2D g, AffineTransform paf, DBase selected){
-		AffineTransform af = new AffineTransform(paf);
-		af.translate(_0820_x, _0821_y);
-		g.setTransform(af);
+	public void draw(Graphics2D g, DBase selected){
+		G.pushMatrix(g);
+		g.translate(_0820_x, _0821_y);
 		
 		if(_0600_opaque){
 			g.setColor(jpalette[6]);
 			g.fillRect(0, 0, _0826_width, _0827_height);
 		}
-		af.translate(_0826_width/2, _0827_height/2);
-		g.setTransform(af);
+		g.translate(_0826_width/2, _0827_height/2);
 
 		int s = Math.min(_0826_width, _0827_height), hs = s/2;
 		// Bezel
@@ -135,12 +133,11 @@ public class DKnob extends DValue1D {
 		g.setStroke(needleStroke);
 		g.drawLine(0, 0, Math.round(0.707f*hs), Math.round(0.707f*hs));
 
-		af.translate(-_0826_width/2, -_0827_height/2);
-		g.setTransform(af);
+		g.translate(-_0826_width/2, -_0827_height/2);
 
 		if(this == selected)
 			drawSelector(g);
-		g.setTransform(paf);
+		G.popMatrix(g);;
 	}
 
 	protected void read(){

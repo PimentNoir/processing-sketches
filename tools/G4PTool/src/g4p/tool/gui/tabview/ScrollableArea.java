@@ -4,6 +4,7 @@
  */
 package g4p.tool.gui.tabview;
 
+import g4p.tool.G;
 import g4p.tool.TGuiConstants;
 
 import java.awt.Color;
@@ -15,7 +16,6 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.AffineTransform;
 
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
@@ -110,14 +110,14 @@ implements Scrollable, MouseListener, MouseMotionListener, TGuiConstants {
 		Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(Color.white);
         g2d.fillRect(0, 0, getWidth(), getHeight());
-        AffineTransform orgAff = g2d.getTransform();
-        AffineTransform aff = new AffineTransform(orgAff);
-        aff.scale(scale, scale);
-        g2d.setTransform(aff);
+        
+        G.pushMatrix(g2d);
+        
+        g2d.scale(scale, scale);
         g2d.setStroke(stdStroke);
         // Draw window and components
-        user.getWindowComponent().draw(g2d, aff, user.getSelected());
-        g2d.setTransform(orgAff);
+        user.getWindowComponent().draw(g2d, user.getSelected());
+        G.popMatrix(g2d);
      }
     
     public boolean setCanvasSize(int w, int h) {

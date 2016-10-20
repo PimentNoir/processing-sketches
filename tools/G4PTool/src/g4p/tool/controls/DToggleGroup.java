@@ -1,9 +1,9 @@
 package g4p.tool.controls;
 
+import g4p.tool.G;
 import g4p.tool.ToolMessages;
 
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
@@ -65,13 +65,11 @@ public class DToggleGroup extends DBase {
 		return null;
 	}
 
-	public void draw(Graphics2D g, AffineTransform paf, DBase selected){
-		AffineTransform af = new AffineTransform(paf);
+	public void draw(Graphics2D g, DBase selected){
 		Enumeration<?> e = children();
 		while(e.hasMoreElements()){
-			((DBase)e.nextElement()).draw(g, af, selected);
+			((DBase)e.nextElement()).draw(g, selected);
 		}
-		g.setTransform(paf);
 	}
 
 }

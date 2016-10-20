@@ -1,11 +1,11 @@
 package g4p.tool.controls;
 
+import g4p.tool.G;
 import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.EditorBase;
 import g4p.tool.gui.propertygrid.EditorJComboBox;
 
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
@@ -17,8 +17,8 @@ public class DCustomSlider extends DLinearTrack {
 	public Boolean skin_edit = true;
 	public Boolean skin_show = true;
 	public String skin_label = "Slider skin";
-	
-	
+
+
 	public DCustomSlider(){
 		super();
 		componentClass = "GCustomSlider";
@@ -53,16 +53,14 @@ public class DCustomSlider extends DLinearTrack {
 		return s;
 	}
 
-	
-	public void draw(Graphics2D g, AffineTransform paf, DBase selected){
-		AffineTransform af = new AffineTransform(paf);
-		af.translate(_0820_x, _0821_y);
-		g.setTransform(af);
+
+	public void draw(Graphics2D g, DBase selected){
+		G.pushMatrix(g);
+		g.translate(_0820_x, _0821_y);
 		int cx = _0826_width/2;
 		int cy = _0827_height/2;
-		
+
 		g.setStroke(stdStroke);
-	
 
 		if(_0600_opaque){
 			g.setColor(jpalette[6]);
@@ -80,7 +78,7 @@ public class DCustomSlider extends DLinearTrack {
 			g.fillRect((_0826_width - 10)/2, 0, 10, _0827_height);
 			g.setColor(csdrSlideBorder);
 			g.drawRect((_0826_width - 10)/2, 0, 10, _0827_height);			
-			
+
 			g.setColor(csdrThumb);
 			g.fillOval(cx - 12, cy - 5, 24, 10);
 			g.setColor(csdrSlideBorder);
@@ -91,18 +89,18 @@ public class DCustomSlider extends DLinearTrack {
 			g.fillRect(0, (_0827_height - 6)/2, _0826_width, 6);
 			g.setColor(csdrSlideBorder);
 			g.drawRect(0, (_0827_height - 6)/2, _0826_width, 6);
-			
+
 			g.setColor(csdrThumb);
 			g.fillOval(cx - 5, cy - 12, 10, 24);
 			g.setColor(csdrSlideBorder);
 			g.drawOval(cx - 5, cy - 12, 10, 24);
 		}
-		
+
 		if(this == selected)
 			drawSelector(g);
-		g.setTransform(paf);
+		G.popMatrix(g);
 	}
-	
+
 	protected void read(){
 		super.read();
 		skin_editor = new EditorJComboBox(SLIDER_SKIN);
@@ -110,9 +108,9 @@ public class DCustomSlider extends DLinearTrack {
 	}
 
 	private void readObject(ObjectInputStream in)
-	throws IOException, ClassNotFoundException
-	{
+			throws IOException, ClassNotFoundException
+			{
 		in.defaultReadObject();
 		read();
-	}
+			}
 }

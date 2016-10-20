@@ -151,14 +151,18 @@ public class CtrlTabView extends JTabbedPane implements ChangeListener {
 		}
 	}
 
-
 	public void componentHasBeenSelected(DBase comp) {
 		if(comp != null)
 			tree.setSelectedComponent(comp);		
 	}
 
-	public void componentChangedInGUI(DBase comp) {
-		comp.updatedInGUI();
+	/**
+	 * This method is called if the control is moved or resized in the GUI
+	 * @param comp the control
+	 * @param action MOVED or RESIZED
+	 */
+	public void componentChangedInGUI(DBase comp, int action) {
+		comp.updatedInGUI(action);
 		props.modelHasBeenChanged();
 	}
 

@@ -1,5 +1,6 @@
 package g4p.tool.controls;
 
+import g4p.tool.G;
 import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.EditorBase;
 import g4p.tool.gui.propertygrid.EditorJComboBox;
@@ -7,7 +8,6 @@ import g4p.tool.gui.propertygrid.Validator;
 import g4p.tool.gui.tabview.CtrlTabView;
 
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -303,10 +303,8 @@ public final class DWindow extends DBase {
 
 
 	@Override
-	public void draw(Graphics2D g, AffineTransform paf, DBase selected){
-		AffineTransform af = new AffineTransform(paf);
-		g.setTransform(af);
-
+	public void draw(Graphics2D g, DBase selected){
+		G.pushMatrix(g);
 		g.setColor(winBack);
 		g.fillRect(0, 0, _0826_width, _0827_height);
 		g.setColor(winEdge);
@@ -323,9 +321,9 @@ public final class DWindow extends DBase {
 		// Draw controls
 		Enumeration<?> e = children();
 		while(e.hasMoreElements()){
-			((DBase)e.nextElement()).draw(g, af, selected);
+			((DBase)e.nextElement()).draw(g, selected);
 		}
-		g.setTransform(paf);
+		G.popMatrix(g);
 	}
 
 }

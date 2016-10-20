@@ -1,16 +1,22 @@
 package g4p.tool.controls;
 
+import g4p.tool.G;
 import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.Validator;
 
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
+/**
+ * A simple password entry control.
+ * 
+ * @author Peter Lager
+ *
+ */
 @SuppressWarnings("serial")
 public class DPassword extends DBaseVisual {
-
+ 
 
 	public int 			_0125_pwsize = 10;
 	public String 		pwsize_label = "Max length";
@@ -60,10 +66,9 @@ public class DPassword extends DBaseVisual {
 		return s;
 	}
 
-	public void draw(Graphics2D g, AffineTransform paf, DBase selected){
-		AffineTransform af = new AffineTransform(paf);
-		af.translate(_0820_x, _0821_y);
-		g.setTransform(af);
+	public void draw(Graphics2D g, DBase selected){
+		G.pushMatrix(g);
+		g.translate(_0820_x, _0821_y);
 
 		if(_0600_opaque){
 			g.setColor(jpalette[6]);
@@ -84,7 +89,7 @@ public class DPassword extends DBaseVisual {
 			g.drawRect(0, 0, _0826_width, _0827_height);		
 		}
 
-		g.setTransform(paf);
+		G.popMatrix(g);
 	}
 
 	protected void read(){

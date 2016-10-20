@@ -40,8 +40,9 @@ public final class ListGen implements TDataConstants {
 		makeGWSliderSkinSelection(SLIDER_SKIN);
 		makeRendererSelection(RENDERER);
 		makeKnobControllerSelection(KNOB_CTRL);
-		makeHorzAlignSelection2(H_ALIGN_2);
-		makeHorzAlignSelection3(H_ALIGN_3);
+//		makeHorzAlignSelection2(H_ALIGN_2);
+		makeIconPosSelection(ICON_POS);
+		makeHorzAlignSelection3(H_ALIGN);
 		makeVertAlignSelection(V_ALIGN);
 		makeValueTypeSelection(VALUE_TYPE);	
 		makeTextOrientationSelection(TEXT_ORIENT);
@@ -115,8 +116,8 @@ public final class ListGen implements TDataConstants {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void makeHorzAlignSelection2(int type){
-		String[] s = new String[] { "LEFT", "RIGHT" };
+	private void makeIconPosSelection(int type){
+		String[] s = new String[] { "NORTH", "SOUTH", "EAST", "WEST" };
 		cbList.put(type,  new DefaultComboBoxModel(s));
 	}
 

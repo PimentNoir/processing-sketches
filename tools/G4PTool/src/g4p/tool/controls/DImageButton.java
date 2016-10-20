@@ -1,10 +1,10 @@
 package g4p.tool.controls;
 
+import g4p.tool.G;
 import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.EditorJFileChooser;
 
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -104,10 +104,10 @@ public class DImageButton extends DBase {
 	}
 	
 	
-	public void draw(Graphics2D g, AffineTransform paf, DBase selected){
-		AffineTransform af = new AffineTransform(paf);
-		af.translate(_0820_x, _0821_y);
-		g.setTransform(af);
+	public void draw(Graphics2D g, DBase selected){
+		G.pushMatrix(g);
+		g.translate(_0820_x, _0821_y);
+
 		if(image != null){
 			g.drawImage(image, 0, 0, _0826_width, _0827_height, 0, 0, image.getWidth(), image.getHeight() , null);
 		}
@@ -119,7 +119,7 @@ public class DImageButton extends DBase {
 		
 		if(this == selected)
 			drawSelector(g);
-		g.setTransform(paf);
+		G.popMatrix(g);
 	}
 
 	public void imageChanged_off(){

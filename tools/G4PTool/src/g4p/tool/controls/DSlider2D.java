@@ -1,9 +1,9 @@
 package g4p.tool.controls;
 
+import g4p.tool.G;
 import g4p.tool.ToolMessages;
 
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
@@ -27,10 +27,9 @@ public class DSlider2D extends DValue2D {
 	}
 
 	
-	public void draw(Graphics2D g, AffineTransform paf, DBase selected){
-		AffineTransform af = new AffineTransform(paf);
-		af.translate(_0820_x, _0821_y);
-		g.setTransform(af);
+	public void draw(Graphics2D g, DBase selected){
+		G.pushMatrix(g);
+		g.translate(_0820_x, _0821_y);
 		
 		if(_0600_opaque){
 			g.setColor(jpalette[6]);
@@ -61,7 +60,7 @@ public class DSlider2D extends DValue2D {
 			g.setStroke(dashed);
 			g.drawRect(0, 0, _0826_width, _0827_height);		
 		}
-		g.setTransform(paf);
+		G.popMatrix(g);
 	}
 
 	

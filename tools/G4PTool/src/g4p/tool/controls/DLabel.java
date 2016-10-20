@@ -1,10 +1,10 @@
 package g4p.tool.controls;
 
+import g4p.tool.G;
 import g4p.tool.ToolMessages;
 import g4p_controls.StyledString;
 
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
@@ -19,9 +19,11 @@ public class DLabel extends DTextIconAlign {
 		_0826_width = 80;
 		_0827_height = 20;
 		_0130_text = "My label";
-		stext = new StyledString(_0130_text, textWidth);
 		eventHandler_edit = eventHandler_show = false;
-	}
+
+		implChanges();
+		stext = new StyledString(_0130_text, textZone.w);
+}
 	
 	/**
 	 * There are no events for this control
@@ -43,10 +45,24 @@ public class DLabel extends DTextIconAlign {
 		return s;
 	}
 
-	public void draw(Graphics2D g, AffineTransform paf, DBase selected){
-		AffineTransform af = new AffineTransform(paf);
-		af.translate(_0820_x, _0821_y);
-		g.setTransform(af);
+	// Icon is in default alignment?
+	protected boolean isIconAlignDefaults(){
+		return _0153_icon_position.equals("EAST") && _0154_icon_x_alignment.equals("CENTER") && _0155_icon_y_alignment.equals("MIDDLE");
+	}
+
+	// Icon is in default position?
+	protected boolean isIconPositionDefault(){
+		return _0153_icon_position.equals("EAST");
+	}
+
+	// Text is using default alignment
+	protected boolean isTextAlignDefaults(){
+		return (textHAlign == LEFT && textVAlign == MIDDLE);
+	}
+
+	public void draw(Graphics2D g, DBase selected){
+		G.pushMatrix(g);
+		g.translate(_0820_x, _0821_y);
 		
 		if(_0600_opaque){
 			g.setColor(jpalette[6]);
@@ -54,8 +70,9 @@ public class DLabel extends DTextIconAlign {
 		}
 		g.setStroke(stdStroke);
 
-		super.draw(g, paf, selected);
+		super.draw(g, selected);
 		
+		// Draw border based on 
 		if(this == selected)
 			drawSelector(g);
 		else {
@@ -63,7 +80,7 @@ public class DLabel extends DTextIconAlign {
 			g.setStroke(dashed);
 			g.drawRect(0, 0, _0826_width, _0827_height);		
 		}
-		g.setTransform(paf);
+		G.popMatrix(g);
 	}
 	
 	protected void read(){

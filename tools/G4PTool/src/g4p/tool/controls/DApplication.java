@@ -44,6 +44,11 @@ public final class DApplication extends DBase {
 	public Boolean 		cursor_off_show = true;
 	public String 		cursor_off_label = "Cursor off image";
 
+	public Boolean 		_0955_use_round_corners  = true;
+	public Boolean 		use_round_corners_edit = true;
+	public Boolean 		use_round_corners_show = true;
+	public String 		use_round_corners_label = "Use rounded corners GButton control";
+	public String		use_round_corners_updater = "roundCornersChanger";
 
 	/**
 	 * 
@@ -74,6 +79,9 @@ public final class DApplication extends DBase {
 		else {
 			sb.append(ToolMessages.build(SET_MOUSE_OVER_ON, _0953_cursor));		
 		}
+		if(!_0955_use_round_corners){
+			sb.append(ToolMessages.build(SET_ROUND_CORNERS, _0955_use_round_corners));		
+		}
 		return new String(sb);
 	}
 
@@ -91,6 +99,10 @@ public final class DApplication extends DBase {
 		propertyModel.hasBeenChanged();
 	}
 
+	public void roundCornersChanger(){
+		DBase.useRoundCorners = _0955_use_round_corners;
+	}
+	
 	public void colourSchemeChange(){
 		DBase.globalColorSchemeID = ListGen.instance().getIndexOf(COLOUR_SCHEME, _0952_col_scheme);
 		DBase.globalColorSchemeName = _0952_col_scheme;

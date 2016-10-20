@@ -121,12 +121,14 @@ public class GuiDesigner extends javax.swing.JFrame {
 	/**
 	 * Creates new form GuiDesignFrame
 	 */
-	private GuiDesigner() {
+	public GuiDesigner() {
+		System.out.println("START");
 		instance = this;
 		initComponents();
 		initCustomComponents();
 		guiControl = new GuiControl(null, tabWindows, treeSketchView, tblPropView);
 		createWindowAdapter();
+		setVisible(true);
 	}
 
 	/**
@@ -142,7 +144,7 @@ public class GuiDesigner extends javax.swing.JFrame {
 		this.tool = tool;
 		initComponents();
 		initCustomComponents();
-		this.setTitle("G4P GUI Builder " + "4.1");
+		this.setTitle("G4P GUI Builder " + "4.2");
 		guiControl = new GuiControl(editor, tabWindows, treeSketchView, tblPropView);
 		guiControl.loadGuiLayout();
 		addKeyBinding(editor);
@@ -878,7 +880,8 @@ public class GuiDesigner extends javax.swing.JFrame {
 	}//GEN-LAST:event_btnKnobActionPerformed
 
 	private void btnCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCheckboxActionPerformed
-		guiControl.addComponent(new DCheckbox());
+		DCheckbox cbx = new DCheckbox();
+		guiControl.addComponent(cbx);
 	}//GEN-LAST:event_btnCheckboxActionPerformed
 
 	private void btnOptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOptionActionPerformed

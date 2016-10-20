@@ -1,5 +1,6 @@
 package g4p.tool.controls;
 
+import g4p.tool.G;
 import g4p.tool.ToolMessages;
 import g4p.tool.gui.tabview.MutableDBase;
 import g4p_controls.StyledString;
@@ -7,7 +8,6 @@ import g4p_controls.StyledString.TextLayoutInfo;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -44,8 +44,6 @@ public class DPanel extends DTextStyle {  // was DTextIcon now DText since no ic
 		set_name(NameGen.instance().getNext("panel"));
 		set_event_name(NameGen.instance().getNext(get_name()+ "_Click"));
 		allowsChildren = true;
-//		text_x_alignment_edit = text_x_alignment_show = false;
-//		text_y_alignment_edit = text_y_alignment_show = false;
 		textHAlign = LEFT;
 		textVAlign = TOP;
 		_0130_text = "Tab bar text";
@@ -53,6 +51,11 @@ public class DPanel extends DTextStyle {  // was DTextIcon now DText since no ic
 		text_tooltip = "text to appear in panel tab";
 		_0826_width = 100;
 		_0827_height = 60;
+		textZone.x = PAD;
+		textZone.y = PAD;
+		textZone.w = _0826_width - 2 * PAD;
+		textZone.h = TAB_HEIGHT - 2 * PAD;
+
 		_0600_opaque = true;
 		opaque_edit = opaque_show = true;
 	}
@@ -123,11 +126,10 @@ public class DPanel extends DTextStyle {  // was DTextIcon now DText since no ic
 		return true;
 	}
 
-	public void draw(Graphics2D g, AffineTransform paf, DBase selected){
-		AffineTransform af = new AffineTransform(paf);
-		af.translate(_0820_x, _0821_y);
-		g.setTransform(af);
-
+	public void draw(Graphics2D g, DBase selected){
+		G.pushMatrix(g);
+		g.translate(_0820_x, _0821_y);
+		
 		if(_0600_opaque){
 			// Panel back
 			if(!_0300_collapsed){
@@ -141,12 +143,12 @@ public class DPanel extends DTextStyle {  // was DTextIcon now DText since no ic
 
 			// Text
 			if(stext == null)
-				stext = new StyledString(_0130_text, textWidth);
+				stext = new StyledString(_0130_text, textZone.w);
 			stext.setWrapWidth(Integer.MAX_VALUE);
 			LinkedList<TextLayoutInfo> lines = stext.getLines(g);
 			g.setColor(jpalette[2]);
 			if(!lines.isEmpty())
-				lines.getFirst().layout.draw(g, textX,  stext.getMaxLineHeight());
+				lines.getFirst().layout.draw(g, textZone.x,  stext.getMaxLineHeight());
 		}
 		else {
 			g.setStroke(dashed);
@@ -154,7 +156,9 @@ public class DPanel extends DTextStyle {  // was DTextIcon now DText since no ic
 			g.drawRect(0, 0, _0826_width, _0827_height);
 		}
 		
-		super.draw(g, paf, selected); // draw text
+		displayText(g, stext.getLines(g));
+		 
+		//super.draw(g, g.getTransform(), selected); // draw text
 
 		if(this == selected)
 			drawSelector(g);
@@ -162,10 +166,11 @@ public class DPanel extends DTextStyle {  // was DTextIcon now DText since no ic
 		if(!_0300_collapsed){
 			Enumeration<?> e = children();
 			while(e.hasMoreElements()){
-				((DBase)e.nextElement()).draw(g, af, selected);
+				((DBase)e.nextElement()).draw(g, selected);
 			}
 		}
-		g.setTransform(paf);
+		
+		G.popMatrix(g);
 	}
 
 	public void drawSelector(Graphics2D g){

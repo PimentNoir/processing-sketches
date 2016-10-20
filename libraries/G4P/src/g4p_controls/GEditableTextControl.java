@@ -30,7 +30,6 @@ import java.awt.Font;
 import java.awt.font.TextAttribute;
 import java.awt.font.TextHitInfo;
 import java.awt.geom.GeneralPath;
-import java.util.ArrayDeque;
 import java.util.LinkedList;
 
 import processing.core.PApplet;
@@ -112,12 +111,6 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 		if(cursorIsOver == this)
 			cursorIsOver = null;
 		focusIsWith = grabber;
-		// If only blank text clear it out allowing default text (if any) to be displayed
-		//		if(stext.length() > 0){
-		//			int tl = stext.getPlainText().trim().length();
-		//			if(tl == 0)
-		//				stext.setText("", wrapWidth);
-		//		}
 		keepCursorInView = true;
 		bufferInvalid = true;
 	}
@@ -284,7 +277,6 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 	 */
 	public void setFont(Font font) {
 		if(font != null && font != localFont && buffer != null){
-			int s = font.getSize();
 			localFont = font;
 			ptx = pty = 0;
 			setScrollbarValues(ptx, pty);

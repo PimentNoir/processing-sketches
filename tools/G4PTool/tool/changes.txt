@@ -1,6 +1,9 @@
 GUI Builder changes incorporated into 
 
 
+V4.2
+Updated to work with G4P V4.1
+
 V4.1
 Fixes a bug that caused the sketch to crash when a large number of controls were added to a GWindow object. GUI created with earlier versions are incompatible with 4.1
 

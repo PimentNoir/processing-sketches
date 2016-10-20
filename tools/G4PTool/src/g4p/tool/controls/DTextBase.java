@@ -1,23 +1,23 @@
 package g4p.tool.controls;
 
+import g4p.tool.G;
 import g4p.tool.gui.propertygrid.Validator;
 import g4p_controls.StyledString;
 import g4p_controls.StyledString.TextLayoutInfo;
 
 import java.awt.Graphics2D;
 import java.awt.font.TextLayout;
-import java.awt.geom.AffineTransform;
 import java.util.LinkedList;
 
 
 @SuppressWarnings("serial")
-public class DTextBase extends DBaseVisual {
+public abstract class DTextBase extends DBaseVisual {
 
-	protected int textWidth, textX;
+	protected int PAD = 2;
+
+	protected Zone textZone = new Zone("Text");
 	protected int textHAlign, textVAlign;
 
-	protected int lastLength;
-	protected boolean textWidthChanged = true;
 	public  StyledString stext = null;
 
 	public String 		_0130_text = "";
@@ -28,7 +28,6 @@ public class DTextBase extends DBaseVisual {
 	public Validator 	text_validator = Validator.getDefaultValidator(String.class);
 	public String		text_updater = "textChanged";
 
-	
 	public DTextBase(){
 		super();
 		selectable = true;
@@ -37,109 +36,76 @@ public class DTextBase extends DBaseVisual {
 		allowsChildren = false;
 		_0826_width = 80;
 		_0827_height = 22;
-		textX = 0;
-		textWidth = _0826_width;
-		lastLength = _0130_text.length();
+		textZone.x = PAD;
+		textZone.y = PAD;
+		textZone.w = _0826_width - 2 * PAD;
+		textZone.h = _0827_height - 2 * PAD;
 		eventHandler_edit = eventHandler_show = true;
 	}
 
 	// Override this method if needed
 	public void textChanged(){
-		stext = new StyledString(_0130_text, textWidth);
+		stext = new StyledString(_0130_text, textZone.w);
 		propertyModel.hasBeenChanged();
 	}
-
-	/**
-	 * This will be called if the text box has to be moved in a child class.
-	 * e.g. if we have an icon
-	 * @param x_offset
-	 * @param text_width
-	 */
-	protected void setHorzTextBoxValues(int x_offset, int text_width){
-		textX = x_offset;
-		if(textWidth != text_width){
-			System.out.println("DTextBase - setHorzTextBoxValues " + x_offset + "  " + text_width);
-			textWidth = text_width;
-			textWidthChanged = true;
-		}
-	}
-
-//	/**
-//	 * If the width or height is changed then we need to update the text etc.
-//	 */
-//	public void sizeChanged(){
-//		textWidth = _0826_width;
-//		textWidthChanged = true;
-//	}
 
 	public String get_text(){
 		return _0130_text;
 	}
 
-	public void draw(Graphics2D g, AffineTransform paf, DBase selected){
-		if(stext == null)
-			stext = new StyledString(_0130_text, textWidth);
-		else if(textWidthChanged){
-//			System.out.println("Set wrap width");
-			stext.setWrapWidth(textWidth);
-			textWidthChanged = false;
+	/**
+	 * Default implementation for displaying the control's text. Child classes may override this if needed.
+	 */
+	protected void displayText(Graphics2D g, LinkedList<TextLayoutInfo> lines){
+		G.pushMatrix(g);
+		float sx = 0, tw = 0;
+		// Get vertical position of text start based on alignment
+		float textY;
+		switch(textVAlign){
+		case TOP:
+			textY = 0;
+			break;
+		case BOTTOM:
+			textY = textZone.h - stext.getTextAreaHeight();
+			break;
+		case MIDDLE:
+		default:
+			textY = (textZone.h - stext.getTextAreaHeight()) / 2;
 		}
-
-		LinkedList<TextLayoutInfo> lines = stext.getLines(g);
-
-		float deltaY = stext.getMaxLineHeight();
-		float currY = 0, startX, startY = 0;
-
+		// Now translate to text start position
+		g.translate(textZone.x, textZone.y + textY);
+		// Now display each line
 		for(TextLayoutInfo lineInfo : lines){
 			TextLayout layout = lineInfo.layout;
-			//			if(layout == null)
-			//				System.out.println("NULL LAYOUT");
-			//			System.out.print("LAYOUT " );
-			//			System.out.println("LAYOUT " + layout.lines.size());
+			g.translate(0, layout.getAscent());
 			switch(textHAlign){
 			case CENTER:
-				startX = (textWidth - layout.getVisibleAdvance())/2;
+				tw = layout.getVisibleAdvance();
+				tw = (tw > textZone.w) ? tw - textZone.w : tw;
+				sx = (textZone.w - tw)/2;
 				break;
 			case RIGHT:
-				startX = (textWidth - layout.getVisibleAdvance());
+				tw = layout.getVisibleAdvance();
+				tw = (tw > textZone.w) ? tw - textZone.w : tw;
+				sx = textZone.w - tw;
 				break;
 			case LEFT:
 			default:
-				startX = 0;		
-			}
-			switch(textVAlign){
-			case TOP:
-				startY = deltaY;
-				break;
-			case MIDDLE:
-				startY = (_0827_height - stext.getTextAreaHeight())/2 + layout.getAscent();
-				break;
-			case BOTTOM:
-				startY = _0827_height - stext.getTextAreaHeight() + deltaY - layout.getDescent();
+				sx = 0;		
 			}
 			// display text
-			try{
-				g.setColor(jpalette[2]);
-			}
-			catch(Exception e) {
-				System.out.println("Can't find palette");
-			}
-			try {
-			layout.draw(g, textX + startX, startY + currY);
-			}
-			catch(Exception e){
-				System.out.println("Can't draw text layout");
-			}
-			currY += deltaY;
+			g.setColor(jpalette[2]);
+			layout.draw(g, sx, 0);
+			g.translate(0, layout.getDescent() + layout.getLeading());	
 		}
+		G.popMatrix(g);
 	}
-
+	
 	protected void read(){
 		super.read();
 		if(stext == null){
-			stext = new StyledString(_0130_text);
+			stext = new StyledString(_0130_text, textZone.w);
 		}
-		textWidthChanged = true;
 	}
 
 

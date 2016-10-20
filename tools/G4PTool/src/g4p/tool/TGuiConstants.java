@@ -17,6 +17,10 @@ public interface TGuiConstants {
 	int OVER_VERT			=	0x00000202;
 	int OVER_DIAG			=	0x00000203;
 
+	
+	int MOVED				=	0x00010001;
+	int RESIZED				=	0x00010002;
+	
 	/*
 	 * The next three sets are to provide simple constants 
 	 * when using the combo-box for alignment and button style.
@@ -32,6 +36,11 @@ public interface TGuiConstants {
 	int TOP					= 	0x00000000;
 	int BOTTOM				= 	0x00000001;
 	int MIDDLE				= 	0x00000002;
+
+	int NORTH				= 	0x00000000;
+	int SOUTH				= 	0x00000001;
+	int EAST				= 	0x00000002;
+	int WEST				= 	0x00000003;
 
 	int TEXT_ONLY			= 	0x00000000;
 	int ICON_ONLY			= 	0x00000001;

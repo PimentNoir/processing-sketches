@@ -56,19 +56,6 @@ public abstract class GTextBase extends GAbstractControl {
 	}
 
 	/**
-	 * Used internally to enforce minimum size constraints and to enable 
-	 * minimising the height used by text icon controls (labels, buttons, 
-	 * radio button and checkboxes)
-	 * 
-	 * @param w the new width
-	 * @param h the new height
-	 */
-	protected void resize(int w, int h){
-		super.resize(w, h);
-		setFont(localFont);
-	}
-
-	/**
 	 * Set the text to be displayed.
 	 * 
 	 * @param text
@@ -133,6 +120,9 @@ public abstract class GTextBase extends GAbstractControl {
 		}
 	}
 	
+	/**
+	 * See comments in GAbstractControl class
+	 */
 	public void forceBufferUpdate(){
 		if(stext != null)
 			stext.invalidateText();

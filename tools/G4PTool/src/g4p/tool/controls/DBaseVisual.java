@@ -24,7 +24,6 @@ public class DBaseVisual extends DBase {
 	public String 		lock_label = "GUI LOCK";
 	public String 		lock_updater = "lockChange";
 
-	
 	public Boolean 		_0600_opaque  = false;
 	public Boolean 		opaque_edit = true;
 	public Boolean 		opaque_show = true;

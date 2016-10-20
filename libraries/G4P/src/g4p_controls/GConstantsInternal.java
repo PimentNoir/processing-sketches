@@ -94,9 +94,8 @@ interface GConstantsInternal {
 	
 	// Padding for text controls
 	int TPAD2	= 2;
-	int TPAD6 = 6;
-
 	int TPAD4	= 4;
+	int TPAD6	= 6;
 	int TPAD8	= 8;
 
 	// ### Scroll bar type constants ###

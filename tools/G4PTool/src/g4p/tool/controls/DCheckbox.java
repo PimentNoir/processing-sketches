@@ -1,10 +1,11 @@
 package g4p.tool.controls;
 
+import g4p.tool.G;
 import g4p.tool.ToolMessages;
 import g4p.tool.gui.ToolImage;
+import g4p_controls.StyledString;
 
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
@@ -14,27 +15,34 @@ public class DCheckbox extends DCoreSelectable{
 	public DCheckbox(){
 		super();
 		componentClass = "GCheckbox";
-		text_label = "Checkbox text";
+		text_label = "Display text";
 		set_name(NameGen.instance().getNext("checkbox"));
 		set_event_name(NameGen.instance().getNext(get_name()+ "_clicked"));
 		// Set up text
 		_0130_text = "checkbox text";
 		_0140_text_x_alignment = "LEFT";
-		textHAlign = ListGen.instance().getIndexOf(H_ALIGN_3, _0140_text_x_alignment);
+		textHAlign = ListGen.instance().getIndexOf(H_ALIGN, _0140_text_x_alignment);
 		textVAlign = ListGen.instance().getIndexOf(V_ALIGN, _0141_text_y_alignment);
 		// Set up icon
 		icon = ToolImage.getImage("CB_ICON");
 		_0152_nbr_tiles = 2;
 		_0154_icon_x_alignment = "LEFT";
-		iconHAlign = ListGen.instance().getIndexOf(H_ALIGN_2, _0154_icon_x_alignment);
-		iconVAlign = ListGen.instance().getIndexOf(V_ALIGN, _0155_icon_y_alignment);
-		iconWidth = icon.getWidth() / _0152_nbr_tiles;
-		iconHeight = icon.getHeight();
+		iconAlignH = ListGen.instance().getIndexOf(H_ALIGN, _0154_icon_x_alignment);
+		iconAlignV = ListGen.instance().getIndexOf(V_ALIGN, _0155_icon_y_alignment);
+		iconW = icon.getWidth() / _0152_nbr_tiles;
+		iconH = icon.getHeight();
+		icon_position_show = true;
 		icon_x_alignment_show = true;
 		icon_y_alignment_show = true;
 		icon_file_show = false;
 		nbr_tiles_show = false;
+		_0153_icon_position = "WEST";
+		icon_position_editor.setSelected(_0153_icon_position);
+		iconPos = ListGen.instance().getIndexOf(ICON_POS, _0153_icon_position);
 		iconAlignChanged();
+		
+		implChanges();
+		stext = new StyledString(_0130_text, textZone.w);
 	}
 
 	/**
@@ -51,15 +59,24 @@ public class DCheckbox extends DCoreSelectable{
 		return s;
 	}
 
-
+	// Icon is in default position and alignment?
 	protected boolean isIconAlignDefaults(){
-		return _0154_icon_x_alignment.equals("LEFT") && _0155_icon_y_alignment.equals("MIDDLE");
+		return _0154_icon_x_alignment.equals("CENTER") && _0155_icon_y_alignment.equals("MIDDLE");
 	}
 
-	public void draw(Graphics2D g, AffineTransform paf, DBase selected){
-		AffineTransform af = new AffineTransform(paf);
-		af.translate(_0820_x, _0821_y);
-		g.setTransform(af);
+	// Icon is in default position?
+	protected boolean isIconPositionDefault(){
+		return _0153_icon_position.equals("WEST");
+	}
+
+	// Text is using default alignment
+	protected boolean isTextAlignDefaults(){
+		return (textHAlign == LEFT && textVAlign == MIDDLE);
+	}
+
+	public void draw(Graphics2D g, DBase selected){
+		G.pushMatrix(g);
+		g.translate(_0820_x, _0821_y);
 		
 		if(_0600_opaque){
 			g.setColor(jpalette[6]);
@@ -67,7 +84,7 @@ public class DCheckbox extends DCoreSelectable{
 		}
 		g.setStroke(stdStroke);
 
-		super.draw(g, paf, selected);
+		super.draw(g, selected);
 		
 		if(this == selected)
 			drawSelector(g);
@@ -76,7 +93,7 @@ public class DCheckbox extends DCoreSelectable{
 			g.setStroke(dashed);
 			g.drawRect(0, 0, _0826_width, _0827_height);		
 		}
-		g.setTransform(paf);
+		G.popMatrix(g);
 	}
 
 	protected void read(){

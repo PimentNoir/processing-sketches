@@ -12,7 +12,6 @@ import g4p_controls.GCScheme;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -72,6 +71,8 @@ public abstract class DBase extends DefaultMutableTreeNode implements Serializab
 	protected static String $(float f){
 		return String.valueOf(f);
 	}
+	
+	protected static boolean useRoundCorners = true;
 	
 	/**
 	 * The property model used in the table view
@@ -148,6 +149,7 @@ public abstract class DBase extends DefaultMutableTreeNode implements Serializab
 		id[0] = IdGen.instance().getNext();
 	}
 
+
 	// ==========================================================================
 	// ==========================================================================
 	// ===========   Stuff for control declaration and  generation   ============
@@ -188,13 +190,14 @@ public abstract class DBase extends DefaultMutableTreeNode implements Serializab
 	}
 
 	/**
-	 * Make windows loop
+	 * Make windows.loop() statements
+	 * 
 	 * @param lines
 	 */
 	public void make_window_loop(ArrayList<String> lines){
-		String decl = get_window_loop();
-		if(decl != null)
-			lines.add(decl);
+		String loop = get_window_loop();
+		if(loop != null)
+			lines.add(loop);
 		if(allowsChildren){
 			Enumeration<?> e = children();
 			while(e.hasMoreElements()){
@@ -382,21 +385,20 @@ public abstract class DBase extends DefaultMutableTreeNode implements Serializab
 	// ==========    Stuff for drawing controls in design window   ==============
 	// ==========================================================================
 
-	public void draw(Graphics2D g2, AffineTransform af, DBase selected) {
-	}
-	
-	/*
-	 * Call this method when a change is made to the object in the window view.
+	/**
+	 * Called when the display is painted.
+	 * @param g2d Graphics2D context
+	 * @param selected currently selected control.
 	 */
-//	public void update(){
-//	}
-
+	public void draw(Graphics2D g2d, DBase selected) { }
+	
+	
 	/**
 	 * Called when the control has been changed in the GUI. <br>
 	 * Override if needed.
+	 * @param action MOVED or RESIZED
 	 */
-	public void updatedInGUI(){		
-	}
+	public void updatedInGUI(int action){ }
 	
 	/**
 	 * Draw a selector if the control is the one being edited.
@@ -545,4 +547,40 @@ public abstract class DBase extends DefaultMutableTreeNode implements Serializab
 		return _0826_width * _0827_height;
 	}
 
+	/**
+	 * Simple class to used to define text and icon zones in this type of control
+	 * @author Peter Lager
+	 *
+	 */
+	class Zone implements Serializable {
+
+		public String id;
+		public int x, y, w, h;
+
+		public Zone(){
+			x = y = w = h = 0;
+		}
+		
+		public Zone(String id){
+			this.id = id;
+			x = y = w = h = 0;
+		}
+		
+		public Zone(int x, int y, int w, int h) {
+			super();
+			this.x = x;
+			this.y = y;
+			this.w = w;
+			this.h = h;
+		}
+
+		public void clear(){
+			x = y = w = h = 0;
+		}
+		
+		public String toString(){
+			return id + " Zone   " + x + "   " + y + "   " + w + "   " + h;
+		}
+		
+	}
 }

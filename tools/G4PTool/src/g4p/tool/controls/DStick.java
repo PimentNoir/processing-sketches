@@ -1,12 +1,12 @@
 package g4p.tool.controls;
 
+import g4p.tool.G;
 import g4p.tool.ToolMessages;
 import g4p.tool.gui.propertygrid.EditorBase;
 import g4p.tool.gui.propertygrid.EditorJComboBox;
 import g4p_controls.G4P;
 
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
@@ -49,17 +49,17 @@ public class DStick extends DBaseVisual {
 		return s;
 	}
 
-	public void draw(Graphics2D g, AffineTransform paf, DBase selected){
-		AffineTransform af = new AffineTransform(paf);
-		af.translate(_0820_x, _0821_y);
-		g.setTransform(af);
+	public void draw(Graphics2D g, DBase selected){
+		G.pushMatrix(g);
+		g.translate(_0820_x, _0821_y);
 		
 		if(_0600_opaque){
 			g.setColor(jpalette[6]);
 			g.fillRect(0, 0, _0826_width, _0827_height);
 		}
-		af.translate(_0826_width/2, _0827_height/2);
-		g.setTransform(af);
+		
+		g.translate(_0826_width/2, _0827_height/2);
+		//g.setTransform(af);
 
 		int s = Math.min(_0826_width, _0827_height);
 		float mag = s/50.0f;
@@ -77,8 +77,8 @@ public class DStick extends DBaseVisual {
 		g.setColor(jpalette[1]);
 		g.drawOval(-ledRingRad, -ledRingRad, 2*ledRingRad, 2*ledRingRad);
 
-		AffineTransform af2 = new AffineTransform(af);
-		g.setTransform(af2);
+//		G.pushMatrix(g);
+//		g.translate(_0820_x, _0821_y);
 		
 		int delta = 2/mode;
 		for(int i = 0; i < 8; i+= delta){
@@ -89,10 +89,9 @@ public class DStick extends DBaseVisual {
 				g.setColor(jpalette[0]);
 				g.fillOval(ledRingRad - ledWidth/2, -ledHeight/2, ledWidth, ledHeight);
 			}
-			af2.rotate(RAD45 * delta);
-			g.setTransform(af2);
+			g.rotate(RAD45 * delta);
 		}
-		g.setTransform(af);
+//		G.popMatrix(g);
 
 		// Inner ring and surface
 		g.setColor(jpalette[5]);
@@ -106,12 +105,11 @@ public class DStick extends DBaseVisual {
 		g.setColor(jpalette[1]);
 		g.drawOval(-gripRad, -gripRad, 2*gripRad, 2*gripRad);
 
-		af.translate(-_0826_width/2, -_0827_height/2);
-		g.setTransform(af);
+		g.translate(-_0826_width/2, -_0827_height/2);
 
 		if(this == selected)
 			drawSelector(g);
-		g.setTransform(paf);
+		G.popMatrix(g);
 	}
 
 	public void stickModeChange(){

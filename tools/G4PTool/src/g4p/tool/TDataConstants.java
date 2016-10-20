@@ -11,8 +11,8 @@ public interface TDataConstants {
 	int SLIDER_SKIN 		=	0x00000024;
 	int RENDERER	 		=	0x00000025;
 	int KNOB_CTRL	 		=	0x00000026;
-	int H_ALIGN_2	 		=	0x00000027;
-	int H_ALIGN_3	 		=	0x00000028;
+	int ICON_POS	 		=	0x00000027;
+	int H_ALIGN		 		=	0x00000028;
 	int V_ALIGN	 			=	0x00000029;
 	int VALUE_TYPE			=	0x0000002A;
 	int TEXT_ORIENT			= 	0x0000002B;
@@ -81,11 +81,13 @@ public interface TDataConstants {
 	String SET_G4P_MESSAGES		=  	"  G4P.messagesEnabled({0});\n";
 	String SET_CURSOR_OFF		=	"  G4P.setCursor({0});\n";
 	String SET_MOUSE_OVER_ON	=	"  G4P.setMouseOverEnabled({0});\n";
+	String SET_ROUND_CORNERS	=	"  GButton.useRoundCorners({0});\n";
 	
 	String SET_TEXT				=	"  {0}.setText(\"{1}\");\n";
 	String SET_PROMPT_TEXT		=	"  {0}.setPromptText(\"{1}\");\n";
 	String SET_TEXT_ALIGN		=	"  {0}.setTextAlign(GAlign.{1}, GAlign.{2});\n";
-	String SET_ICON				= 	"  {0}.setIcon(\"{1}\", {2}, GAlign.{3}, GAlign.{4});\n";
+	String SET_ICON				= 	"  {0}.setIcon(\"{1}\", {2}, GAlign.{3}, GAlign.{4}, GAlign.{5});\n";
+	String SET_ICON_POS			=	"  {0}.setIconPos(GAlign.{1});\n";
 	String SET_ICON_ALIGN		=	"  {0}.setIconAlign(GAlign.{1}, GAlign.{2});\n";
 	String SET_TEXT_BOLD		=	"  {0}.setTextBold();\n";
 	String SET_TEXT_ITALIC		=	"  {0}.setTextItalic();\n";

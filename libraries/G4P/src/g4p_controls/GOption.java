@@ -3,7 +3,7 @@
   	http://www.lagers.org.uk/g4p/index.html
 	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2012 Peter Lager
+  Copyright (c) 2016 Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -63,9 +63,18 @@ public class GOption extends GToggleControl{
 	public GOption(PApplet theApplet, float p0, float p1, float p2, float p3, String text) {
 		super(theApplet, p0, p1, p2, p3);
 		opaque = false;
+		
+		// Initialise text and icon alignment
+		PAD = 1;
+		textAlignH = GAlign.LEFT;
+		textAlignV = GAlign.MIDDLE;
+		iconPos = GAlign.WEST;
+		// Start with text only so the text zone is sized correctly
+		calcZones(false, true);
 		setText(text);
-		setIcon("pinhead.png", 2, GAlign.LEFT, null);
-		setTextAlign(GAlign.LEFT, null);
+		setIcon("pinhead.png", 2, GAlign.CENTER, GAlign.MIDDLE);
+		// Setting the icon will resize the text and icon zones, so no need to do it again.
+		
 		z = Z_SLIPPY;
 		// Now register control with applet
 		createEventHandler(G4P.sketchWindow, "handleToggleControlEvents", 
