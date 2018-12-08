@@ -142,9 +142,10 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 			loseFocus(null);
 			return;
 		}
-		// Make sure we have some text
+		// Only do something if we don't have the focus
 		if(focusIsWith != this){
 			dragging = false;
+			// Make sure we have some text
 			if(stext == null || stext.length() == 0)
 				stext.setText(" ", wrapWidth);
 			LinkedList<TextLayoutInfo> lines = stext.getLines(buffer.g2);
@@ -578,11 +579,16 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 
 	// Only executed if text has changed
 	protected boolean changeText(){
+		stext.removeConsecutiveBlankLines();
 		TextLayoutInfo tli;
 		TextHitInfo thi = null, thiRight = null;
 
 		pos += adjust;
 		// Force layouts to be updated
+		String pt = stext.getPlainText();
+		if(pt.indexOf("\n\n\n") >= 0){
+			System.out.println("Double blank line");
+		}
 		stext.getLines(buffer.g2);
 
 		// Try to get text layout info for the current position
@@ -659,6 +665,15 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 		if(tabManager != null)
 			tabManager.removeControl(this);
 		super.markForDisposal();
+	}
+
+	/**
+	 * Remove from its tab manager before disposing.
+	 */
+	public void dispose(){
+		if(tabManager != null)
+			tabManager.removeControl(this);
+		super.dispose();
 	}
 
 	/**

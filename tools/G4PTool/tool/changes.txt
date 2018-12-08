@@ -1,8 +1,14 @@
 GUI Builder changes incorporated into 
 
 
+V4.2.1
+Fixes a bug when a GTextArea width or height exceeds 999 pixels (Ticket 10)
+
+Colour schemes 8-15 can now be selected but requires the user to provide a suitable scheme image file. (Ticket 9)
+
 V4.2
 Updated to work with G4P V4.1
+
 
 V4.1
 Fixes a bug that caused the sketch to crash when a large number of controls were added to a GWindow object. GUI created with earlier versions are incompatible with 4.1

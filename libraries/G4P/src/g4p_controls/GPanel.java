@@ -162,6 +162,8 @@ public class GPanel extends GTextBase {
 			highX = p.width/2;
 			lowY = -p.height/2;
 			highY = p.height/2;
+			dockX = x;
+			dockY = y;
 		}
 	}
 	
@@ -418,14 +420,18 @@ public class GPanel extends GTextBase {
 			tabOnly = collapse;
 			// If we open the panel make sure it fits on the screen but if we collapse
 			// the panel disable the panel controls but leave the panel available
-			if(tabOnly){
+			if(tabOnly){ // Panel has collapsed
+				// Make children unavailable
 				setAvailable(false);
+				// Now make panel available
 				available = true; // Needed so we can click on the title bar
 			}
-			else {
+			else { // Panel has expanded
+				// Make everything available
 				setAvailable(true);
 			}
 		}
+		bufferInvalid = true;
 	}
 
 	/**
@@ -448,6 +454,7 @@ public class GPanel extends GTextBase {
 		if(c == false){
 			tabOnly = false;
 			setAvailable(true);
+			bufferInvalid = true;
 		}
 	}
 	

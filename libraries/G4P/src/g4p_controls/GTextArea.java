@@ -318,8 +318,9 @@ public class GTextArea extends GEditableTextControl {
 		endTLHI.thi = endTLHI.tli.layout.getNextRightHit(endTLHI.tli.nbrChars - 1);
 		startTLHI.copyFrom(endTLHI);
 		calculateCaretPos(endTLHI);
-		setScrollbarValues(ptx,pty);
+		setScrollbarValues(ptx, pty);
 		bufferInvalid = true;
+		keepCursorInView = true;
 		return true;
 	}
 

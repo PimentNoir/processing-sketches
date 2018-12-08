@@ -42,7 +42,7 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.colorchooser.AbstractColorChooserPanel;
-import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -93,14 +93,14 @@ public class G4P implements GConstants, PConstants {
 	 * return the pretty version of the library.
 	 */
 	public static String getPrettyVersion() {
-		return "4.1";
+		return "4.1.5";
 	}
 
 	/**
 	 * return the version of the library used by Processing
 	 */
 	public static String getVersion() {
-		return "29";
+		return "34";
 	}
 
 	static int globalColorScheme = GCScheme.BLUE_SCHEME;
@@ -134,7 +134,7 @@ public class G4P implements GConstants, PConstants {
 	// Mouse wheel direction
 	static int wheelForSlider = FORWARD;
 	static int wheelForScrollbar = FORWARD;
-	
+
 	/**
 	 * Register a GWindow so we can keep track of all GWindows in the application.
 	 * This will be needed for global transformations e.g. setGlobalAlpha(...)
@@ -173,12 +173,7 @@ public class G4P implements GConstants, PConstants {
 	 * G4P controls or windows have already been created because the act of
 	 * creating a control will do this for you. <br>
 	 * 
-	 * Some controls are created without passing a reference to the sketch applet
-	 * but still need to know it. An example is the GColorChooser control which
-	 * cannot be used until this method is called or some other G4P control has
-	 * been created.
-	 * 
-	 * Also some other libraries such as PeasyCam change the transformation matrix.
+	 * Some libraries such as PeasyCam change the transformation matrix when initiated.
 	 * In which case either a G4P control should be created or this method called
 	 * before creating a PeasyCam object.
 	 * 
@@ -191,7 +186,7 @@ public class G4P implements GConstants, PConstants {
 			announceG4P();
 		}
 	}
-	
+
 	/**
 	 * Set the global colour scheme. This will change the local
 	 * colour scheme for every control.
@@ -203,7 +198,7 @@ public class G4P implements GConstants, PConstants {
 		if(sketchWindowImpl != null)
 			sketchWindowImpl.invalidateBuffers();
 	}
-	
+
 	/**
 	 * Set the global colour scheme. This will change the local
 	 * colour scheme for every control.
@@ -291,7 +286,7 @@ public class G4P implements GConstants, PConstants {
 	static void announceG4P(){
 		if(!announced){
 			System.out.println("===================================================");
-			System.out.println("   G4P V4.1 created by Peter Lager");
+			System.out.println("   G4P V4.1.5 created by Peter Lager");
 			System.out.println("===================================================");
 			announced = true;
 		}
@@ -380,7 +375,7 @@ public class G4P implements GConstants, PConstants {
 		if(dir == FORWARD || dir == REVERSE)
 			wheelForSlider = dir;			
 	}
-	
+
 	/**
 	 * Determines how the direction of the mouse wheel rotation is interpreted
 	 * for sliders. This value applies to all sliders.<br/>
@@ -391,7 +386,7 @@ public class G4P implements GConstants, PConstants {
 		if(dir == FORWARD || dir == REVERSE)
 			wheelForScrollbar = dir;			
 	}
-	
+
 	/**
 	 * @deprecated use setCursor(int)
 	 */
@@ -517,9 +512,54 @@ public class G4P implements GConstants, PConstants {
 	 * @return the ARGB colour as a 32 bit integer (as used in Processing). 
 	 */
 	public static int selectColor(){
+		return selectColorImpl(null);
+	}
+	
+	/**
+	 * This will open a version of the Java Swing color chooser dialog. The dialog's
+	 * UI is dependent on the OS and JVM implementation running. <br>
+	 * 
+	 * If you click on Cancel then it returns the last color previously selected.
+	 * 
+	 * @param color the color to start the dialog 
+	 * @return the ARGB colour as a 32 bit integer (as used in Processing). 
+	 */
+	public static int selectColor(Color color){
+		return selectColorImpl(color);
+	}
+	
+	/**
+	 * This will open a version of the Java Swing color chooser dialog. The dialog's
+	 * UI is dependent on the OS and JVM implementation running. <br>
+	 * 
+	 * If you click on Cancel then it returns the last color previously selected.
+	 * 
+	 * 
+	 * @param red red channel value (0-255)
+	 * @param green green channel value (0-255)
+	 * @param blue red channel value (0-255)
+	 * @return  the ARGB colour as a 32 bit integer (as used in Processing).
+	 */
+	public static int selectColor(int red, int green, int blue){
+		red &= 255;
+		green &= 255;
+		blue &= 255;
+		return selectColorImpl(new Color(red, green, blue));
+	}
+	
+	/**
+	 * This will open a version of the Java Swing color chooser dialog. The dialog's
+	 * UI is dependent on the OS and JVM implementation running. <br>
+	 * 
+	 * If you click on Cancel then it returns the last color previously selected.
+	 * 
+	 * @return the ARGB colour as a 32 bit integer (as used in Processing). 
+	 */
+	protected static int selectColorImpl(Color color){
+		lastColor = color == null ? color.WHITE : color;
 		Frame frame = getFrame(sketchWindow);
 		if(chooser == null){
-			chooser = new JColorChooser();
+			chooser = new JColorChooser(lastColor);
 			AbstractColorChooserPanel[] oldPanels = chooser.getChooserPanels();
 			// Do not assume what panels are present
 			LinkedList<AbstractColorChooserPanel> panels = new LinkedList<AbstractColorChooserPanel>();	
@@ -552,10 +592,11 @@ public class G4P implements GConstants, PConstants {
 				lastColor = chooser.getColor();
 			}
 		}, 
-		null);
+				null);
 		dialog.setVisible(true);
 		return lastColor.getRGB();
 	}
+	
 
 	/**
 	 * Select a folder from the local file system.
@@ -572,7 +613,9 @@ public class G4P implements GConstants, PConstants {
 			FileDialog fileDialog =
 					new FileDialog(frame, prompt, FileDialog.LOAD);
 			System.setProperty("apple.awt.fileDialogForDirectories", "true");
+			// Make visible and wait for user input
 			fileDialog.setVisible(true);
+			// Reset this property for later dialogs
 			System.setProperty("apple.awt.fileDialogForDirectories", "false");
 			String filename = fileDialog.getFile();
 			if (filename != null) {
@@ -607,7 +650,19 @@ public class G4P implements GConstants, PConstants {
 	 * cancelled.
 	 */
 	public static String selectInput(String prompt){
-		return selectInput(prompt, null, null);
+		return selectImpl(prompt, FileDialog.LOAD, null, null, null);
+	}
+
+	/**
+	 * Select a file for input from the local file system. <br>
+	 * 
+	 * @param prompt the frame text for the chooser
+	 * @param startFolder the location to start the dialog box
+	 * @return the absolute path name for the selected folder, or null if action 
+	 * cancelled.
+	 */
+	public static String selectInput(String prompt, String startFolder){
+		return selectImpl(prompt, FileDialog.LOAD, null, null, startFolder);
 	}
 
 	/**
@@ -626,7 +681,27 @@ public class G4P implements GConstants, PConstants {
 	 * cancelled.
 	 */
 	public static String selectInput(String prompt, String types, String typeDesc){
-		return selectImpl(prompt, FileDialog.LOAD, types, typeDesc);
+		return selectImpl(prompt, FileDialog.LOAD, types, typeDesc, null);
+	}
+
+	/**
+	 * Select a file for input from the local file system. <br>
+	 * 
+	 * This version allows the dialog window to filter the output based on file extensions.
+	 * This is not available on all platforms, if not then it is ignored. <br>
+	 * 
+	 * It is definitely available on Linux systems because it uses the standard Swing
+	 * JFileFinder component.
+	 * 
+	 * @param prompt the frame text for the chooser
+	 * @param types a comma separated list of file extensions e.g. "png,gif,jpg,jpeg"
+	 * @param typeDesc simple textual description of the file types e.g. "Image files"
+	 * @param startFolder the folder where the dialog starts (uses default if null or not a folder)
+	 * @return the absolute path name for the selected folder, or null if action 
+	 * cancelled.
+	 */
+	public static String selectInput(String prompt, String types, String typeDesc, String startFolder){
+		return selectImpl(prompt, FileDialog.LOAD, types, typeDesc, startFolder);
 	}
 
 	/**
@@ -636,7 +711,20 @@ public class G4P implements GConstants, PConstants {
 	 * @return the absolute path name for the selected folder, or null if action is cancelled.
 	 */
 	public static String selectOutput(String prompt){
-		return selectOutput(prompt, null, null);
+		return selectImpl(prompt, FileDialog.SAVE, null, null, null);
+		//return selectOutput(prompt, null, null);
+	}
+
+	/**
+	 * Select a file for output from the local file system. <br>
+	 * 
+	 * @param prompt the frame text for the chooser
+	 * @param startFolder the folder where the dialog starts (uses default if null or not a folder)
+	 * @return the absolute path name for the selected folder, or null if action is cancelled.
+	 */
+	public static String selectOutput(String prompt, String startFolder){
+		return selectImpl(prompt, FileDialog.SAVE, null, null, startFolder);
+		//return selectOutput(prompt, null, null);
 	}
 
 	/**
@@ -655,19 +743,40 @@ public class G4P implements GConstants, PConstants {
 	 * cancelled.
 	 */
 	public static String selectOutput(String prompt, String types, String typeDesc){
-		return selectImpl(prompt, FileDialog.SAVE, types, typeDesc);
+		return selectImpl(prompt, FileDialog.SAVE, types, typeDesc, null);
+	}
+
+	/**
+	 * Select a file for output from the local file system. <br>
+	 * 
+	 * This version allows the dialog window to filter the output based on file extensions.
+	 * This is not available on all platforms, if not then it is ignored. <br>
+	 * 
+	 * It is definitely available on Linux systems because it uses the standard swing
+	 * JFileFinder component.
+	 * 
+	 * @param prompt the frame text for the chooser
+	 * @param types a comma separated list of file extensions e.g. "png,jpf,tiff"
+	 * @param typeDesc simple textual description of the file types e.g. "Image files"
+	 * @param startFolder the folder where the dialog starts (uses default if null or not a folder)
+	 * @return the absolute path name for the selected folder, or null if action 
+	 * cancelled.
+	 */
+	public static String selectOutput(String prompt, String types, String typeDesc, String startFolder){
+		return selectImpl(prompt, FileDialog.SAVE, types, typeDesc, startFolder);
 	}
 
 	/**
 	 * The implementation of the select input and output methods.
-	 * @param prompt
-	 * @param mode
-	 * @param types
-	 * @param typeDesc
+	 * @param prompt the frame text for the chooser
+	 * @param mode FileDialog.LOAD or FileDialog.SAVE
+	 * @param types a comma separated list of file extensions e.g. "png,jpf,tiff"
+	 * @param typeDesc simple textual description of the file types e.g. "Image files"
+	 * @param startFolder the folder where the dialog starts (uses default if null or not a folder)
 	 * @return the absolute path name for the selected folder, or null if action 
 	 * cancelled.
 	 */
-	private static String selectImpl(String prompt, int mode, String types, String typeDesc) {
+	private static String selectImpl(String prompt, int mode, String types, String typeDesc, String startFolder) {
 		// If no initial selection made then use last selection	
 		// Assume that a file will not be selected
 		String selectedFile = null;
@@ -681,6 +790,8 @@ public class G4P implements GConstants, PConstants {
 				filter = new FilenameChooserFilter(types);
 				dialog.setFilenameFilter(filter);
 			}
+			// Set the starting folder
+			dialog.setDirectory(startFolder);
 			dialog.setVisible(true);
 			String directory = dialog.getDirectory();
 			if(directory != null){
@@ -696,11 +807,13 @@ public class G4P implements GConstants, PConstants {
 		} else {
 			JFileChooser chooser = new JFileChooser();
 			chooser.setDialogTitle(prompt);
-			FileFilter filter = null;
 			if(types != null && types.length() > 0){
-				filter = new FileChooserFilter(types, typeDesc);
-				chooser.setFileFilter(filter);
+				String[] ftypes = PApplet.split(types.toLowerCase(), ',');
+				chooser.setAcceptAllFileFilterUsed(false);
+				chooser.addChoosableFileFilter(new FileNameExtensionFilter(typeDesc, ftypes));
 			}
+			// Set the starting folder
+			chooser.setCurrentDirectory(new File(startFolder));
 			int result = JFileChooser.ERROR_OPTION;
 			if (mode == FileDialog.SAVE) {
 				result = chooser.showSaveDialog(frame);

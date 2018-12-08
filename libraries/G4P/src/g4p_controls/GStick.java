@@ -44,7 +44,7 @@ import processing.event.MouseEvent;
  * range 0-7 and -1 when in the dead zone. <br>
  * <pre>
  *     5   6   7
- * 		\  |  /
+ *      \  |  /
  *       \ | /
  *   4 --- + --- 0         + is the dea zone so -1
  *       / | \
@@ -56,7 +56,7 @@ import processing.event.MouseEvent;
  * which give the values. <br>
  * <pre>
  * X= -1   0   +1 
- * 		\  |  /  -1
+ *      \  |  /  -1
  *       \ | /
  *     --- + ---  0
  *       / | \
@@ -173,7 +173,7 @@ public class GStick extends GAbstractControl {
 	 * Returns the current position of the stick based on <br>
 	 * <pre>
 	 *     5   6   7
-	 * 		\  |  /
+	 *      \  |  /
 	 *       \ | /
 	 *   4 --- + --- 0         + is the dea zone so -1
 	 *       / | \
@@ -190,7 +190,7 @@ public class GStick extends GAbstractControl {
 	 * Get the X position of the stick from <br>
 	 *  * <pre>
 	 * X= -1   0   +1 
-	 * 		\  |  /  -1
+	 *      \  |  /  -1
 	 *       \ | /
 	 *     --- + ---  0
 	 *       / | \
@@ -207,7 +207,7 @@ public class GStick extends GAbstractControl {
 	 * Get the Y position of the stick from <br>
 	 *  * <pre>
 	 * X= -1   0   +1 
-	 * 		\  |  /  -1
+	 *      \  |  /  -1
 	 *       \ | /
 	 *     --- + ---  0
 	 *       / | \

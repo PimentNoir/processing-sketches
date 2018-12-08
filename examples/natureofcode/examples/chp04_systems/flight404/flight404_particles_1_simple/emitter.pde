@@ -2,13 +2,13 @@
 /*
 The emitter is just an object that follows the cursor and
 can spawn new particle objects. It would be easier to just make
-the location vector match the cursor position but I have opted
+the position vector match the cursor position but I have opted
 to use a velocity vector because later I will be allowing for 
 multiple emitters.
 */
 
 class Emitter{
-  Vec3D loc;
+  Vec3D pos;
   Vec3D vel;
   Vec3D velToMouse;
   
@@ -17,7 +17,7 @@ class Emitter{
   ArrayList particles;
   
   Emitter(  ){
-    loc        = new Vec3D();
+    pos        = new Vec3D();
     vel        = new Vec3D();
     velToMouse = new Vec3D();
     
@@ -40,7 +40,7 @@ class Emitter{
   }
   
   void setVelToMouse(){
-    velToMouse.set( mouseX - loc.x, mouseY - loc.y, 0 );
+    velToMouse.set( mouseX - pos.x, mouseY - pos.y, 0 );
   }
   
   void findVelocity(){
@@ -48,11 +48,11 @@ class Emitter{
   }
   
   void setPosition(){
-    loc.addSelf( vel );
+    pos.addSelf( vel );
     
     if( ALLOWFLOOR ){
-      if( loc.y > floorLevel ){
-        loc.y = floorLevel;
+      if( pos.y > floorLevel ){
+        pos.y = floorLevel;
         vel.y = 0;
       }
     }
@@ -71,7 +71,7 @@ class Emitter{
   
   
   void render(){
-    renderImage( emitterImg, loc, 150, myColor, 1.0 );
+    renderImage( emitterImg, pos, 150, myColor, 1.0 );
   }
   
   void iterateListRenderTrails(){
@@ -83,7 +83,7 @@ class Emitter{
 
   void addParticles( int _amt ){
     for( int i=0; i<_amt; i++ ){
-      particles.add( new Particle( loc, vel ) );
+      particles.add( new Particle( pos, vel ) );
     }
   }
 }

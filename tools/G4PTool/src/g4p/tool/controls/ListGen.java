@@ -91,7 +91,9 @@ public final class ListGen implements TDataConstants {
 	private void makeColourSchemeSelection(int type){
 		String[] s = new String[] { "RED_SCHEME", "GREEN_SCHEME",  
 				"YELLOW_SCHEME", "PURPLE_SCHEME", "ORANGE_SCHEME", 
-				"CYAN_SCHEME", "BLUE_SCHEME", "GOLD_SCHEME" };
+				"CYAN_SCHEME", "BLUE_SCHEME", "GOLD_SCHEME",
+				"SCHEME_8", "SCHEME_9", "SCHEME_10", "SCHEME_11",  
+				"SCHEME_12", "SCHEME_13", "SCHEME_14", "SCHEME_15" };
 		cbList.put(type,  new DefaultComboBoxModel(s));
 	}
 	

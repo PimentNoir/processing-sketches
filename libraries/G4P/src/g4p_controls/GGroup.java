@@ -113,6 +113,7 @@ public final class GGroup extends GAbstractControl {
 	 * @param duration time to fade over (milli-seconds)
 	 */
 	public void fadeOut(int delay, int duration){
+		duration = duration <= 0 ? 1 : duration;
 		actions.add(new Action(ALPHA_TO, delay, new Object[] { 0, duration }));
 	}
 
@@ -123,6 +124,7 @@ public final class GGroup extends GAbstractControl {
 	 * @param duration time to fade over (milli-seconds)
 	 */
 	public void fadeIn(int delay, int duration){
+		duration = duration <= 0 ? 1 : duration;
 		actions.add(new Action(ALPHA_TO, delay, new Object[] { 255, duration }));
 	}
 
@@ -134,6 +136,7 @@ public final class GGroup extends GAbstractControl {
 	 * @param alpha the target alpha value
 	 */
 	public void fadeTo(int delay, int duration, int alpha){
+		duration = duration <= 0 ? 1 : duration;
 		alpha &= 0xFF;
 		actions.add(new Action(ALPHA_TO, delay, new Object[] { alpha, duration }));
 	}
@@ -180,7 +183,7 @@ public final class GGroup extends GAbstractControl {
 	 * use this in preference to fadeIn/fadeOut
 	 */
 	public void setVisible(boolean visible){
-		setEnabled(0, visible);	
+		setVisible(0, visible);	
 	}
 	
 	/**
@@ -264,7 +267,9 @@ public final class GGroup extends GAbstractControl {
 					if(a.duration <= 0)
 						alphaImpl(a.target);
 					else {
-						speed = ((float)(a.target - currentAlpha))/(float) a.duration;
+						speed = a.target - currentAlpha;
+						if(a.duration > 0)
+							speed /= a.duration;
 						alpha = currentAlpha;
 						targetAlpha = a.target;
 					}

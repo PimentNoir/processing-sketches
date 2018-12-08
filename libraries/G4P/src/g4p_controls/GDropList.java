@@ -63,6 +63,9 @@ public class GDropList extends GTextBase {
 	protected static final int ITEM_BACK_COLOR = 6;
 	protected static final int OVER_ITEM_FORE_COLOR = 15;
 
+	protected static final float BUTTON_WIDTH = 10;
+	protected static final int VIEW_LIST_DEFAULT_SIZE = 4;
+	protected static final int VIEW_LIST_MIN_SIZE = 3;
 
 	private GScrollbar vsb;
 	private GButton showList;
@@ -77,16 +80,18 @@ public class GDropList extends GTextBase {
 	protected int currOverItem = lastOverItem;
 
 
-	protected int dropListMaxSize = 4;
-	protected int dropListActualSize = 4;
+	protected int viewListSize = VIEW_LIST_DEFAULT_SIZE;
+	protected int viewListActualSize = 4;
 
-	protected float itemHeight, buttonWidth;
+	protected float itemHeight;
+	//, buttonWidth;
 
 	protected boolean expanded = false;   // make false in release version
 
 	/**
-	 * Create a drop down list component with a list size of 4.
+	 * Create a drop down list component with a list size of 4.<br>
 	 * 
+	 * IMPORTANT <br>
 	 * After creating the control use setItems to initialise the list. <br>
 	 * 
 	 * @param theApplet the applet that will display this component.
@@ -96,12 +101,13 @@ public class GDropList extends GTextBase {
 	 * @param p3
 	 */
 	public GDropList(PApplet theApplet, float p0, float p1, float p2, float p3) {
-		this(theApplet, p0, p1, p2, p3, 4);
+		this(theApplet, p0, p1, p2, p3, VIEW_LIST_DEFAULT_SIZE, BUTTON_WIDTH);
 	}
 
 	/**
-	 * Create a drop down list component with a specified list size.
+	 * Create a drop down list component with a specified list size. <br>
 	 * 
+	 * IMPORTANT <br>
 	 * After creating the control use setItems to initialise the list. <br>
 	 * 
 	 * @param theApplet
@@ -109,23 +115,47 @@ public class GDropList extends GTextBase {
 	 * @param p1
 	 * @param p2
 	 * @param p3
-	 * @param dropListMaxSize the maximum number of element to appear in the drop down list 
+	 * @param viewListMaxSize the maximum number of element to appear in the drop down list 
 	 */
-	public GDropList(PApplet theApplet, float p0, float p1, float p2, float p3, int dropListMaxSize) {
+	public GDropList(PApplet theApplet, float p0, float p1, float p2, float p3, int viewListMaxSize) {
+		this(theApplet, p0, p1, p2, p3, viewListMaxSize, BUTTON_WIDTH);
+	}
+
+	/**
+	 * Create a drop down list component with a specified list size.<br>
+	 * 
+	 * The width of the show-list button is constrained between 10pixels and
+	 * half the control width.<br>
+	 * 
+	 * IMPORTANT <br>
+	 * After creating the control use setItems to initialise the list. <br>
+	 * 
+	 * @param theApplet
+	 * @param p0
+	 * @param p1
+	 * @param p2
+	 * @param p3
+	 * @param listSize the maximum number of elements to appear in the drop down list 
+	 * @param buttonWidth the width in pixels for the show-list button
+	 */
+	public GDropList(PApplet theApplet, float p0, float p1, float p2, float p3, int listSize, float buttonWidth) {
 		super(theApplet, p0, p1, p2, p3);
 		children = new LinkedList<GAbstractControl>();
-		this.dropListMaxSize = Math.max(dropListMaxSize, 3);
-		itemHeight = height / (dropListMaxSize + 1); // make allowance for selected text at top
+		this.viewListSize = Math.max(listSize, 3);
+		itemHeight = height / (viewListSize + 1); // make allowance for selected text at top
 
 		G4P.pushStyle();
 		G4P.showMessages = false;
 
-		vsb = new GScrollbar(theApplet, 0, 0, height - itemHeight-2, 10);
+		buttonWidth = Math.max(BUTTON_WIDTH, buttonWidth);
+		buttonWidth = buttonWidth > halfWidth ? halfWidth : buttonWidth;
+		
+		vsb = new GScrollbar(theApplet, 0, 0, height - itemHeight-2, buttonWidth);
 		vsb.addEventHandler(this, "vsbEventHandler");
 		vsb.setAutoHide(true);
 		vsb.setVisible(false);
 
-		buttonWidth = 10;
+		
 		showList = new GButton(theApplet, 0, 0, buttonWidth, itemHeight, ":");
 		showList.addEventHandler(this, "buttonShowListHandler");
 
@@ -140,7 +170,7 @@ public class GDropList extends GTextBase {
 		G4P.popStyle();
 
 		hotspots = new HotSpot[]{
-				new HSrect(LIST_SURFACE, 0, itemHeight+1, width - 11, height - itemHeight - 1),	// text list area
+				new HSrect(LIST_SURFACE, 0, itemHeight+1, width - buttonWidth - 1, height - itemHeight - 1),	// text list area
 				new HSrect(CLOSED_SURFACE, 0, 0, width - buttonWidth, itemHeight)				// selected text display area
 		};
 
@@ -204,14 +234,14 @@ public class GDropList extends GTextBase {
 			sitems[i] = new StyledString(itemlist.get(i));
 		// Force selected value into valid range
 		selItem = PApplet.constrain(selected, 0, sitems.length - 1);
-		startItem = (selItem >= dropListMaxSize) ? selItem - dropListMaxSize + 1 : 0;
+		startItem = (selItem >= viewListSize) ? selItem - viewListSize + 1 : 0;
 		// Make selected item bold
 		sitems[selItem].addAttribute(WEIGHT, WEIGHT_BOLD);
 		// Create separate styled string for display area
 		selText = new StyledString(sitems[selItem].getPlainText());
-		dropListActualSize = Math.min(sitems.length, dropListMaxSize);
-		if((sitems.length > dropListActualSize)){
-			float filler = ((float)dropListMaxSize)/sitems.length;
+		viewListActualSize = Math.min(sitems.length, viewListSize);
+		if((sitems.length > viewListActualSize)){
+			float filler = ((float)viewListSize)/sitems.length;
 			float value = ((float)startItem)/sitems.length;
 			vsb.setValue(value, filler);
 			vsb.setVisible(false); //  make it false
@@ -294,7 +324,7 @@ public class GDropList extends GTextBase {
 	public void setSelected(int selected){
 		if(selected >=0 && selected < sitems.length){
 			selItem = selected;
-			startItem = (selItem >= dropListMaxSize) ? selItem - dropListMaxSize + 1 : 0;
+			startItem = (selItem >= viewListSize) ? selItem - viewListSize + 1 : 0;
 			for(StyledString s : sitems)
 				s.clearAttributes();
 			sitems[selItem].addAttribute(WEIGHT, WEIGHT_BOLD);
@@ -444,7 +474,7 @@ public class GDropList extends GTextBase {
 
 			if(expanded){
 				buffer.fill(palette[ITEM_BACK_COLOR].getRGB());
-				buffer.rect(0,itemHeight, width, itemHeight * dropListActualSize);
+				buffer.rect(0,itemHeight, width, itemHeight * viewListActualSize);
 			}
 
 			float px = TPAD2, py;
@@ -458,7 +488,7 @@ public class GDropList extends GTextBase {
 
 			if(expanded){
 				//				g2d.setColor(palette[ITEM_FORE_COLOR]);         // REDUNDANT CODE ????
-				for(int i = 0; i < dropListActualSize; i++){
+				for(int i = 0; i < viewListActualSize; i++){
 					py += itemHeight;
 					if(currOverItem == startItem + i)
 						g2d.setColor(palette[OVER_ITEM_FORE_COLOR]);
@@ -512,7 +542,7 @@ public class GDropList extends GTextBase {
 		}
 		else {
 			takeFocus();
-			vsb.setVisible(sitems.length > dropListActualSize);
+			vsb.setVisible(sitems.length > viewListActualSize);
 			expanded = true;
 		}
 		bufferInvalid = true;

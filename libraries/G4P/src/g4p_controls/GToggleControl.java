@@ -111,7 +111,8 @@ public abstract class GToggleControl extends GTextIconBase {
 	 * Set whether this is or is not selected.
 	 */
 	public void setSelected(boolean selected) {
-		bufferInvalid = this.selected != selected; // status changed.
+		// Buffer is already invalid or the status has changed.
+		bufferInvalid = bufferInvalid | this.selected != selected; 
 		GAnimIcon ai = icon.me();
 		if(ai != null){
 			if(selected)
@@ -206,7 +207,7 @@ public abstract class GToggleControl extends GTextIconBase {
 			// Get the latest lines of text
 			LinkedList<TextLayoutInfo> lines = stext.getLines(g2d);	
 			// Back ground colour
-			buffer.background(opaque ? palette[6].getRGB() : palette[2].getRGB() & 0xFFFFFF);
+			buffer.background(opaque ? palette[6].getRGB() : palette[2].getRGB() & 0xFFFFFF | 0x00010101);
 			// If there is an icon draw it
 			if(icon.me() == null){
 				buffer.image(icon.getFrame(selected ? 1 : 0), iconX, iconY);

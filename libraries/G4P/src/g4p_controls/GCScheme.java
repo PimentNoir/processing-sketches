@@ -82,7 +82,7 @@ public class GCScheme implements GConstants, PConstants {
 			palettes[schemeNbr][i] = new Color(colors[i], true); // keep alpha
 		G4P.invalidateBuffers();
 	}
-	
+
 	/**
 	 * Copies the colours from the source scheme to the destination scheme.
 	 * 
@@ -97,7 +97,7 @@ public class GCScheme implements GConstants, PConstants {
 			changePalette(dstSchemeNbr, palette);
 		}
 	}
-	
+
 	/**
 	 * Change a single colour within an existing scheme
 	 * 
@@ -111,7 +111,7 @@ public class GCScheme implements GConstants, PConstants {
 		palettes[schemeNbr][colorNbr] = new Color(color, true); // keep alpha
 		G4P.invalidateBuffers();
 	}
-	
+
 	/**
 	 * Save the current colour schemes as an image in the sketch's data folder. The file will be 
 	 * called <pre>"user_gui_palette.png"</pre>
@@ -121,7 +121,7 @@ public class GCScheme implements GConstants, PConstants {
 	public static void savePalettes(PApplet app){
 		savePalettes(app, "user_gui_palette.png");
 	}
-	
+
 	/**
 	 * Save the current colour schemes as an image in the sketch's data folder.
 	 * 
@@ -152,8 +152,8 @@ public class GCScheme implements GConstants, PConstants {
 		System.out.println(filename);
 		pg.save(filename);
 	}
-	
-	
+
+
 	/**
 	 * Called every time we create a control. The palettes will be made when 
 	 * the first control is created.
@@ -168,23 +168,19 @@ public class GCScheme implements GConstants, PConstants {
 			return;
 		// Load the image
 		PImage image = null;;
-		InputStream is = app.createInput("user_gui_palette.png");
-		if(is != null){
+		InputStream is = app.createInputRaw("user_gui_palette.png");
+		if(is != null){ // file exists so close the input stream and load it
 			try {
 				is.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			} catch (IOException e) { /* do nothing */ }
 			image = app.loadImage("user_gui_palette.png");
 			GMessenger.message(USER_COL_SCHEME, null);
 		}
 		else {
 			// User image not provided
 			image = app.loadImage("default_gui_palette.png");
-			// Added to 3.4 to hopefully fix problem with OpenProcessing
-			if(image == null)
-				image = new PImage((new javax.swing.ImageIcon(new GCScheme().getClass().getResource("/data/default_gui_palette.png"))).getImage());
 		}
+
 		// Now make the palette
 		palettes = new Color[16][16];
 		for(int p = 0; p < 16; p++)
@@ -197,7 +193,7 @@ public class GCScheme implements GConstants, PConstants {
 	/*
 	 * The following methods are ONLY called by GUI Builder do not change their names.
 	 */
-	
+
 	/**
 	 * DO NOT CALL THIS METHOD<br>
 	 * 

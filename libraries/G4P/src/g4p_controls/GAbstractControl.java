@@ -168,7 +168,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 * @param theApplet
 	 */
 	public GAbstractControl(PApplet theApplet) {
-		G4P.registerSketch(theApplet);;
+		G4P.registerSketch(theApplet);
 		winApp = theApplet;		
 		GCScheme.makeColorSchemes(winApp);
 		rotAngle = 0;
@@ -210,21 +210,52 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 		buffer.endDraw();
 	}
 
-	// May not need this method needs to be caled in updateBuffer
-	protected void setTextRenderingHints(Graphics2D g2d){
+	// May not need this method needs to be called in updateBuffer
+	protected void setTextRenderingHints(Graphics2D g2d, int hint){
 		// Attempt to fix antialiasing
-
-		// MIGHT NEED THESE
-		// If so they have to be done in update method
-		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-				RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-
-
-		//				buffer.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-		//						RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-		//				buffer.g2.setRenderingHint(
-		//				        RenderingHints.KEY_TEXT_ANTIALIASING,
-		//				        RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+		if(hint == 0){
+			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+					RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+			return;
+		}
+		// Switch on antialiasing
+		// Select hint type
+		switch(hint) {
+		case 1:
+			g2d.setRenderingHint(
+					RenderingHints.KEY_TEXT_ANTIALIASING,
+					RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+			break;
+		case 2:
+			g2d.setRenderingHint(
+					RenderingHints.KEY_TEXT_ANTIALIASING,
+					RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);			
+			break;
+		case 3:
+			g2d.setRenderingHint(
+					RenderingHints.KEY_TEXT_ANTIALIASING,
+					RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);			
+			break;
+		default:
+			g2d.setRenderingHint(
+					RenderingHints.KEY_TEXT_ANTIALIASING,
+					RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+			break;
+			
+		}
+//		// MIGHT NEED THESE
+//		// If so they have to be done in update method
+//		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+//				RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+//
+//
+////		g2d.setRenderingHint(
+////				RenderingHints.KEY_TEXT_ANTIALIASING,
+////				RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+//
+////		g2d.setRenderingHint(
+////		        RenderingHints.KEY_TEXT_ANTIALIASING,
+////		        RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
 
 	}
 
@@ -302,8 +333,13 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 * The user is responsible for nullifying all references to this control
 	 * in their sketch code. <br>
 	 * Once this method is called the control cannot be reused but resources
-	 * used by the control remain until all references to the control are 
-	 * set to null.
+	 * used by the control remain until ALL references to the control are 
+	 * set to null.<br>
+	 * For example if you want to dispose of a button called 
+	 * <pre>btnDoThis</pre> then to remove the button use the
+	 * statements <br> <pre>
+	 * btnDoThis.dispose(); <br>
+	 * btnDoThis = null; <br></pre>
 	 * 
 	 */
 	public void dispose(){

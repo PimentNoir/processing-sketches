@@ -66,8 +66,8 @@ public class GWindowImpl implements GConstants, GConstantsInternal {
 	}
 
 	/**
-	 * Set the colour scheme to be used by all controls on this window.
-	 * @param cs colour scheme e.g. G4P.GREEN_SCHEME
+	 * Invalidate the graphic buffers for all controls so they are forced
+	 * to be redrawn
 	 */
 	void invalidateBuffers(){
 		for(GAbstractControl control : windowControls)
@@ -105,6 +105,29 @@ public class GWindowImpl implements GConstants, GConstantsInternal {
 				control.draw();
 		}		
 		app.popMatrix();
+	}
+
+	String actionString(MouseEvent e) {
+		switch (e.getAction()) {
+		default:
+			return "UNKNOWN";
+		case MouseEvent.CLICK:
+			return "CLICK";
+		case MouseEvent.DRAG:
+			return "DRAG";
+		case MouseEvent.ENTER:
+			return "ENTER";
+		case MouseEvent.EXIT:
+			return "EXIT";
+		case MouseEvent.MOVE:
+			return "MOVE";
+		case MouseEvent.PRESS:
+			return "PRESS";
+		case MouseEvent.RELEASE:
+			return "RELEASE";
+		case MouseEvent.WHEEL:
+			return "WHEEL";
+		}
 	}
 
 	/**
@@ -180,9 +203,9 @@ public class GWindowImpl implements GConstants, GConstantsInternal {
 					control.eventHandlerMethod = null;
 					control.winApp = null;
 					windowControls.remove(control);
-					System.gc();			
 				}
 				toRemove.clear();
+				System.gc();			
 			}
 			if(!toAdd.isEmpty()){
 				for(GAbstractControl control : toAdd)

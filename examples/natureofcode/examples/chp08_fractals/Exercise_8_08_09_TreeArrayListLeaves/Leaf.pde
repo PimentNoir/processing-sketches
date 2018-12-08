@@ -8,16 +8,16 @@
 // the last branches
 
 class Leaf {
-  PVector loc;
+  PVector pos;
 
   Leaf(PVector l) {
-    loc = l.get();
+    pos = l.get();
   }
 
   void display() {
     noStroke();
     fill(50,100);
-    ellipse(loc.x,loc.y,4,4);   
+    ellipse(pos.x,pos.y,4,4);   
   }
 }
 

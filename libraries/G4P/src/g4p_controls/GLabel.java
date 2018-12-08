@@ -168,12 +168,24 @@ public class GLabel extends GTextIconBase {
 			bufferInvalid = false;
 			buffer.beginDraw();
 			Graphics2D g2d = buffer.g2;
+			// **********************************************************************************************************
+			// **********************************************************************************************************
+			// **********************************************************************************************************
+//			if(tagNo == 1){
+//				setTextRenderingHints(g2d, 3);
+//			}
+//			else {
+//				setTextRenderingHints(g2d, 0);
+//			}
+			// **********************************************************************************************************
+			// **********************************************************************************************************
+			// **********************************************************************************************************
 			g2d.setFont(localFont);
 
 			// Get the latest lines of text
 			LinkedList<TextLayoutInfo> lines = stext.getLines(g2d);	
 			// Back ground colour
-			buffer.background(opaque ? palette[6].getRGB() : palette[2].getRGB() & 0xFFFFFF);
+			buffer.background(opaque ? palette[6].getRGB() : palette[2].getRGB() & 0xFFFFFF | 0x00010101);
 			
 			// If there is an icon draw it
 			if(icon != null){

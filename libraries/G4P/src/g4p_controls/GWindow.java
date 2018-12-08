@@ -128,7 +128,7 @@ public abstract class GWindow extends PApplet implements GConstants, GConstantsI
 		unregisterMethod("post", this);
 		unregisterMethod("mouseEvent", this);
 		unregisterMethod("keyEvent", this);
-		// bely and braces
+		// belt and braces
 		preHandlerObject = null;
 		drawHandlerObject = null;
 		postHandlerObject = null;
@@ -488,12 +488,12 @@ public abstract class GWindow extends PApplet implements GConstants, GConstantsI
 	public void addOnCloseHandler(Object obj, String methodName){
 		try{
 			closeHandlerObject = obj;
-			closetHandlerMethodName = methodName;
-			closetHandlerMethod = obj.getClass().getMethod(methodName, new Class<?>[] { PApplet.class, GWinData.class } );
+			closeHandlerMethodName = methodName;
+			closetHandlerMethod = obj.getClass().getMethod(methodName, new Class<?>[] { GWindow.class } );
 		} catch (Exception e) {
-			GMessenger.message(NONEXISTANT, new Object[] {this, methodName, new Class<?>[] { PApplet.class, GWinData.class } } );
+			GMessenger.message(NONEXISTANT, new Object[] {this, methodName, new Class<?>[] { GWindow.class } } );
 			closeHandlerObject = null;
-			closetHandlerMethodName = "";
+			closeHandlerMethodName = "";
 		}
 	}
 
@@ -568,10 +568,10 @@ public abstract class GWindow extends PApplet implements GConstants, GConstantsI
 		if(closeHandlerObject != null){
 			try {
 				closetHandlerMethod.invoke(closeHandlerObject, 
-						new Object[] { this, data });
+						new Object[] { this });
 			} catch (Exception e) {
 				GMessenger.message(EXCP_IN_HANDLER, 
-						new Object[] {preHandlerObject, preHandlerMethodName, e} );
+						new Object[] {closeHandlerObject, closeHandlerMethodName, e} );
 			}
 		}
 	}
@@ -652,9 +652,10 @@ public abstract class GWindow extends PApplet implements GConstants, GConstantsI
 			switch(actionOnClose){
 			case EXIT_APP:
 				// Next two come from processing.opengl PSurfaceJOGL.java
-				// performCloseAction();
+				//performCloseAction();
 				//dispose();
-				exitActual();
+				//exitActual();
+				exit();
 				break;
 			case CLOSE_WINDOW:
 				performCloseAction();
@@ -714,7 +715,7 @@ public abstract class GWindow extends PApplet implements GConstants, GConstantsI
 	/** The method in closeHandlerObject to execute */
 	protected Method closetHandlerMethod = null;
 	/** the name of the method to handle the event */ 
-	protected String closetHandlerMethodName;
+	protected String closeHandlerMethodName;
 
 	protected boolean is3D;
 }

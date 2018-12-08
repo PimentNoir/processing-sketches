@@ -105,7 +105,7 @@ public class GSlider extends GLinearTrackControl {
 			buffer.rectMode(PApplet.CENTER);
 			buffer.ellipseMode(PApplet.CENTER);
 			// Back ground colour
-			buffer.background(opaque ? palette[6].getRGB() : palette[2].getRGB() & 0xFFFFFF);
+			buffer.background(opaque ? palette[6].getRGB() : palette[2].getRGB() & 0xFFFFFF | 0x00010101);
 			
 			// Draw track, thumb, ticks etc.
 			buffer.pushMatrix();

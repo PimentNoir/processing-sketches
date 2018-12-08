@@ -4,11 +4,11 @@
 
 // Attraction
 
-// A class to describe a thing in our world, has vectors for location, velocity, and acceleration
+// A class to describe a thing in our world, has vectors for position, velocity, and acceleration
 // Also includes scalar values for mass, maximum velocity, and elasticity
 
 class Crawler {
-  PVector loc;
+  PVector pos;
   PVector vel;
   PVector acc;
   float mass;
@@ -18,7 +18,7 @@ class Crawler {
   Crawler() {
     acc = new PVector();
     vel = new PVector(random(-1,1),random(-1,1));
-    loc = new PVector(random(width),random(height));
+    pos = new PVector(random(width),random(height));
     mass = random(8,16);
     osc = new Oscillator(mass*2);
   }
@@ -29,10 +29,10 @@ class Crawler {
     acc.add(f);
   }
 
-  // Method to update location
+  // Method to update position
   void update() {
     vel.add(acc);
-    loc.add(vel);
+    pos.add(vel);
     // Multiplying by 0 sets the all the components to 0
     acc.mult(0);
     
@@ -43,16 +43,15 @@ class Crawler {
   void display() {
     float angle = vel.heading2D();
     pushMatrix();
-    translate(loc.x,loc.y);
+    translate(pos.x,pos.y);
     rotate(angle);
     ellipseMode(CENTER);
     stroke(0);
     fill(175,100);
     ellipse(0,0,mass*2,mass*2);
     
-    osc.display(loc);
+    osc.display(pos);
     popMatrix();
     
   }
 }
-

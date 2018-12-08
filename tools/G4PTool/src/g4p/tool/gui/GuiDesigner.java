@@ -144,7 +144,7 @@ public class GuiDesigner extends javax.swing.JFrame {
 		this.tool = tool;
 		initComponents();
 		initCustomComponents();
-		this.setTitle("G4P GUI Builder " + "4.2");
+		this.setTitle("G4P GUI Builder " + "4.2.1");
 		guiControl = new GuiControl(editor, tabWindows, treeSketchView, tblPropView);
 		guiControl.loadGuiLayout();
 		addKeyBinding(editor);

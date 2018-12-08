@@ -180,7 +180,7 @@ public class GCustomSlider extends GLinearTrackControl {
 			g2d.setFont(localFont);
 
 			// Back ground colour
-			buffer.background(opaque ? palette[6].getRGB() : palette[2].getRGB() & 0xFFFFFF);
+			buffer.background(opaque ? palette[6].getRGB() : palette[2].getRGB() & 0xFFFFFF | 0x00010101);
 			// Draw track, thumb, ticks etc.
 			buffer.pushMatrix();
 			buffer.translate(width/2, height/2);

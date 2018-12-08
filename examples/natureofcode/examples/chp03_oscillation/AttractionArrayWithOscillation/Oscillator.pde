@@ -23,8 +23,8 @@ class Oscillator {
     theta += thetaVel;
   }
 
-  // Display based on a location
-  void display(PVector loc) {
+  // Display based on a position
+  void display(PVector pos) {
     float x = map(cos(theta),-1,1,0,amplitude);
     
     stroke(0);
@@ -33,5 +33,3 @@ class Oscillator {
     ellipse(x,0,8,8);
   }
 }
-
-

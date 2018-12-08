@@ -1,7 +1,7 @@
 /**
  * GUI form designer for G4P.
  *
- * (C) 2015
+ * (C) 2017
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * Boston, MA  02111-1307  USA
  * 
  * @author		Peter Lager http://www.lagers.org.uk
- * @modified	09/29/2016
+ * @modified	04/24/2017
  * @version		##version##
  */
 package g4p.tool;
@@ -63,7 +63,7 @@ public class G4PTool implements Tool, TFileConstants {
 	 * @return revision number string
 	 */
 	public static String getVersion(){
-		return "4.2";
+		return "4.2.1";
 	}
 
 	/**
@@ -71,7 +71,7 @@ public class G4PTool implements Tool, TFileConstants {
 	 * @return revision number string
 	 */
 	public static String getCompatibleVersionNo(){
-		String n[] = "4.2".split("[\\.]");
+		String n[] = "4.2.1".split("[\\.]");
 		return n[0] + "." + n[1];
 	}
 
@@ -84,7 +84,7 @@ public class G4PTool implements Tool, TFileConstants {
 	 * @return version number as int
 	 */
 	public static int getVersionNo(){
-		String n[] = "4.2".split("[\\.]");
+		String n[] = "4.2.1".split("[\\.]");
 		int[] vnp = new int[3];
 		for(int i = 0; i < n.length; i++){
 			try {
@@ -133,7 +133,7 @@ public class G4PTool implements Tool, TFileConstants {
 		if (dframe == null) { // Design window does not exist
 			
 			System.out.println("===================================================");
-			System.out.println("   G4P GUI Builder 4.2 created by Peter Lager");
+			System.out.println("   G4P GUI Builder 4.2.1 created by Peter Lager");
 			System.out.println("===================================================");
 
 			// If the gui.pde tab does not exist create it

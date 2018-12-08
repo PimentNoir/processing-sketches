@@ -131,7 +131,7 @@ public class GTextField extends GEditableTextControl {
 				new String[]{ "textcontrol", "event" } 
 				);
 		registeredMethods = PRE_METHOD | DRAW_METHOD | MOUSE_METHOD | KEY_METHOD;
-		
+
 		// Must register control
 		G4P.registerControl(this);
 		bufferInvalid = true;
@@ -143,6 +143,7 @@ public class GTextField extends GEditableTextControl {
 	 * @param ss
 	 */
 	public void setStyledText(StyledString ss){
+		cancelSelection();
 		stext = ss.convertToSingleLineText();
 		stext.getLines(buffer.g2);
 		if(stext.getNbrLines() > 0){
@@ -170,12 +171,21 @@ public class GTextField extends GEditableTextControl {
 	 */
 	public void setText(String text){
 		if(text != null){
+			cancelSelection();
 			stext.setText(text, Integer.MAX_VALUE);
 			setScrollbarValues(0,0);
 			bufferInvalid = true;
 		}
 	}
 
+	/**
+	 * Cancels any selection. So the selection box will disappear.
+	 */
+	protected void cancelSelection(){
+		startTLHI.cancelInfo();
+		endTLHI.cancelInfo();
+	}
+	
 	/**
 	 * Add some plain text to the end of the existing text.
 	 * 
@@ -483,17 +493,17 @@ public class GTextField extends GEditableTextControl {
 			stext.insertCharacters(" ", 0);
 			adjust++; textChanged = true;
 		}
-//		if(stext.length() == 0){
-//			stext.insertCharacters(" ", 0);
-//			adjust++; textChanged = true;
-//			LinkedList<TextLayoutInfo> lines = stext.getLines(buffer.g2);
-//			startTLHI = new TextLayoutHitInfo(lines.getFirst(), null);
-//			startTLHI.thi = startTLHI.tli.layout.getNextLeftHit(1);
-//
-//			endTLHI = new TextLayoutHitInfo(lines.getLast(), null);
-//			int lastChar = endTLHI.tli.layout.getCharacterCount();
-//			endTLHI.thi = startTLHI.tli.layout.getNextRightHit(lastChar-1);
-//		}
+		//		if(stext.length() == 0){
+		//			stext.insertCharacters(" ", 0);
+		//			adjust++; textChanged = true;
+		//			LinkedList<TextLayoutInfo> lines = stext.getLines(buffer.g2);
+		//			startTLHI = new TextLayoutHitInfo(lines.getFirst(), null);
+		//			startTLHI.thi = startTLHI.tli.layout.getNextLeftHit(1);
+		//
+		//			endTLHI = new TextLayoutHitInfo(lines.getLast(), null);
+		//			int lastChar = endTLHI.tli.layout.getCharacterCount();
+		//			endTLHI.thi = startTLHI.tli.layout.getNextRightHit(lastChar-1);
+		//		}
 
 	}
 
@@ -557,23 +567,22 @@ public class GTextField extends GEditableTextControl {
 			buffer.beginDraw();
 			Graphics2D g2d = buffer.g2;
 			g2d.setFont(localFont);
-			
+
 			// Get the latest lines of text
 			LinkedList<TextLayoutInfo> lines = stext.getLines(g2d);	
-			
+
 			boolean usePromptText = promptText != null && !hasFocus() && (lines.isEmpty() || stext.getPlainText().equals("") || stext.getPlainText().equals(" "));
 			if(usePromptText)
 				lines = promptText.getLines(g2d);
 
 			// If needed update the horizontal scrollbar
-//			if(hsb != null){
-//				if(stext.getMaxLineLength() < tw)
-//					hsb.setValue(0, 1);
-//				else
-//					hsb.setValue(0, tw/stext.getMaxLineLength());
-//			}
+			//			if(hsb != null){
+			//				if(stext.getMaxLineLength() < tw)
+			//					hsb.setValue(0, 1);
+			//				else
+			//					hsb.setValue(0, tw/stext.getMaxLineLength());
+			//			}
 
-			TextLayoutHitInfo startSelTLHI = null, endSelTLHI = null;
 			// Whole control surface if opaque
 			if(opaque)
 				buffer.background(palette[6].getRGB());
@@ -601,6 +610,7 @@ public class GTextField extends GEditableTextControl {
 				int lastChar = endTLHI.tli.layout.getCharacterCount();
 				endTLHI.thi = startTLHI.tli.layout.getNextRightHit(lastChar-1);
 			}
+			TextLayoutHitInfo startSelTLHI = null, endSelTLHI = null;
 
 			if(hasSelection()){
 				if(endTLHI.compareTo(startTLHI) == -1){
