@@ -3,11 +3,11 @@ SimplexNoise simplexnoise = new SimplexNoise();
 INoise perlininoise = new INoise();
 ImprovedNoise perlinnoise = new ImprovedNoise();
 
-int i, w=500, h=w, x, y, s=6;
+int i, w=600, h=w, x, y, s=6;
 float k, m, r, j=0.01;
 
 void setup() {
-  size(500, 500, P3D);
+  size(600, 600, P3D);
   colorMode(HSB, 100, 100, 100);
   noStroke();
   int framerate = 24;
@@ -20,37 +20,36 @@ float inoise(float i, float j, float k) {
   return (1 + ((float)(INoise.noise((int)(i*mult), (int)(j*mult), (int)(k*mult))) / mult)) / 2.0f;
 }
 
-float perlininoise(float i, float j, float k)
+double perlininoise(float i, float j, float k)
 {
   int octave = 4;
-  float persistence = 0.25;
-  float lacunarity = 0.5;
-  float frequency = 1.0;
+  double persistence = 0.25;
+  double lacunarity = 0.5;
+  double frequency = 1.0;
 
-  float rc = 0;
-  float amp = 1.0;
+  double rc = 0;
+  double amp = 1.0;
   for (int l = 0; l < octave; l++) { 
-    rc += inoise(frequency*i, frequency*j, frequency*k) * amp;
+    rc += inoise((float)frequency*i, (float)frequency*j, (float)frequency*k) * amp;
     amp *= persistence;
     frequency *= lacunarity;
   }
   return rc * (1 - persistence)/(1 - amp);
 }
 
-// Mimic the processing FBM in noise() and off by one the FBM amplification
-float perlinnoise(float i, float j, float k)
+double perlinnoise(float i, float j, float k)
 {
-  int octave = 8;
-  float persistence = 0.65;
-  float lacunarity = 2.0;
-  float frequency = 1.0;
+  int octave = 4;
+  double persistence = 0.25;
+  double lacunarity = 0.5;
+  double frequency = 1.0;
 
-  float rc = 0;
-  float maxamp = 0;
-  float amp = 0.5;
+  double rc = 0;
+  double maxamp = 0;
+  double amp = 1.0;
   for (int l = 0; l < octave; l++) {
     //Keep the same behaviour as the processing perlin noise() function: return values in [0,1] range. 
-    rc += ((1 + (float)ImprovedNoise.noise((double)(frequency*i), (double)(frequency*j), (double)(frequency*k))) / 2.0f) * amp;
+    rc += ((1 + ImprovedNoise.noise((double)(frequency*i), (double)(frequency*j), (double)(frequency*k))) / 2.0f) * amp;
     maxamp += amp;
     amp *= persistence;
     frequency *= lacunarity;
@@ -58,17 +57,17 @@ float perlinnoise(float i, float j, float k)
   return rc / maxamp;
 }
 
-float simplexnoise(float i, float j, float k) {
+double simplexnoise(float i, float j, float k) {
   int octave = 4;
-  float persistence = 0.25;
-  float lacunarity = 0.5;
-  float frequency = 1.0;
+  double persistence = 0.25;
+  double lacunarity = 0.5;
+  double frequency = 1.0;
 
-  float rc = 0;
-  float amp = 1.0;
+  double rc = 0;
+  double amp = 1.0;
   for (int l = 0; l < octave; l++) {
     //Keep the same behaviour as the processing perlin noise() function, return values in [0,1] range.
-    rc += (((float)SimplexNoise.noise((double)(frequency * i), (double)(frequency * j), (double)(frequency * k)) + 1) / 2.0f) * amp;
+    rc += ((SimplexNoise.noise((double)(frequency * i), (double)(frequency * j), (double)(frequency * k)) + 1) / 2.0f) * amp;
     amp *= persistence;
     frequency *= lacunarity;
   }
@@ -76,15 +75,15 @@ float simplexnoise(float i, float j, float k) {
 }
 
 float Noise(float x, float y, float z) {
-  int octave = 8; 
-  float persistence = 0.65;
-  float lacunarity = 2.0;
+  int octave = 4; 
+  float persistence = 0.25;
+  float lacunarity = 0.5;
   float frequency = 1.0;
 
   float rc = 0;
-  float amp = 0.5;
-  float maxamp = 0;
-  //FBM with frequency = 1.0, lacunarity = 2.0 and persistence = 0.5 on 4 octaves with initial amp = 0.5.
+  float amp = 1.0;
+  //float maxamp = 0;
+  //FBM with frequency = 1.0, lacunarity = 2.0 and persistence = 0.5 on 4 octaves with initial amp = 1.0.
   //Take only the first octave with persistence = 0.0.
   noiseDetail(1, 0);
   for (int l = 0; l < octave; l++) {
@@ -94,7 +93,7 @@ float Noise(float x, float y, float z) {
     // noise() function arguments and is not an internal variable. There seem also to have some reseeding between octave in the FBM. libnoise do something that look similar in the idea but without the off by one.
     // The normalization in processing noise() function is still a mystery, libnoise do not normalize but the reseeding or something elsewhere might normalize between [-1,1]. 
     rc += noise(x*frequency, y*frequency, z*frequency) * amp;
-    maxamp += amp;
+    //maxamp += amp;
     amp *= persistence;
     frequency *= lacunarity;
   }
@@ -112,8 +111,8 @@ float rawnoise(float x, float y, float z) {
 }
 
 float n(float i) {
-  float xspeed = 0.1;
-  float zspeed = 0.0125;
+  //float xspeed = 0.1;
+  //float zspeed = 0.0125;
   float lx_prev, ly_prev, lz_prev;
   if ( i <= 0 ) {
     lx_prev = 0;
@@ -129,9 +128,9 @@ float n(float i) {
   float lz = (i*j/w-r);
   float pulsey = sin(ly) * 1.25 + cos(ly) * 1.25;
   float noise_scale = 0.5125;
-  float rc = simplexnoise(lx_prev * noise_scale + abs(lx - lx_prev), ly_prev * noise_scale + abs(ly - ly_prev) + pulsey, lz_prev * noise_scale + abs(lz - lz_prev));
+  double rc = perlinnoise(lx_prev * noise_scale + abs(lx - lx_prev), ly_prev * noise_scale + abs(ly - ly_prev) + pulsey, lz_prev * noise_scale + abs(lz - lz_prev));
   //println(rc);
-  return rc*s*12+h/2;
+  return (float)rc*s*12+h/2;
 }
 
 // Useless functions
