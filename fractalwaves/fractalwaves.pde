@@ -128,7 +128,7 @@ float n(float i) {
   float lz = (i*j/w-r);
   float pulsey = sin(ly) * 1.25 + cos(ly) * 1.25;
   float noise_scale = 0.5125;
-  double rc = perlinnoise(lx_prev * noise_scale + abs(lx - lx_prev), ly_prev * noise_scale + abs(ly - ly_prev) + pulsey, lz_prev * noise_scale + abs(lz - lz_prev));
+  double rc = simplexnoise(lx_prev * noise_scale + abs(lx - lx_prev), ly_prev * noise_scale + abs(ly - ly_prev) + pulsey, lz_prev * noise_scale + abs(lz - lz_prev));
   //println(rc);
   return (float)rc*s*12+h/2;
 }
