@@ -58,10 +58,11 @@ import processing.event.MouseEvent;
  * CLICKED event e.g.
  * <pre>
  * public void handleButtonEvents(GButton button, GEvent event) {
- *   if (button == button1 && event == GEvent.CLICKED) {
+ *   if (button == button1 &amp;&amp; event == GEvent.CLICKED) {
  *       button1.setEnabled(false);
  *   }
  * }
+ * </pre>
  * do not try this with the RELEASED or PRESSED event as it will lead to inconsistent 
  * behaviour.
  * 
@@ -82,7 +83,7 @@ public class GButton extends GTextIconBase {
 	private static float CORNER_RADIUS = 6;
 
 	/**
-	 * By default buttons are created with rounded corners. <br/>
+	 * By default buttons are created with rounded corners. <br>
 	 * 
 	 *  This method can be used to change this setting for buttons yet to be created. Note that it does not affect any existing buttons.
 	 *   
@@ -96,14 +97,32 @@ public class GButton extends GTextIconBase {
 	protected int status = 0;
 
 	// Only report CLICKED events
-	protected boolean reportAllButtonEvents = false;
+//	protected boolean reportAllButtonEvents = false;
 
+	/**
+	 * New button without text
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
+	 */
 	public GButton(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		this(theApplet, p0, p1, p2, p3, "");
 	}
 
+	/**
+	 * New button with text
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
+	 * @param text the button face text 
+	 */
 	public GButton(PApplet theApplet, float p0, float p1, float p2, float p3, String text) {
 		super(theApplet, p0, p1, p2, p3);
+		makeBuffer();
 		// Create mask for hotspots
 		PGraphics mask = winApp.createGraphics((int) width, (int) height, JAVA2D);
 		mask.beginDraw();
@@ -143,14 +162,14 @@ public class GButton extends GTextIconBase {
 		G4P.registerControl(this);
 	}
 
-	/**
+	/*
 	 * If the parameter is true all 3 event types are generated, if false
 	 * only CLICKED events are generated (default behaviour).
 	 * @param all
 	 */
-	public void fireAllEvents(boolean all){
-		reportAllButtonEvents = all;
-	}
+//	public void fireAllEvents(boolean all){
+//		reportAllButtonEvents = all;
+//	}
 
 	/**
 	 * Enable or disable the ability of the component to generate mouse events.<br>
@@ -173,7 +192,7 @@ public class GButton extends GTextIconBase {
 	 * 
 	 * <pre>
 	 * void handleButtonEvents(void handleButtonEvents(GButton button, GEvent event) {
-	 *	  if(button == btnName && event == GEvent.CLICKED){
+	 *	  if(button == btnName &amp;&amp; event == GEvent.CLICKED){
 	 *        // code for button click event
 	 *    }
 	 * </pre> <br>
@@ -181,7 +200,6 @@ public class GButton extends GTextIconBase {
 	 * 
 	 */
 	public void mouseEvent(MouseEvent event){
-//		System.out.println("        GButtom mouse event " + event.getAction());
 		if(!visible || !enabled || !available) return;
 
 		calcTransformedOrigin(winApp.mouseX, winApp.mouseY);
@@ -198,8 +216,8 @@ public class GButton extends GTextIconBase {
 				dragging = false;
 				status = PRESS_CONTROL;
 				takeFocus();
-				if(reportAllButtonEvents)
-					fireEvent(this, GEvent.PRESSED);
+//				if(reportAllButtonEvents)
+//					fireEvent(this, GEvent.PRESSED);
 				bufferInvalid = true;
 			}
 			break;
@@ -219,8 +237,8 @@ public class GButton extends GTextIconBase {
 			// if the mouse has moved then release focus otherwise
 			// MOUSE_CLICKED will handle it
 			if(focusIsWith == this && dragging){
-				if(reportAllButtonEvents)
-					fireEvent(this, GEvent.RELEASED);
+//				if(reportAllButtonEvents)
+//					fireEvent(this, GEvent.RELEASED);
 				dragging = false;
 				loseFocus(null);
 				status = OFF_CONTROL;
@@ -270,7 +288,7 @@ public class GButton extends GTextIconBase {
 			bufferInvalid = false;
 			buffer.beginDraw();
 			// Set the font and read the latest test
-			Graphics2D g2d = (Graphics2D) buffer.g2;
+			Graphics2D g2d = buffer.g2;
 			g2d.setFont(localFont);
 			LinkedList<TextLayoutInfo> lines = stext.getLines(g2d);
 			// Draw the button head

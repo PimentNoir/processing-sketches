@@ -29,7 +29,7 @@ public class GWindowImpl implements GConstants, GConstantsInternal {
 
 	PApplet app;
 	PMatrix orgMatrix = null;
-
+	
 	public GWindowImpl(PApplet app){
 		this.app = app;
 		PMatrix mat = app.getMatrix();
@@ -38,7 +38,7 @@ public class GWindowImpl implements GConstants, GConstantsInternal {
 		registerMethods();
 	}
 
-	protected void registerMethods(){
+	public void registerMethods(){
 		app.registerMethod("pre", this);
 		app.registerMethod("draw", this);
 		app.registerMethod("post", this);
@@ -92,20 +92,125 @@ public class GWindowImpl implements GConstants, GConstantsInternal {
 	 * @param alpha 0-255 inclusive
 	 */
 	void setAlpha(int alpha){
-		for(GAbstractControl control : windowControls)
+		for(GAbstractControl control : windowControls) {
 			control.setAlpha(alpha);
+		}
 	}
 
 	public void draw() {
 		app.pushMatrix();
-		if(orgMatrix != null)
+		if(orgMatrix != null && app.getGraphics().is3D())
 			app.setMatrix(orgMatrix);
 		for(GAbstractControl control : windowControls){
-			if( (control.registeredMethods & DRAW_METHOD) == DRAW_METHOD )
+			if( (control.registeredMethods & DRAW_METHOD) == DRAW_METHOD ) {
 				control.draw();
+			}
 		}		
 		app.popMatrix();
 	}
+
+	/**
+	 * The mouse method registered with Processing
+	 * 
+	 * @param event the mouse event to process
+	 */
+	public void mouseEvent(MouseEvent event){
+		for(GAbstractControl control : windowControls){
+			if((control.registeredMethods & MOUSE_METHOD) == MOUSE_METHOD) {
+				control.mouseEvent(event);
+			}
+		}
+	}
+
+	/**
+	 * The key method registered with Processing
+	 * @param event the key event to process
+	 */	
+	public void keyEvent(KeyEvent event) {
+		for(GAbstractControl control : windowControls){
+			if( (control.registeredMethods & KEY_METHOD) == KEY_METHOD) {
+				control.keyEvent(event);
+			}
+		}			
+	}
+
+	/**
+	 * Manages allocating focus to the correct control
+	 */
+	public void pre(){
+		if(GAbstractControl.controlToTakeFocus != null && GAbstractControl.controlToTakeFocus.getPApplet() == app){
+			GAbstractControl.controlToTakeFocus.setFocus(true);
+			GAbstractControl.controlToTakeFocus = null;
+		}
+		for(GAbstractControl control : windowControls){
+			if( (control.registeredMethods & PRE_METHOD) == PRE_METHOD) {
+				control.pre();
+			}
+		}
+	}
+
+	/**
+	 * Manages cursor icon changes, also adding and removing controls
+	 */
+	public void post() {
+		if(G4P.cursorChangeEnabled){
+			// If the cursor is over a control and the control is in the main sketch window
+			if(GAbstractControl.cursorIsOver != null  
+					&& GAbstractControl.cursorIsOver.getPApplet() == app
+					) {
+				app.cursor(GAbstractControl.cursorIsOver.cursorOver);
+			} else {
+				app.cursor(G4P.mouseOff);
+			}
+		}
+		for(GAbstractControl control : windowControls){
+			if( (control.registeredMethods & POST_METHOD) == POST_METHOD) {
+				control.post();
+			}
+		}
+		// =====================================================================================================
+		// =====================================================================================================
+		//  This is where components are removed or added to the window to avoid concurrent access violations 
+		// =====================================================================================================
+		// =====================================================================================================
+
+		synchronized (this) {
+			// Dispose of any unwanted controls
+			if(!toRemove.isEmpty()){
+				for(GAbstractControl control : toRemove){
+					// If the control has focus then lose it
+					if(GAbstractControl.focusIsWith == control) {
+						control.loseFocus(null);
+					}
+					// Clear control resources
+					control.buffer = null;
+					if(control.parent != null){
+						control.parent.children.remove(control);
+						control.parent = null;
+					}
+					if(control.children != null) {
+						control.children.clear();
+					}
+					control.palette = null;
+					control.eventHandlerObject = null;
+					control.eventHandlerMethod = null;
+					control.winApp = null;
+					windowControls.remove(control);
+				}
+				toRemove.clear();
+				System.gc();			
+			}
+			if(!toAdd.isEmpty()){
+				for(GAbstractControl control : toAdd) {
+					windowControls.add(control);
+				}
+				toAdd.clear();
+				Collections.sort(windowControls, G4P.zorder);
+			}
+		}
+
+	}
+
 
 	String actionString(MouseEvent e) {
 		switch (e.getAction()) {
@@ -130,89 +235,4 @@ public class GWindowImpl implements GConstants, GConstantsInternal {
 		}
 	}
 
-	/**
-	 * The mouse method registered with Processing
-	 * 
-	 * @param event
-	 */
-	public void mouseEvent(MouseEvent event){
-		for(GAbstractControl control : windowControls){
-			if((control.registeredMethods & MOUSE_METHOD) == MOUSE_METHOD)
-				control.mouseEvent(event);
-		}
-	}
-
-	/**
-	 * The key method registered with Processing
-	 */	
-	public void keyEvent(KeyEvent event) {
-		for(GAbstractControl control : windowControls){
-			if( (control.registeredMethods & KEY_METHOD) == KEY_METHOD)
-				control.keyEvent(event);
-		}			
-	}
-
-	/**
-	 * The pre method registered with Processing
-	 */
-	public void pre(){
-		if(GAbstractControl.controlToTakeFocus != null && GAbstractControl.controlToTakeFocus.getPApplet() == app){
-			GAbstractControl.controlToTakeFocus.setFocus(true);
-			GAbstractControl.controlToTakeFocus = null;
-		}
-		for(GAbstractControl control : windowControls){
-			if( (control.registeredMethods & PRE_METHOD) == PRE_METHOD)
-				control.pre();
-		}
-	}
-
-	public void post() {
-		//System.out.println("POST");
-		if(G4P.cursorChangeEnabled){
-			if(GAbstractControl.cursorIsOver != null && GAbstractControl.cursorIsOver.getPApplet() == app)
-				app.cursor(GAbstractControl.cursorIsOver.cursorOver);			
-			else 
-				app.cursor(G4P.mouseOff);
-		}
-		for(GAbstractControl control : windowControls){
-			if( (control.registeredMethods & POST_METHOD) == POST_METHOD)
-				control.post();
-		}
-		// =====================================================================================================
-		// =====================================================================================================
-		//  This is where components are removed or added to the window to avoid concurrent access violations 
-		// =====================================================================================================
-		// =====================================================================================================
-		synchronized (this) {
-			// Dispose of any unwanted controls
-			if(!toRemove.isEmpty()){
-				for(GAbstractControl control : toRemove){
-					// If the control has focus then lose it
-					if(GAbstractControl.focusIsWith == control)
-						control.loseFocus(null);
-					// Clear control resources
-					control.buffer = null;
-					if(control.parent != null){
-						control.parent.children.remove(control);
-						control.parent = null;
-					}
-					if(control.children != null)
-						control.children.clear();
-					control.palette = null;
-					control.eventHandlerObject = null;
-					control.eventHandlerMethod = null;
-					control.winApp = null;
-					windowControls.remove(control);
-				}
-				toRemove.clear();
-				System.gc();			
-			}
-			if(!toAdd.isEmpty()){
-				for(GAbstractControl control : toAdd)
-					windowControls.add(control);
-				toAdd.clear();
-				Collections.sort(windowControls, G4P.zorder);
-			}
-		}
-	}
 }

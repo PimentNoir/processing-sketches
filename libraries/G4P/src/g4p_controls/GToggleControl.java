@@ -46,6 +46,14 @@ public abstract class GToggleControl extends GTextIconBase {
 
 	protected boolean selected = false;
 
+	/**
+	 * Toggle control for option and checkboxes
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
+	 */
 	public GToggleControl(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		super(theApplet, p0, p1, p2, p3);
 		opaque = false;
@@ -55,13 +63,13 @@ public abstract class GToggleControl extends GTextIconBase {
 	}
 
 	/**
-	 * Set the icon to be used for this control. <br/> 
+	 * Set the icon to be used for this control. <br> 
 	 * Use the constants in GAlign e.g. <b>GAlign.LEFT</b> <br>
 	 * 
 	 * This is the only method that allows you to use an animated icon. Create and configure the icon before adding 
 	 * to this control. You can use the getIcon
 	 * 
-	 * You can pass <b>null</b> if you don't want to change a particular position/alignment.   <br/>
+	 * You can pass <b>null</b> if you don't want to change a particular position/alignment.   <br>
 	 * 
 	 * @param g_icon the icon to use
 	 * @param pos GAlign.NORTH, SOUTH, EAST or WEST
@@ -93,8 +101,8 @@ public abstract class GToggleControl extends GTextIconBase {
 	}	
 
 	/**
-	 * Get the toggle group. If null is returned then it is not part 
-	 * of the group.
+	 * Gets the toggle group for this control. 
+	 * @return the toggle group or null if not part of a toggle group.
 	 */
 	public GToggleGroup getToggleGroup(){
 		return group;
@@ -109,6 +117,7 @@ public abstract class GToggleControl extends GTextIconBase {
 
 	/**
 	 * Set whether this is or is not selected.
+	 * @param selected mark the control as selected or not
 	 */
 	public void setSelected(boolean selected) {
 		// Buffer is already invalid or the status has changed.

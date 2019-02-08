@@ -20,7 +20,7 @@ public class DStick extends DBaseVisual {
 
 	protected int mode = G4P.X4;
  
-	public String 		_0902_stick_mode = "X4";
+	public String 		_0650_stick_mode = "X4";
 	transient public 	EditorBase stick_mode_editor = new EditorJComboBox(STICK_TYPE);
 	public Boolean 		stick_mode_edit = true;
 	public Boolean 		stick_mode_show = true;
@@ -44,7 +44,7 @@ public class DStick extends DBaseVisual {
 	protected String get_creator(DBase parent, String window){
 		String s;
 		s = ToolMessages.build(CTOR_GSTICK, _0010_name, window, $(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height));
-		s += ToolMessages.build(SET_STICK_MODE, _0010_name, _0902_stick_mode);
+		s += ToolMessages.build(SET_STICK_MODE, _0010_name, _0650_stick_mode);
 		s += super.get_creator(parent, window);		
 		return s;
 	}
@@ -113,7 +113,7 @@ public class DStick extends DBaseVisual {
 	}
 
 	public void stickModeChange(){
-		if(_0902_stick_mode.equals("X4"))
+		if(_0650_stick_mode.equals("X4"))
 			mode = G4P.X4;
 		else
 			mode = G4P.X8;
@@ -122,11 +122,11 @@ public class DStick extends DBaseVisual {
 	protected void read(){
 		super.read();
 		stick_mode_editor = new EditorJComboBox(STICK_TYPE);
-		stick_mode_editor.setSelected(_0902_stick_mode);
+		stick_mode_editor.setSelected(_0650_stick_mode);
 	}
 	
 	private void readObject(ObjectInputStream in)
-	throws IOException, ClassNotFoundException
+	throws IOException, ClassNotFoundException 
 	{
 		in.defaultReadObject();
 		read();

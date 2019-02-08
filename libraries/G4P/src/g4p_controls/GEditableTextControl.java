@@ -83,7 +83,15 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 	KeySpeedMeasurer ksm = new KeySpeedMeasurer(20);
 	float scrollAdvance = 4;
 	
-	
+	/**
+	 * Base class for controls with editable text.
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
+	 * @param scrollbars scrollbar policy
+	 */
 	public GEditableTextControl(PApplet theApplet, float p0, float p1, float p2, float p3, int scrollbars) {
 		super(theApplet, p0, p1, p2, p3);
 		scrollbarPolicy = scrollbars;
@@ -274,7 +282,7 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 
 	/**
 	 * Set the font for this control.
-	 * @param font
+	 * @param font the java.awt.Font to use
 	 */
 	public void setFont(Font font) {
 		if(font != null && font != localFont && buffer != null){
@@ -314,8 +322,8 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 	 * If some text has been selected then set the style. If there is no selection then 
 	 * the text is unchanged.
 	 * 
-	 * 
-	 * @param style
+	 * @param style set the style of some selected text
+	 * @param value a value associated with this style
 	 */
 	public void setSelectedTextStyle(TextAttribute style, Object value){
 		if(!hasSelection())
@@ -516,7 +524,7 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 	}
 
 	/**
-	 * Is this control keyboard enabled
+	 * @return true if this control is keyboard enabled
 	 */
 	public boolean isTextEditEnabled(){
 		return textEditEnabled;
@@ -631,14 +639,14 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 		return true;
 	}
 
-	/**
+	/*
 	 * Do not call this directly. A timer calls this method as and when required.
 	 */
 	public void flashCaret(GTimer timer){
 		showCaret = !showCaret;
 	}
 
-	/**
+	/*
 	 * Do not call this method directly, G4P uses it to handle input from
 	 * the horizontal scrollbar.
 	 */
@@ -648,7 +656,7 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 		bufferInvalid = true;
 	}
 
-	/**
+	/*
 	 * Do not call this method directly, G4P uses it to handle input from
 	 * the vertical scrollbar.
 	 */
@@ -656,15 +664,6 @@ public abstract class GEditableTextControl extends GTextBase implements Focusabl
 		keepCursorInView = false;
 		pty = vsb.getValue() * (stext.getTextAreaHeight() + 1.5f * stext.getMaxLineHeight());
 		bufferInvalid = true;
-	}
-
-	/**
-	 * Permanently dispose of this control.
-	 */
-	public void markForDisposal(){
-		if(tabManager != null)
-			tabManager.removeControl(this);
-		super.markForDisposal();
 	}
 
 	/**

@@ -1,6 +1,5 @@
 package g4p.tool.controls;
 
-import g4p.tool.G;
 import g4p.tool.ToolMessages;
 
 import java.awt.Graphics2D;

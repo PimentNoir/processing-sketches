@@ -194,7 +194,7 @@ public final class DWindow extends DBase {
 				ev_code = ToolMessages.build(CODE_GWINDOW_KEY, _0010_name);
 				break;
 			case 3:
-				ev_code = ToolMessages.build(CODE_GWINDOW_PEE, _0010_name);
+				ev_code = ToolMessages.build(CODE_GWINDOW_PRE, _0010_name);
 				break;
 			case 4:
 				ev_code = ToolMessages.build(CODE_GWINDOW_POST, _0010_name);
@@ -229,8 +229,9 @@ public final class DWindow extends DBase {
 		else {
 			sb.append(ToolMessages.build(CTOR_WINDOW, _0010_name, "this", _0012_title,
 					$(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height), _0031_renderer));
-			if(!_0032_close_action.equals("KEEP_OPEN"))
-				sb.append(ToolMessages.build(SET_ACTION_ON_CLOSE, _0010_name, _0032_close_action));
+			// _0032_close_action KEEP_OPEN CLOSE_WINDOW EXIT_APP
+			// Add code no matter which option selected. See Ticket 11
+			sb.append(ToolMessages.build(SET_ACTION_ON_CLOSE, _0010_name, _0032_close_action));
 			if(_0020_wdraw.length() > 0){
 				sb.append(ToolMessages.build(ADD_DRAW_HANDLER, _0010_name, "this", _0020_wdraw));
 			}
@@ -258,7 +259,6 @@ public final class DWindow extends DBase {
 			return ToolMessages.build(LOOP_WINDOW, _0010_name);
 		else
 			return null;
-		
 	}
 	
 

@@ -69,11 +69,11 @@ public class GTextArea extends GEditableTextControl {
 	/**
 	 * Create a text area without scrollbars and a text wrap width to fit the control.
 	 * 
-	 * @param theApplet
-	 * @param p0
-	 * @param p1
-	 * @param p2
-	 * @param p3
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
 	 */
 	public GTextArea(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		this(theApplet, p0, p1, p2, p3, SCROLLBARS_NONE, Integer.MAX_VALUE);
@@ -94,12 +94,12 @@ public class GTextArea extends GEditableTextControl {
 	 * </ul>
 	 * e.g. SCROLLBARS_BOTH | SCROLLBARS_AUTOHIDE
 	 * <br>
-	 * @param theApplet
-	 * @param p0
-	 * @param p1
-	 * @param p2
-	 * @param p3
-	 * @param sbPolicy
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
+	 * @param sbPolicy scrollbar policy
 	 */
 	public GTextArea(PApplet theApplet, float p0, float p1, float p2, float p3, int sbPolicy) {
 		this(theApplet, p0, p1, p2, p3, sbPolicy, Integer.MAX_VALUE);
@@ -108,16 +108,17 @@ public class GTextArea extends GEditableTextControl {
 	/**
 	 * Create a text field with the given scrollbar policy with a user specified text wrap length <br>
 	 * 
-	 * @param theApplet
-	 * @param p0
-	 * @param p1
-	 * @param p2
-	 * @param p3
-	 * @param sbPolicy
-	 * @param wrapWidth
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
+	 * @param sbPolicy scrollbar policy
+	 * @param wrapWidth the line width in pixels used for wrapping text.
 	 */
 	public GTextArea(PApplet theApplet, float p0, float p1, float p2, float p3, int sbPolicy, int wrapWidth) {
 		super(theApplet, p0, p1, p2, p3, sbPolicy);
+		makeBuffer();
 		children = new LinkedList<GAbstractControl>();
 		tx = ty = TPAD6;
 		tw = width - 2 * TPAD6 - ((scrollbarPolicy & SCROLLBAR_VERTICAL) != 0 ? 18 : 0);
@@ -485,7 +486,7 @@ public class GTextArea extends GEditableTextControl {
 	 * 
 	 * @param lineNo the text area line number we want
 	 * @param ignoreEOL if true do not include trailing end=of-line characters
-	 * @return the length of the line, or <) if the line number is invalid
+	 * @return the length of the line, or &lt;0) if the line number is invalid
 	 */
 	public int getTextLength(int lineNo, boolean ignoreEOL){
 		Graphics2D g2d = buffer.g2;

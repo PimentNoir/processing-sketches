@@ -62,11 +62,11 @@ public class GTextField extends GEditableTextControl {
 	/**
 	 * Create a text field without a scrollbar.
 	 * 
-	 * @param theApplet
-	 * @param p0
-	 * @param p1
-	 * @param p2
-	 * @param p3
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
 	 */
 	public GTextField(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		this(theApplet, p0, p1, p2, p3, SCROLLBARS_NONE);
@@ -85,15 +85,16 @@ public class GTextField extends GEditableTextControl {
 	 * </ul>
 	 * e.g. SCROLLBARS_HORIZONTAL_ONLY | SCROLLBARS_AUTOHIDE
 	 * <br>
-	 * @param theApplet
-	 * @param p0
-	 * @param p1
-	 * @param p2
-	 * @param p3
-	 * @param sbPolicy
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
+	 * @param sbPolicy scrollbar policy
 	 */
 	public GTextField(PApplet theApplet, float p0, float p1, float p2, float p3, int sbPolicy) {
 		super(theApplet, p0, p1, p2, p3, sbPolicy);
+		makeBuffer();
 		children = new LinkedList<GAbstractControl>();
 		tx = ty = 2;
 		tw = width - 2 * 2;
@@ -140,7 +141,7 @@ public class GTextField extends GEditableTextControl {
 	/**
 	 * Set the styled text for this textfield after ensuring that all EOL characters
 	 * have been removed.
-	 * @param ss
+	 * @param ss the styled text to be displayed
 	 */
 	public void setStyledText(StyledString ss){
 		cancelSelection();
@@ -167,7 +168,7 @@ public class GTextField extends GEditableTextControl {
 	/**
 	 * Set the text to be displayed.
 	 * 
-	 * @param text
+	 * @param text the text to be displayed
 	 */
 	public void setText(String text){
 		if(text != null){
@@ -189,7 +190,7 @@ public class GTextField extends GEditableTextControl {
 	/**
 	 * Add some plain text to the end of the existing text.
 	 * 
-	 * @param extraText
+	 * @param extraText the text to append
 	 */
 	public void appendText(String extraText){
 		if(extraText == null || extraText.equals(""))

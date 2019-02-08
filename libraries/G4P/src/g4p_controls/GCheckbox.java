@@ -39,11 +39,11 @@ public class GCheckbox extends GToggleControl {
 	/**
 	 * Create an option button without text.
 	 * 
-	 * @param theApplet that will display the control
-	 * @param p0
-	 * @param p1
-	 * @param p2
-	 * @param p3
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
 	 */	
 	public GCheckbox(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		this(theApplet, p0, p1, p2, p3, "");
@@ -52,15 +52,16 @@ public class GCheckbox extends GToggleControl {
 	/**
 	 * Create an option button with text.
 	 * 
-	 * @param theApplet that will display the control
-	 * @param p0
-	 * @param p1
-	 * @param p2
-	 * @param p3
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
 	 * @param text text to be displayed
 	 */
 	public GCheckbox(PApplet theApplet, float p0, float p1, float p2, float p3, String text) {
 		super(theApplet, p0, p1, p2, p3);
+		makeBuffer();
 		opaque = false;
 		
 		// Initialise text and icon alignment

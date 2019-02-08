@@ -165,10 +165,10 @@ public class GTimer implements GConstantsInternal {
 	
 	/**
 	 * Start the timer and call the method for the number of
-	 * times indicated by nrepeats
-	 * If nrepeats is <=0 then repeat forever
+	 * times indicated by nrepeats. 
+	 * If nrepeats is &le;0 then repeat forever
 	 * 
-	 * @param nrepeats
+	 * @param nrepeats the number of times to repeat the action
 	 */
 	public void start(int nrepeats){
 		this.nbrRepeats = nrepeats;
@@ -265,7 +265,7 @@ public class GTimer implements GConstantsInternal {
 
 	/**
 	 * The number of times an event is to be fired.
-	 * @param nbrRepeats <=0 keep running until stopped by user
+	 * @param nbrRepeats &ge; 0 keep running until stopped by user
 	 */
 	public void setNbrRepeats(int nbrRepeats) {
 		this.nbrRepeats = nbrRepeats;

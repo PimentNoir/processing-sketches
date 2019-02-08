@@ -63,7 +63,7 @@ public class GDropList extends GTextBase {
 	protected static final int ITEM_BACK_COLOR = 6;
 	protected static final int OVER_ITEM_FORE_COLOR = 15;
 
-	protected static final float BUTTON_WIDTH = 10;
+	protected static final float BUTTON_WIDTH = 12;
 	protected static final int VIEW_LIST_DEFAULT_SIZE = 4;
 	protected static final int VIEW_LIST_MIN_SIZE = 3;
 
@@ -84,7 +84,6 @@ public class GDropList extends GTextBase {
 	protected int viewListActualSize = 4;
 
 	protected float itemHeight;
-	//, buttonWidth;
 
 	protected boolean expanded = false;   // make false in release version
 
@@ -94,11 +93,11 @@ public class GDropList extends GTextBase {
 	 * IMPORTANT <br>
 	 * After creating the control use setItems to initialise the list. <br>
 	 * 
-	 * @param theApplet the applet that will display this component.
-	 * @param p0
-	 * @param p1
-	 * @param p2
-	 * @param p3
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
 	 */
 	public GDropList(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		this(theApplet, p0, p1, p2, p3, VIEW_LIST_DEFAULT_SIZE, BUTTON_WIDTH);
@@ -110,11 +109,11 @@ public class GDropList extends GTextBase {
 	 * IMPORTANT <br>
 	 * After creating the control use setItems to initialise the list. <br>
 	 * 
-	 * @param theApplet
-	 * @param p0
-	 * @param p1
-	 * @param p2
-	 * @param p3
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
 	 * @param viewListMaxSize the maximum number of element to appear in the drop down list 
 	 */
 	public GDropList(PApplet theApplet, float p0, float p1, float p2, float p3, int viewListMaxSize) {
@@ -130,16 +129,18 @@ public class GDropList extends GTextBase {
 	 * IMPORTANT <br>
 	 * After creating the control use setItems to initialise the list. <br>
 	 * 
-	 * @param theApplet
-	 * @param p0
-	 * @param p1
-	 * @param p2
-	 * @param p3
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
 	 * @param listSize the maximum number of elements to appear in the drop down list 
 	 * @param buttonWidth the width in pixels for the show-list button
 	 */
 	public GDropList(PApplet theApplet, float p0, float p1, float p2, float p3, int listSize, float buttonWidth) {
 		super(theApplet, p0, p1, p2, p3);
+		makeBuffer();
+
 		children = new LinkedList<GAbstractControl>();
 		this.viewListSize = Math.max(listSize, 3);
 		itemHeight = height / (viewListSize + 1); // make allowance for selected text at top
@@ -189,8 +190,8 @@ public class GDropList extends GTextBase {
 	 * the valid range. <br>
 	 * Null and empty values in the list will be ignored. <br>
 	 * If the list is null then or empty then then no changes are made. <br>
-	 * @param array
-	 * @param selected
+	 * @param array the text to appear in the dorpdown list elements
+	 * @param selected the index of the selected element
 	 */
 	public void setItems(String[] array, int selected){
 		if(array == null)
@@ -273,8 +274,8 @@ public class GDropList extends GTextBase {
 
 	/**
 	 * Insert an item at the specified position in the list. <br>
-	 * If idx is <0 then the list is unchanged. <br> 
-	 * If idx is >= the number of items in the list, it is added to the end. <br> 
+	 * If idx is &lt;0 then the list is unchanged. <br> 
+	 * If idx is &ge; the number of items in the list, it is added to the end. <br> 
 	 * If idx points to the selected item or an item below it then the 
 	 * selected index value is incremented by 1 but the selected text remains  
 	 * the same. <br>
@@ -319,7 +320,7 @@ public class GDropList extends GTextBase {
 	 * Set the currently selected item from the droplist by index position. <br>
 	 * Invalid values are ignored.
 	 * 
-	 * @param selected
+	 * @param selected the index of the element to be selected
 	 */
 	public void setSelected(int selected){
 		if(selected >=0 && selected < sitems.length){
@@ -334,14 +335,14 @@ public class GDropList extends GTextBase {
 	}
 
 	/**
-	 * Get the index position of the selected item
+	 * @return the index of the selected item
 	 */
 	public int getSelectedIndex(){
 		return selItem;
 	}
 
 	/**
-	 * Get the text for the selected item
+	 * @return the text of the selected item
 	 */
 	public String getSelectedText(){
 		return sitems[selItem].getPlainText();
@@ -349,6 +350,7 @@ public class GDropList extends GTextBase {
 
 	/**
 	 * Sets the local colour scheme for this control
+	 * @param cs colour scheme ID
 	 */
 	public void setLocalColorScheme(int cs){
 		super.setLocalColorScheme(cs);
@@ -361,6 +363,9 @@ public class GDropList extends GTextBase {
 	/**
 	 * Determines if a particular pixel position is over this control taking
 	 * into account whether it is collapsed or not.
+	 * @param x the x value for the position to be tested
+	 * @param y the y value for the position to be tested
+	 * @return true if [x,y] is over the control else false
 	 */
 	public boolean isOver(float x, float y){
 		calcTransformedOrigin(winApp.mouseX, winApp.mouseY);
@@ -504,7 +509,7 @@ public class GDropList extends GTextBase {
 	}
 
 	/**
-	 * For most components there is nothing to do when they loose focus.
+	 * For most components there is nothing to do when they lose focus.
 	 * Override this method in classes that need to do something when
 	 * they loose focus eg TextField
 	 */
@@ -520,7 +525,7 @@ public class GDropList extends GTextBase {
 	}
 
 
-	/**
+	/*
 	 * This method should <b>not</b> be called by the user. It
 	 * is for internal library use only.
 	 */
@@ -530,7 +535,7 @@ public class GDropList extends GTextBase {
 		bufferInvalid = true;
 	}
 
-	/**
+	/*
 	 * This method should <b>not</b> be called by the user. It
 	 * is for internal library use only.
 	 */

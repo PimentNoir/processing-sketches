@@ -140,14 +140,14 @@ public abstract class GLinearTrackControl extends GValueControl {
 	 * The offset is the distance the value/labels are drawn from the 
 	 * centre of the track. <br>
 	 * You may wish to tweak this value for visual effect.
-	 * @param offset
+	 * @param offset the offset value in pixels
 	 */
 	public void setTrackOffset(float offset){
 		trackOffset = offset;
 	}
 	
 	/**
-	 * Get the visual offset for the value/label text.
+	 * @return the visual offset for the value/label text.
 	 */
 	public float getTrackOffset(){
 		return trackOffset;
@@ -157,6 +157,7 @@ public abstract class GLinearTrackControl extends GValueControl {
 	 * If we are using labels then this will get the label text
 	 * associated with the current value. <br>
 	 * If labels have not been set then return null
+	 * @return get current value as a String
 	 */
 	public String getValueS(){
 		// Use the valueTarget rather than the valuePos since intermediate values

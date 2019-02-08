@@ -57,6 +57,7 @@ class GScrollbar extends GAbstractControl {
 	 */
 	public GScrollbar(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		super(theApplet, p0, p1, p2, p3);
+		makeBuffer();
 		hotspots = new HotSpot[]{
 				new HSrect(1, 0, 0, 16, height),			// low cap
 				new HSrect(2, width - 16, 0, 16, height),	// high cap

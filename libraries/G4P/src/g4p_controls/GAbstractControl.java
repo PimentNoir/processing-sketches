@@ -3,7 +3,7 @@
   	http://www.lagers.org.uk/g4p/index.html
 	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-12 Peter Lager
+  Copyright (c) Peter Lager 2008
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -51,11 +51,11 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 
 	/*
 	 * INTERNAL USE ONLY
-	 * This holds a reference to the GComponent that currently has the
+	 * This holds a reference to the Gcontrol that currently has the
 	 * focus.
-	 * A component loses focus when another component takes focus with the
+	 * A control loses focus when another control takes focus with the
 	 * takeFocus() method. The takeFocus method should use focusIsWith.loseFocus()
-	 * before setting its value to the new component. 
+	 * before setting its value to the new control. 
 	 */
 	static GAbstractControl focusIsWith = null;
 
@@ -68,7 +68,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 
 	/*
 	 * INTERNAL USE ONLY
-	 * Keeps track of the component the mouse is over so the mouse
+	 * Keeps track of the control the mouse is over so the mouse
 	 * cursor can be changed if we wish.
 	 */
 	static GAbstractControl cursorIsOver;
@@ -76,7 +76,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	// Reference to the PApplet object that owns this control
 	protected PApplet winApp;
 
-	/* Used to when components overlap */
+	/* Used to when controls overlap */
 	protected int z = Z_STICKY;
 
 	// Set to true when mouse is dragging : set false on button released
@@ -88,7 +88,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	protected GAbstractControl parent = null;
 
 	/*
-	 * A list of child GComponents added to this component
+	 * A list of child Gcontrols added to this control
 	 * Created and used by GPanel and GDropList classes
 	 */
 	protected LinkedList<GAbstractControl> children = null;
@@ -97,10 +97,10 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	protected Color[] palette = null;
 	protected int alphaLevel = G4P.globalAlpha;
 
-	/** Top left position of component in pixels (relative to parent or absolute if parent is null) 
+	/** Top left position of control in pixels (relative to parent or absolute if parent is null) 
 	 * (changed form int data type in V3*/
 	protected float x, y;
-	/** Width and height of component in pixels for drawing background (changed form int data type in V3*/
+	/** Width and height of control in pixels for drawing background (changed form int data type in V3*/
 	protected float width, height;
 	/** Half sizes reduces programming complexity later */
 	protected float halfWidth, halfHeight;
@@ -111,7 +111,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	/** Introduced V3 to speed up AffineTransform operations */
 	protected double[] temp = new double[2];
 
-	// New to V3 components have an image buffer which is only redrawn if 
+	// New to V3 controls have an image buffer which is only redrawn if 
 	// it has been invalidated
 	protected PGraphicsJava2D buffer = null;
 	protected boolean bufferInvalid = true;
@@ -134,17 +134,17 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	/** Simple tag that can be used by the user */
 	public String tag = "";
 
-	/** Allows user to specify a number for this component */
+	/** Allows user to specify a number for this control */
 	public int tagNo;
 
-	/* Is the component visible or not */
+	/* Is the control visible or not */
 	boolean visible = true;
 
-	/* Is the component enabled to generate mouse and keyboard events */
+	/* Is the control enabled to generate mouse and keyboard events */
 	boolean enabled = true;
 
 	/* 
-	 * Is the component available for mouse and keyboard events.
+	 * Is the control available for mouse and keyboard events.
 	 * This is only used internally to prevent user input being
 	 * processed during animation.
 	 * It will preserve enabled and visible flags
@@ -165,7 +165,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 * access to a PApplet object. <br>
 	 * As of V3.5 the only class using this constructor is GGroup
 	 * 
-	 * @param theApplet
+	 * @param theApplet the main sketch or GWindow control for this control
 	 */
 	public GAbstractControl(PApplet theApplet) {
 		G4P.registerSketch(theApplet);
@@ -180,7 +180,9 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 * Base constructor for ALL control ctors that have a visible UI but whose width and height 
 	 * are determined elsewhere e.g. the size of an image. It will set the 
 	 * position of the control based on controlMode. <br>
-	 * 
+	 * @param theApplet the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
 	 */
 	public GAbstractControl(PApplet theApplet, float p0, float p1) {
 		this(theApplet);
@@ -198,18 +200,27 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	/**
 	 * Base constructor for ALL control ctors that have a visible UI. It will set the 
 	 * position and size of the control based on controlMode. <br>
-	 * 
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
 	 */
 	public GAbstractControl(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		this(theApplet);
 		setPositionAndSize(p0, p1, p2, p3);
-		// Create the buffer (only created with this ctor)
+	}
+
+	/**
+	 * Make a 2D off-screen buffer for this control.
+	 */
+	protected void makeBuffer() {
 		buffer = (PGraphicsJava2D) winApp.createGraphics((int)width, (int)height, PApplet.JAVA2D);
 		buffer.rectMode(PApplet.CORNER);
 		buffer.beginDraw();
 		buffer.endDraw();
 	}
-
+	
 	// May not need this method needs to be called in updateBuffer
 	protected void setTextRenderingHints(Graphics2D g2d, int hint){
 		// Attempt to fix antialiasing
@@ -243,20 +254,6 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 			break;
 			
 		}
-//		// MIGHT NEED THESE
-//		// If so they have to be done in update method
-//		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-//				RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-//
-//
-////		g2d.setRenderingHint(
-////				RenderingHints.KEY_TEXT_ANTIALIASING,
-////				RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-//
-////		g2d.setRenderingHint(
-////		        RenderingHints.KEY_TEXT_ANTIALIASING,
-////		        RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-
 	}
 
 	/**
@@ -309,7 +306,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * If the component responds to key or mouse input or has a visual representation
+	 * If the control responds to key or mouse input or has a visual representation
 	 * this it can be part of a group controller.
 	 * @param control the G4P control we are interested in
 	 * @return true if it can be added to a group controller
@@ -329,7 +326,8 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	public void post(){ }
 
 	/**
-	 * This will remove all references to this control in the library. <br>
+	 * This will remove all references to this control from G4P after the next frame 
+	 * has been rendered. <br>
 	 * The user is responsible for nullifying all references to this control
 	 * in their sketch code. <br>
 	 * Once this method is called the control cannot be reused but resources
@@ -348,18 +346,18 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 
 	/**
 	 * <b>This is for emergency use only!!!! </b>
-	 * <br/>
+	 * <br>
 	 * In this version of the library a visual controls is drawn to off-screen buffer
 	 * and then drawn to the screen by copying the buffer. This means that the 
 	 * computationally expensive routines needed to draw the control (especially text 
 	 * controls) are only done when a change has been noted. This means that single
 	 * changes need not trigger a full redraw to buffer. 
-	 * <br/>
+	 * <br>
 	 * It does mean that an error in the library code could result in the buffer not
 	 * being updated after changes. If this happens then in draw() call this method
 	 * on the affected control, and report it as an issue 
 	 * <a href = 'https://sourceforge.net/p/g4p/tickets/?source=navbar'>here</a>
-	 * <br/>
+	 * <br>
 	 * Thanks
 	 */
 	public void forceBufferUpdate(){
@@ -375,7 +373,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 * 
 	 * @param px
 	 * @param py
-	 * @return the index for the first hotspot containing px,py else return -1
+	 * @return the index for the first hotspot containing [px,py] else return -1
 	 */
 	protected int whichHotSpot(float px, float py){
 		if(hotspots == null) return -1;
@@ -391,17 +389,6 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 
 	protected int getCurrHotSpot(){
 		return currSpot;
-	}
-
-	/**
-	 * Determines if a particular pixel position is over the panel.
-	 * 
-	 * @return true if the position is over.
-	 */
-	public boolean isOver(float x, float y){
-		calcTransformedOrigin(winApp.mouseX, winApp.mouseY);
-		currSpot = whichHotSpot(ox, oy);
-		return (currSpot >= 0);
 	}
 
 	/**
@@ -456,16 +443,16 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * Get the local color scheme ID number. If it returns a value <0 then
+	 * Get the local color scheme ID number. If it returns a value &lt;0 then
 	 * it is using a control specific palette.
-	 * 
+	 * @return local colour scheme ID
 	 */
 	public int getLocalColorScheme(){
 		return localColorScheme;
 	}
 
 	/**
-	 * Set the transparency of the component and make it unavailable to
+	 * Set the transparency of the control and make it unavailable to
 	 * mouse and keyboard events if below the threshold. Child controls 
 	 * are ignored?
 	 * 
@@ -481,7 +468,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * Set the transparency of the component and make it unavailable to
+	 * Set the transparency of the control and make it unavailable to
 	 * mouse and keyboard events if below the threshold. Child controls 
 	 * are ignored? <br>
 	 * If required include the children and their children.
@@ -498,14 +485,25 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * Get the parent control. If null then this is a top-level component
+	 * Returns the current transparency level <br>
+	 * 0 = fully transparent <br>
+	 * 255 = opaque <br>
+	 * @return alpha level
+	 */
+	public int getAlpha() {
+		return alphaLevel;
+	}
+	
+	/**
+	 * Get the parent control. If null then this is a top-level control
+	 * @return return parent control, or null if top level
 	 */
 	public GAbstractControl getParent() {
 		return parent;
 	}
 
 	/**
-	 * Get the PApplet that manages this component
+	 * @return the PApplet that manages this control
 	 */
 	public PApplet getPApplet() {
 		return winApp;
@@ -554,6 +552,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	
 	/**
 	 * Save a snapshot of the control using the specified filename 
+	 * @param filename the name of the file to save for the image
 	 * @return true if the snapshot was saved else return false
 	 */
 	public boolean saveSnapshot(String filename){
@@ -573,9 +572,9 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 
 
 	/**
-	 * Attempt to create the default event handler for the component class. 
+	 * Attempt to create the default event handler for the control class. 
 	 * The default event handler is a method that returns void and has a single
-	 * parameter of the same type as the component class generating the
+	 * parameter of the same type as the control class generating the
 	 * event and a method name specific for that class. 
 	 * 
 	 * @param handlerObj the object to handle the event
@@ -596,9 +595,9 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * Attempt to create the default event handler for the component class. 
+	 * Attempt to create the default event handler for the control class. 
 	 * The default event handler is a method that returns void and has a single
-	 * parameter of the same type as the component class generating the
+	 * parameter of the same type as the control class generating the
 	 * event and a method name specific for that class. 
 	 * 
 	 * @param obj the object to handle the event
@@ -617,7 +616,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * Attempt to fire an event for this component.
+	 * Attempt to fire an event for this control.
 	 * 
 	 * The method called must have a single parameter which is the object 
 	 * firing the event.
@@ -735,7 +734,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 * If the control is on a panel then the value returned is relative to the 
 	 * top-left corner of the panel otherwise it is relative to the sketch 
 	 * window display. <br>
-	 * 
+	 * @return top-left corner x position
 	 */
 	public float getX() {
 		if(parent != null)
@@ -749,7 +748,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 * If the control is on a panel then the value returned is relative to the 
 	 * top-left corner of the panel otherwise it is relative to the sketch 
 	 * window display. <br>
-	 * 
+	 * @return top-left corner y position
 	 */
 	public float getY() {
 		if(parent != null)
@@ -763,6 +762,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 * If the control is on a panel then the value returned is relative to the 
 	 * top-left corner of the panel otherwise it is relative to the sketch 
 	 * window display. <br>
+	 * @return the x position corresponding to the centre of the control. 
 	 */
 	public float getCX() {
 		if(parent != null)
@@ -776,7 +776,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	 * If the control is on a panel then the value returned is relative to the 
 	 * top-left corner of the panel otherwise it is relative to the sketch 
 	 * window display. <br>
-	 * 
+	 * @return the y position corresponding to the centre of the control. 
 	 */
 	public float getCY() {
 		if(parent != null)
@@ -823,7 +823,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 
 
 	/**
-	 * @return the component's visibility
+	 * @return the control's visibility
 	 */
 	public boolean isVisible() {
 		return visible;
@@ -832,7 +832,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	/**
 	 * The availability flag is used by the library code to determine whether
 	 * a control should be considered for drawing and mouse/key input. <br>
-	 * It perits an internal control that does not affect the visible
+	 * It permits an internal control that does not affect the visible
 	 * and enabled state of the control, which are set by the programmer.
 	 * 
 	 * If a control and its children are made unavailable it will still be drawn 
@@ -857,8 +857,8 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 
 	/**
 	 * Determines whether to show the back colour or not.
-	 * Only applies to some components
-	 * @param opaque
+	 * Only applies to some controls
+	 * @param opaque true = opaque, flase = transparent
 	 */
 	public void setOpaque(boolean opaque){
 		// Ensure that we dont't go from true >> false otherwise 
@@ -868,7 +868,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * Find out if the component is opaque
+	 * Find out if the control is opaque
 	 * @return true if the background is visible
 	 */
 	public boolean isOpaque(){
@@ -880,7 +880,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * Enable or disable the ability of the component to generate mouse events.<br>
+	 * Enable or disable the ability of the control to generate mouse events.<br>
 	 * GTextField - it also controls key press events <br>
 	 * GPanel - controls whether the panel can be moved/collapsed/expanded <br>
 	 * @param enable true to enable else false
@@ -894,18 +894,18 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * Is this component enabled
-	 * @return true if the component is enabled
+	 * Is this control enabled
+	 * @return true if the control is enabled
 	 */
 	public boolean isEnabled(){
 		return enabled;
 	}
 
 	/**
-	 * Give the focus to this component but only after allowing the 
-	 * current component with focus to release it gracefully. <br>
-	 * Always cancel the keyFocusIsWith irrespective of the component
-	 * type. If the component needs to retain keyFocus then override this
+	 * Give the focus to this control but only after allowing the 
+	 * current control with focus to release it gracefully. <br>
+	 * Always cancel the keyFocusIsWith irrespective of the control
+	 * type. If the control needs to retain keyFocus then override this
 	 * method in that class e.g. GCombo
 	 */
 	protected void takeFocus(){
@@ -915,7 +915,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * For most components there is nothing to do when they loose focus.
+	 * For most controls there is nothing to do when they loose focus.
 	 * Override this method in classes that need to do something when
 	 * they loose focus eg TextField
 	 */
@@ -927,8 +927,8 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * Determines whether this component is to have focus or not
-	 * @param focus
+	 * Determines whether this control is to have focus or not
+	 * @param focus true if the control is to have focus else false.
 	 */
 	public void setFocus(boolean focus){
 		if(focus)
@@ -938,8 +938,8 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * Does this component have focus
-	 * @return true if this component has focus else false
+	 * Does this control have focus
+	 * @return true if this control has focus else false
 	 */
 	public boolean hasFocus(){
 		return (this == focusIsWith);
@@ -1130,15 +1130,14 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 		}
 	}
 
-
 	/**
-	 * Recursive function to set the priority of a component. This
-	 * is used to determine who gets focus when components overlap
-	 * on the screen e.g. when a combobo expands it might cover a button. <br>
-	 * It is used where components have childen e.g. GCombo and
+	 * Recursive function to set the priority of a control. This
+	 * is used to determine who gets focus when controls overlap
+	 * on the screen e.g. when a droplist expands it might cover a button. <br>
+	 * It is used where controls have childen e.g. GDropList and
 	 * GPaneln
-	 * It is used when a child component is added.
-	 * @param component
+	 * It is used when a child control is added.
+	 * @param control
 	 * @param parentZ
 	 */
 	protected void setZ(int parentZ){
@@ -1150,22 +1149,6 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 		}
 	}
 
-	/**
-	 * If the control is permanently no longer required then call
-	 * this method to remove it and free up resources. <br>
-	 * The variable identifier used to create this control should 
-	 * be set to null. <br>
-	 * For example if you want to dispose of a button called 
-	 * <pre>btnDoThis</pre> then to remove the button use the
-	 * statements <br> <pre>
-	 * btnDoThis.dispose(); <br>
-	 * btnDoThis = null; <br></pre>
-	 */
-	public void markForDisposal(){
-		G4P.removeControl(this);
-	}
-
-
 	public String toString(){
 		if(tag == null)
 			return this.getClass().getSimpleName();
@@ -1174,7 +1157,7 @@ public abstract class GAbstractControl implements PConstants, GConstants, GConst
 	}
 
 	/**
-	 * Comparator used for controlling the order components are drawn
+	 * Comparator used for controlling the order controls are drawn
 	 * @author Peter Lager
 	 */
 	public static class Z_Order implements Comparator<GAbstractControl> {

@@ -44,11 +44,11 @@ public class GLabel extends GTextIconBase {
 	 * Create an empty label
 	 * use setText and setIcon to change the text and icon.
 	 * 
-	 * @param theApplet
-	 * @param p0
-	 * @param p1
-	 * @param p2
-	 * @param p3
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
 	 */
 	public GLabel(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		this(theApplet, p0, p1, p2, p3, "       ");
@@ -59,15 +59,16 @@ public class GLabel extends GTextIconBase {
 	 * 
 	 * use setIcon to add an icon
 	 * 
-	 * @param theApplet
-	 * @param p0
-	 * @param p1
-	 * @param p2
-	 * @param p3
-	 * @param text
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
+	 * @param text the initial text to display
 	 */
 	public GLabel(PApplet theApplet, float p0, float p1, float p2, float p3, String text) {
 		super(theApplet, p0, p1, p2, p3);
+		makeBuffer();
 		opaque = false;
 		
 		// Initialise text and icon alignment

@@ -82,11 +82,11 @@ public class GPanel extends GTextBase {
 	 * constrained so that it can't be dragged outside the viewable area. 
 	 * Otherwise no constraint is applied.
 	 * 
-	 * @param theApplet the PApplet reference
-	 * @param p0 horizontal position
-	 * @param p1 vertical position
-	 * @param p2 width of the panel
-	 * @param p3 height of the panel (excl. tab)
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
 	 */
 	public GPanel(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		this(theApplet, p0, p1, p2, p3, "Panel        ");
@@ -100,15 +100,16 @@ public class GPanel extends GTextBase {
 	 * constrained so that it can't be dragged outside the viewable area. 
 	 * Otherwise no constraint is applied.
 	 *  
-	 * @param theApplet the PApplet reference
-	 * @param p0 horizontal position
-	 * @param p1 vertical position
-	 * @param p2 width of the panel
-	 * @param p3 height of the panel (excl. tab)
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
 	 * @param text to appear on tab
 	 */
 	public GPanel(PApplet theApplet, float p0, float p1, float p2, float p3, String text) {
 		super(theApplet, p0, p1, p2, p3);
+		makeBuffer();
 		// Set the values used to constrain movement of the panel
 		if(x < 0 || y < 0 || x + width > winApp.width || y+  height > winApp.height)
 			clearDragArea();
@@ -178,15 +179,15 @@ public class GPanel extends GTextBase {
 		bufferInvalid = true;
 	}
 
-	public void setFont(Font font) {
-		if(font != null)
-			localFont = font;
-		tabHeight = (int) (1.2f * localFont.getSize() + 2);
-		buffer.g2.setFont(localFont);
-		bufferInvalid = true;
-		calcHotSpots();
-		bufferInvalid = true;
-	}
+//	public void setFont(Font font) {
+//		if(font != null)
+//			localFont = font;
+//		tabHeight = (int) (1.2f * localFont.getSize() + 2);
+//		buffer.g2.setFont(localFont);
+//		bufferInvalid = true;
+//		calcHotSpots();
+//		bufferInvalid = true;
+//	}
 
 	/**
 	 * What to do when the FPanel loses focus.
@@ -268,8 +269,10 @@ public class GPanel extends GTextBase {
 	}
 
 	/**
-	 * Determines if a particular pixel position is over the panel taking
-	 * into account whether it is collapsed or not.
+	 * @param x position of pixel
+	 * @param y position of pixel
+	 * @return true if pixel position [x,y] is over the panel taking into account
+	 * whether it is collapsed or not.
 	 */
 	public boolean isOver(float x, float y){
 		calcTransformedOrigin(winApp.mouseX, winApp.mouseY);
@@ -373,7 +376,7 @@ public class GPanel extends GTextBase {
 	 * </ul>
 	 * If the parameter is true then the panel will remain non-collapsible
 	 * and the user must change this if required. <br>
-	 * @param opaque
+	 * @param opaque true if the panel is opaque
 	 */
 	public void setOpaque(boolean opaque){
 		if(this.opaque == opaque)
@@ -396,8 +399,8 @@ public class GPanel extends GTextBase {
 	}
 
 	/**
-	 * Sets whether the panel can be dragged by the mouse or not.
-	 * @param draggable
+	 * Determines whether the panel can be dragged by the mouse or not.
+	 * @param draggable true if the panel can be dragged else false
 	 */
 	public void setDraggable(boolean draggable){
 		this.draggable = draggable;
@@ -413,7 +416,7 @@ public class GPanel extends GTextBase {
 
 	/**
 	 * Collapse or open the panel
-	 * @param collapse
+	 * @param collapse if true collapse the panel else expand the panel
 	 */
 	public void setCollapsed(boolean collapse){
 		if(collapsible){
@@ -447,7 +450,7 @@ public class GPanel extends GTextBase {
 	 *  
 	 * If this is set to false then the panel will be expanded and it will
 	 * not be possible to collapse it until set back to true.
-	 * 
+	 * @param c whether the panel is collapsable or not
 	 */
 	public void setCollapsible(boolean c){
 		collapsible = c;
@@ -459,12 +462,15 @@ public class GPanel extends GTextBase {
 	}
 	
 	/**
-	 * Is this panel collapsible
+	 * @return true if this panel can be collapsed
 	 */
 	public boolean isCollapsible(){
 		return collapsible;
 	}
 	
+	/**
+	 * @return the height of the panel tab
+	 */
 	public int getTabHeight(){
 		return tabHeight;
 	}
@@ -474,10 +480,10 @@ public class GPanel extends GTextBase {
 	 * within which the panel can be dragged and move the panel inside the area if 
 	 * not already inside. <br>
 	 *  
-	 * @param xMin
-	 * @param yMin
-	 * @param xMax
-	 * @param yMax
+	 * @param xMin the closest distance the panel can be to the left-hand-side
+	 * @param yMin the closest distance the panel can be to the top
+	 * @param xMax the panel cannot move beyond this point on the right-hand-side
+	 * @param yMax the panel cannot move beyond this point to the bottom
 	 * @return true if the constraint was applied successfully else false
 	 */
 	public boolean setDragArea(float xMin, float yMin, float xMax, float yMax){

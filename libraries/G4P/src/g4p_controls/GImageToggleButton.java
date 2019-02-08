@@ -79,13 +79,13 @@ public class GImageToggleButton extends GAbstractControl {
 	protected PImage[] overImage;
 
 	protected int status;
-	protected boolean reportAllButtonEvents = false;
+//	protected boolean reportAllButtonEvents = false;
 
 
 	/**
 	 * Create the library default image-toggle-button at the stated position. <br>
 	 * 
-	 * @param theApplet
+	 * @param theApplet the main sketch or GWindow control for this control
 	 * @param p0 horizontal position of the control
 	 * @param p1 vertical position of the control
 	 */
@@ -97,7 +97,7 @@ public class GImageToggleButton extends GAbstractControl {
 	 * Create an image-toggle-button. <br>
 	 * Single row of tiles.
 	 * 
-	 * @param theApplet
+	 * @param theApplet the main sketch or GWindow control for this control
 	 * @param p0 horizontal position of the control
 	 * @param p1 vertical position of the control
 	 * @param offPicture the filename of bitmap containing toggle state pictures
@@ -110,7 +110,7 @@ public class GImageToggleButton extends GAbstractControl {
 	/**
 	 * Create an image-toggle-button. <br>
 	 * 
-	 * @param theApplet
+	 * @param theApplet the main sketch or GWindow control for this control
 	 * @param p0 horizontal position of the control
 	 * @param p1 vertical position of the control
 	 * @param offPicture the filename of bitmap containing toggle state pictures
@@ -125,7 +125,7 @@ public class GImageToggleButton extends GAbstractControl {
 	 * Create an image-toggle-button. <br>
 	 * Single row of tiles.
 	 * 
-	 * @param theApplet
+	 * @param theApplet the main sketch or GWindow control for this control
 	 * @param p0 horizontal position of the control
 	 * @param p1 vertical position of the control
 	 * @param offPicture the filename of bitmap containing toggle state pictures
@@ -139,7 +139,7 @@ public class GImageToggleButton extends GAbstractControl {
 	/**
 	 * Create an image-toggle-button. <br>
 	 * 
-	 * @param theApplet
+	 * @param theApplet the main sketch or GWindow control for this control
 	 * @param p0 horizontal position of the control
 	 * @param p1 vertical position of the control
 	 * @param offPicture the filename of bitmap containing toggle state pictures
@@ -221,7 +221,7 @@ public class GImageToggleButton extends GAbstractControl {
 	 * <pre>btnName.fireAllEvents(true); </pre><br>
 	 * <pre>
 	 * void handleButtonEvents(void handleToggleButtonEvents(GImageToggleButton button, GEvent event) {
-	 *	  if(button == btnName && event == GEvent.CLICKED){
+	 *	  if(button == btnName &amp;&amp; event == GEvent.CLICKED){
 	 *        int buttonState = btnName.stateValue();
 	 *    }
 	 * </pre> <br>
@@ -244,8 +244,8 @@ public class GImageToggleButton extends GAbstractControl {
 				dragging = false;
 				status = PRESS_CONTROL;
 				takeFocus();
-				if(reportAllButtonEvents)
-					fireEvent(this, GEvent.PRESSED);
+//				if(reportAllButtonEvents)
+//					fireEvent(this, GEvent.PRESSED);
 			}
 			break;
 		case MouseEvent.CLICK:
@@ -268,11 +268,11 @@ public class GImageToggleButton extends GAbstractControl {
 					nextState();
 					fireEvent(this, GEvent.CLICKED);
 				}
-				else {
-					if(reportAllButtonEvents){
-						fireEvent(this, GEvent.RELEASED);
-					}
-				}
+//				else {
+//					if(reportAllButtonEvents){
+//						fireEvent(this, GEvent.RELEASED);
+//					}
+//				}
 				dragging = false;
 				loseFocus(null);
 				status = OFF_CONTROL;
@@ -301,7 +301,7 @@ public class GImageToggleButton extends GAbstractControl {
 	}
 
 	/**
-	 * Get the current state value of the button.
+	 * @return the current state value of this control.
 	 * @deprecated use getState()
 	 */
 	@Deprecated
@@ -311,6 +311,7 @@ public class GImageToggleButton extends GAbstractControl {
 	
 	/**
 	 * Get the current state value of the button.
+	 * @return get the current state of this control
 	 */
 	public int getState(){
 		return stateValue;
@@ -321,7 +322,7 @@ public class GImageToggleButton extends GAbstractControl {
 	 * If the parameter is not a valid toggle state value then it
 	 * is ignored and the button's state value is unchanged.
 	 * @deprecated use setState(int)
-	 * @param newState
+	 * @param newState the new state for this control
 	 */
 	@Deprecated
 	public void stateValue(int newState){
@@ -336,7 +337,7 @@ public class GImageToggleButton extends GAbstractControl {
 	 * Change the current toggle state. <br>
 	 * If the parameter is not a valid toggle state value then it
 	 * is ignored and the button's state value is unchanged.
-	 * @param newState
+	 * @param newState the new state for this control
 	 */
 	public void setState(int newState){
 		if(newState >= 0 && newState < nbrStates && newState != stateValue){
@@ -353,8 +354,8 @@ public class GImageToggleButton extends GAbstractControl {
 	 * CLICKED events
 	 * @param all
 	 */
-	public void fireAllEvents(boolean all){
-		reportAllButtonEvents = all;
-	}
+//	public void fireAllEvents(boolean all){
+//		reportAllButtonEvents = all;
+//	}
 	 
 }

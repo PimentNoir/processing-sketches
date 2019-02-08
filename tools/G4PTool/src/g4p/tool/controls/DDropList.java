@@ -34,7 +34,13 @@ public class DDropList extends DBaseVisual {
 	public String 		list_file_tooltip = "Do not change the filename!";
 	transient public 	EditorBase list_file_editor = new EditorStringList();
 
-	
+	public int 			_0683_thumb_width = 10;
+	public String 		thumb_width_label = "Thumb width";
+	public String 		thumb_width_tooltip = "pixels";
+	public Boolean 		thumb_width_edit = true;
+	public Boolean 		thumb_width_show = true;
+	public Validator 	thumb_width_validator = Validator.getValidator(int.class, 8, 50);
+
 	public DDropList(){
 		super();
 		componentClass = "GDropList";
@@ -50,7 +56,8 @@ public class DDropList extends DBaseVisual {
 	protected String get_creator(DBase parent, String window){
 		String s = "";
 		s = ToolMessages.build(CTOR_DROPLIST, _0010_name, window, 
-					 $(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height * (_0680_nbr_rows + 1)) , $(_0680_nbr_rows));	
+					 $(_0820_x), $(_0821_y), $(_0826_width), $(_0827_height * (_0680_nbr_rows + 1)) ,
+					 $(_0680_nbr_rows), _0683_thumb_width);	
 		s += ToolMessages.build(CTOR_SET_LIST,  _0010_name, _0682_list_file, $(_0681_selected));
 		s += super.get_creator(parent, window);
 		return s;

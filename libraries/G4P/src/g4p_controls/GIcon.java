@@ -28,7 +28,7 @@ import processing.core.PImage;
 
 /**
  * 
- * Class for the creation of non-animated icons to be used with GButton, GLabel, GCheckbox and GOption controls. <br/>
+ * Class for the creation of non-animated icons to be used with GButton, GLabel, GCheckbox and GOption controls. <br>
  * 
  * Introduced in v4.1
  * @author Peter Lager
@@ -89,7 +89,7 @@ public class GIcon {
 	}
 
 	/**
-	 * Returns a copy of this icon to be used with another control.
+	 * @return a copy of this icon to be used with another control.
 	 */
 	public GIcon copy(){
 		GIcon icon = new GIcon();
@@ -112,8 +112,8 @@ public class GIcon {
 	/**
 	 * Set the current frame to be displayed. The supplied frame number will be constrained 
 	 * to a valid value.
-	 * 
 	 * @param fn the frame number to display.
+	 * @return this icon
 	 */
 	GIcon setFrame(int fn){
 		currFrame = PApplet.constrain(fn,  0,  nbrFrames - 1);
@@ -123,8 +123,8 @@ public class GIcon {
 	/**
 	 * Get the image to be displayed for the specified frame number. The supplied frame number 
 	 * will be constrained to a valid value.
-	 * 
 	 * @param fn the frame image to retrieve.
+	 * @return this icon
 	 */
 	public PImage getFrame(int fn){
 		fn = PApplet.constrain(Math.abs(fn), 0, nbrFrames-1);
@@ -132,7 +132,7 @@ public class GIcon {
 	}
 
 	/**
-	 * Get the image for the current frame to be displayed.
+	 * @return the image for the current frame to be displayed.
 	 */
 	public PImage getFrame(){
 		return img[currFrame];		

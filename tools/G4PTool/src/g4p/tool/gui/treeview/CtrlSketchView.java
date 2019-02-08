@@ -214,7 +214,7 @@ public class CtrlSketchView extends JTree {
 				System.out.println(comp.getRoot());
 				return;
 			}
-			// Only need to do something if we have a window/panel componen
+			// Only need to do something if we have a window/panel component
 			if(window instanceof DWindow) {
 				comp._0820_x = va.x + (va.width - comp._0826_width)/ 2;
 				comp._0821_y = va.y + (va.height - comp._0827_height)/ 2;

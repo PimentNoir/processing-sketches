@@ -25,7 +25,7 @@ package g4p_controls;
 
 /**
  * This class provides an enumeration that is used to control the alignment
- * of text and images. <br/>
+ * of text and images. <br>
  * 
  * It also defines the constants for the position of the icon relative to 
  * the text.
@@ -109,15 +109,14 @@ public enum GAlign {
 	
 	
 	/**
-	 * Returns the textual ID of with this alignment.
+	 * @return the textual ID of this alignment.
 	 */
 	public String getTextID(){
 		return alignText;
 	}
 	
 	/**
-	 * Returns the textual verbose description of this alignment. <br/> 
-	 * e.g. "Right align text"
+	 * @return the textual verbose description of this alignment e.g. "Right align text"
 	 */
 	public String getDesc(){
 		return description;
@@ -125,6 +124,7 @@ public enum GAlign {
 	
 	/**
 	 * Is this a horizontal alignment constant?
+	 * @return true if horizontally aligned else false.
 	 */
 	public boolean isHorzAlign(){
 		return (alignID & 0x000F) != 0;
@@ -132,20 +132,21 @@ public enum GAlign {
 	
 	/**
 	 * Is this a vertical alignment constant?
+	 * @return true if vertically aligned else false.
 	 */
 	public boolean isVertAlign(){
 		return (alignID & 0x00F0) != 0;
 	}
 	
 	/**
-	 * Is this an icon position constant?
+	 * @return true is this is an icon alignment constant
 	 */
 	public boolean isPosAlign(){
 		return (alignID & 0x0F00) != 0;
 	}
 	
 	/**
-	 * Returns a full description
+	 * @return a full description of this alignment constant
 	 */
 	public String toString(){
 		return "ID = " + alignText + " {" + alignID + "}  " + description;

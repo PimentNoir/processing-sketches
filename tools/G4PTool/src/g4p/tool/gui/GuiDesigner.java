@@ -24,7 +24,7 @@ import g4p.tool.controls.DLabel;
 import g4p.tool.controls.DOption;
 import g4p.tool.controls.DPanel;
 import g4p.tool.controls.DPassword;
-import g4p.tool.controls.DSketchPad;
+import g4p.tool.controls.DView;
 import g4p.tool.controls.DSlider;
 import g4p.tool.controls.DSlider2D;
 import g4p.tool.controls.DStick;
@@ -144,12 +144,13 @@ public class GuiDesigner extends javax.swing.JFrame {
 		this.tool = tool;
 		initComponents();
 		initCustomComponents();
-		this.setTitle("G4P GUI Builder " + "4.2.1");
+		this.setTitle("G4P GUI Builder " + "4.3");
 		guiControl = new GuiControl(editor, tabWindows, treeSketchView, tblPropView);
 		guiControl.loadGuiLayout();
 		addKeyBinding(editor);
 		createWindowAdapter();
 		listenToEditorClosing(this);
+
 	}
 
 	/**
@@ -271,6 +272,7 @@ public class GuiDesigner extends javax.swing.JFrame {
 		ToolIcon.addIcon(DLabel.class, btnLabel.getIcon());
 		ToolIcon.addIcon(DSlider.class, btnSlider.getIcon());
 		ToolIcon.addIcon(DTextField.class, btnTextfield.getIcon());
+		ToolIcon.addIcon(DTextArea.class, btnTextarea.getIcon());
 		ToolIcon.addIcon(DCheckbox.class, btnCheckbox.getIcon());
 		ToolIcon.addIcon(DToggleGroup.class, btnOptGroup.getIcon());
 		ToolIcon.addIcon(DOption.class, btnOption.getIcon());
@@ -279,7 +281,7 @@ public class GuiDesigner extends javax.swing.JFrame {
 		ToolIcon.addIcon(DImageButton.class, btnImgButton.getIcon());
 		ToolIcon.addIcon(DDropList.class, btnDropList.getIcon());
 		ToolIcon.addIcon(DKnob.class, btnKnob.getIcon());
-		ToolIcon.addIcon(DSketchPad.class, btnSketchPad.getIcon());
+		ToolIcon.addIcon(DView.class, btnView.getIcon());
 		ToolIcon.addIcon(DSlider2D.class, btnSlider2D.getIcon());
 		ToolIcon.addIcon(DStick.class, btnStick.getIcon());
 		ToolIcon.addIcon(DImageToggleButton.class, btnImgTogButton.getIcon());
@@ -291,10 +293,10 @@ public class GuiDesigner extends javax.swing.JFrame {
 		try {
 			ToolImage.addImage("CB_ICON", ImageIO.read(getClass().getResource("/g4p/tick.png")));
 			ToolImage.addImage("OP_ICON", ImageIO.read(getClass().getResource("/g4p/pinhead.png")));
-			ToolImage.addImage("SPAD_ICON", ImageIO.read(getClass().getResource("/g4p/spad.jpg")));
+			ToolImage.addImage("VIEW_ICON", ImageIO.read(getClass().getResource("/g4p/view.png")));
+			ToolImage.addImage("VIEW_PCAM_ICON", ImageIO.read(getClass().getResource("/g4p/viewpcam.png")));
 			ToolImage.addImage("IMG_TOG_BTN_ICON", ImageIO.read(getClass().getResource("/g4p/toggle.png")));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -358,7 +360,7 @@ public class GuiDesigner extends javax.swing.JFrame {
         btnOption = new javax.swing.JButton();
         btnOptGroup = new javax.swing.JButton();
         btnDropList = new javax.swing.JButton();
-        btnSketchPad = new javax.swing.JButton();
+        btnView = new javax.swing.JButton();
         btnTimer = new javax.swing.JButton();
         splitControl = new javax.swing.JSplitPane();
         pnlTreeView = new java.awt.Panel();
@@ -686,17 +688,17 @@ public class GuiDesigner extends javax.swing.JFrame {
         });
         tbarComponents.add(btnDropList);
 
-        btnSketchPad.setIcon(new javax.swing.ImageIcon(getClass().getResource("/g4p/toolSketchPad.png"))); // NOI18N
-        btnSketchPad.setToolTipText("Sketchpad");
-        btnSketchPad.setFocusable(false);
-        btnSketchPad.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnSketchPad.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        btnSketchPad.addActionListener(new java.awt.event.ActionListener() {
+        btnView.setIcon(new javax.swing.ImageIcon(getClass().getResource("/g4p/toolView.png"))); // NOI18N
+        btnView.setToolTipText("View");
+        btnView.setFocusable(false);
+        btnView.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnView.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnView.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSketchPadActionPerformed(evt);
+                btnViewActionPerformed(evt);
             }
         });
-        tbarComponents.add(btnSketchPad);
+        tbarComponents.add(btnView);
 
         btnTimer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/g4p/toolTimer.png"))); // NOI18N
         btnTimer.setToolTipText("Timer");
@@ -908,8 +910,8 @@ public class GuiDesigner extends javax.swing.JFrame {
 		guiControl.addComponent(new DTextArea());
 	}//GEN-LAST:event_btnTextareaActionPerformed
 
-	private void btnSketchPadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSketchPadActionPerformed
-		guiControl.addComponent(new DSketchPad());
+	private void btnViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSketchPadActionPerformed
+		guiControl.addComponent(new DView());
 	}//GEN-LAST:event_btnSketchPadActionPerformed
 
 	private void btnSlider2DActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSlider2DActionPerformed
@@ -963,6 +965,7 @@ public class GuiDesigner extends javax.swing.JFrame {
 			}
 		});
 	}
+	
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnButton;
     private javax.swing.JButton btnCheckbox;
@@ -977,7 +980,7 @@ public class GuiDesigner extends javax.swing.JFrame {
     private javax.swing.JButton btnPanel;
     private javax.swing.JButton btnPassword;
     private javax.swing.JButton btnRemove;
-    private javax.swing.JButton btnSketchPad;
+    private javax.swing.JButton btnView;
     private javax.swing.JButton btnSlider;
     private javax.swing.JButton btnSlider2D;
     private javax.swing.JCheckBox btnSnap;

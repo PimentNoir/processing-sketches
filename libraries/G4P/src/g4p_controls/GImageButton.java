@@ -81,16 +81,16 @@ public class GImageButton extends GAbstractControl {
 	protected PImage mask = null;
 
 	protected int status;
-	protected boolean reportAllButtonEvents = false;
+//	protected boolean reportAllButtonEvents = false;
 
 
 	/**
 	 * The control size will be set to the size of the image file used for the button OFF state. <br>
 	 * There is no alpha mask file..
 	 * 
-	 * @param theApplet
-	 * @param p0
-	 * @param p1
+	 * @param theApplet the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
 	 * @param fnames an array of up to 3 image filenames to represent the off/over/down state of the button.
 	 */
 	public GImageButton(PApplet theApplet, float p0, float p1, String[] fnames) {
@@ -100,9 +100,9 @@ public class GImageButton extends GAbstractControl {
 	/**
 	 * The control size will be set to the size of the image file used for the button OFF state. <br>
 	 * 
-	 * @param theApplet
-	 * @param p0
-	 * @param p1
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
 	 * @param fnames an array of up to 3 image filenames to represent the off/over/down state of the button.
 	 * @param fnameMask the alpha mask filename or null if no mask
 	 */
@@ -147,7 +147,7 @@ public class GImageButton extends GAbstractControl {
 		//========================================================================
 		
 		//========================================================================
-		// Setup the hotspaots
+		// Setup the hotspots
 		if(mask != null){	// if we have a mask use it for the hot spot
 			hotspots = new HotSpot[]{
 					new HSmask(1, mask)
@@ -176,11 +176,11 @@ public class GImageButton extends GAbstractControl {
 	 * Create an image button of the size specified by the parameters. <br>
 	 * The images will be resized to fit and there is no alpha mask file.
 	 * 
-	 * @param theApplet
-	 * @param p0
-	 * @param p1
-	 * @param p2
-	 * @param p3
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
 	 * @param fnames an array of up to 3 image filenames to represent the off/over/down state of the button.
 	 */
 	public GImageButton(PApplet theApplet, float p0, float p1, float p2, float p3, String[] fnames) {
@@ -191,11 +191,11 @@ public class GImageButton extends GAbstractControl {
 	 * Create an image button of the size specified by the parameters. <br>
 	 * The images will be resized to fit.
 	 * 
-	 * @param theApplet
-	 * @param p0
-	 * @param p1
-	 * @param p2
-	 * @param p3
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
 	 * @param fnames an array of up to 3 image filenames to represent the off/over/down state of the button.
 	 * @param fnameMask the alpha mask filename or null if no mask
 	 */
@@ -211,7 +211,7 @@ public class GImageButton extends GAbstractControl {
 			fnames = new String[] { "err0.png", "err1.png", "err2.png" };
 		bimage = ImageManager.loadImage(winApp, fnames);
 		// There should be 3 images if not use as many as possible, 
-		// duplicating the last one if neccessary
+		// duplicating the last one if necessary
 		if(bimage.length != 3){
 			PImage[] temp = new PImage[3];
 			for(int i = 0; i < 3; i++)
@@ -240,7 +240,7 @@ public class GImageButton extends GAbstractControl {
 		//========================================================================
 		
 		//========================================================================
-		// Setup the hotspaots
+		// Setup the hotspots
 		if(mask != null){	// if we have a mask use it for the hot spot
 			hotspots = new HotSpot[]{
 					new HSmask(1, mask)
@@ -268,8 +268,6 @@ public class GImageButton extends GAbstractControl {
 	public void draw(){
 		if(!visible) return;
 
-		// Update buffer if invalid
-		//updateBuffer();
 		winApp.pushStyle();
 
 		winApp.pushMatrix();
@@ -296,7 +294,7 @@ public class GImageButton extends GAbstractControl {
 	 * 
 	 * <pre>
 	 * void handleButtonEvents(void handleButtonEvents(GImageButton button, GEvent event) {
-	 *	  if(button == btnName && event == GEvent.CLICKED){
+	 *	  if(button == btnName &amp;&amp; event == GEvent.CLICKED){
 	 *        // code for button click event
 	 *    }
 	 * </pre> <br>
@@ -319,8 +317,8 @@ public class GImageButton extends GAbstractControl {
 				dragging = false;
 				status = PRESS_CONTROL;
 				takeFocus();
-				if(reportAllButtonEvents)
-					fireEvent(this, GEvent.PRESSED);
+//				if(reportAllButtonEvents)
+//					fireEvent(this, GEvent.PRESSED);
 			}
 			break;
 		case MouseEvent.CLICK:
@@ -340,11 +338,11 @@ public class GImageButton extends GAbstractControl {
 			if(focusIsWith == this && dragging){
 				if(currSpot >= 0)
 					fireEvent(this, GEvent.CLICKED);
-				else {
-					if(reportAllButtonEvents){
-						fireEvent(this, GEvent.RELEASED);
-					}
-				}
+//				else {
+//					if(reportAllButtonEvents){
+//						fireEvent(this, GEvent.RELEASED);
+//					}
+//				}
 				dragging = false;
 				loseFocus(null);
 				status = OFF_CONTROL;
@@ -368,9 +366,9 @@ public class GImageButton extends GAbstractControl {
 	 * only CLICKED events are generated (default behaviour).
 	 * @param all
 	 */
-	public void fireAllEvents(boolean all){
-		reportAllButtonEvents = all;
-	}
+//	public void fireAllEvents(boolean all){
+//		reportAllButtonEvents = all;
+//	}
 
 	/**
 	 * Enable or disable the ability of the component to generate mouse events.<br>

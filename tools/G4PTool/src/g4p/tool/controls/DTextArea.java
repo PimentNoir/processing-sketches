@@ -38,7 +38,7 @@ public class DTextArea extends DTextBase {
 		componentClass = "GTextArea";
 		set_name(NameGen.instance().getNext("textarea"));
 		set_event_name(NameGen.instance().getNext(get_name()+ "_change"));
-		_0826_width = 160;
+		_0826_width = 120;
 		_0827_height = 80;
 		_0600_opaque  = true;
 	}

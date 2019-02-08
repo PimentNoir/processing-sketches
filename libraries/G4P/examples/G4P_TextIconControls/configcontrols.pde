@@ -58,12 +58,12 @@ public void makeTextIconConfigControls() {
   String[] items;  
 
   items = new String[] { "LEFT", "CENTER", "RIGHT", "JUSTIFY"};
-  textH = new GDropList(this, x, y + 40, 80, 90, 4);
+  textH = new GDropList(this, x, y + 40, 80, 90, 4, 14);
   textH.setItems(items, 0);
   textH.tag = "textH";
 
   items = new String[] { "TOP", "MIDDLE", "BOTTOM"};
-  textV = new GDropList(this, x, y + 60, 80, 90, 4);
+  textV = new GDropList(this, x, y + 60, 80, 90, 4, 14);
   textV.setItems(items, 1);
   textV.tag = "textV";
 
@@ -73,12 +73,12 @@ public void makeTextIconConfigControls() {
   lblIconAlign.setTextItalic();
 
   items = new String[] { "LEFT", "CENTER", "RIGHT"};
-  iconH = new GDropList(this, x, y + 40, 80, 90, 4);
+  iconH = new GDropList(this, x, y + 40, 80, 90, 4, 14);
   iconH.setItems(items, 1);
   iconH.tag = "iconH";
 
   items = new String[] { "TOP", "MIDDLE", "BOTTOM"};
-  iconV = new GDropList(this, x, y + 60, 80, 90, 4);
+  iconV = new GDropList(this, x, y + 60, 80, 90, 4, 14);
   iconV.setItems(items, 1);
   iconV.tag = "iconV";
 
@@ -88,7 +88,7 @@ public void makeTextIconConfigControls() {
   lblIconPos.setTextItalic();
 
   items = new String[] { "NORTH", "SOUTH", "EAST", "WEST"};
-  iconP = new GDropList(this, x, y + 30, 80, 90, 4);
+  iconP = new GDropList(this, x, y + 30, 80, 90, 4, 14);
   iconP.setItems(items, 3);
   iconP.tag = "iconP";
 

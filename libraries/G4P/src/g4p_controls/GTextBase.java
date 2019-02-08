@@ -44,11 +44,11 @@ public abstract class GTextBase extends GAbstractControl {
 
 	/**
 	 * Constructor
-	 * @param theApplet
-	 * @param p0
-	 * @param p1
-	 * @param p2
-	 * @param p3
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
 	 */
 	public GTextBase(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		super(theApplet, p0, p1, p2, p3);
@@ -58,7 +58,7 @@ public abstract class GTextBase extends GAbstractControl {
 	/**
 	 * Set the text to be displayed.
 	 * 
-	 * @param text
+	 * @param text the text to display
 	 */
 	public void setText(String text){
 		if(text == null || text.length() == 0 )
@@ -102,7 +102,7 @@ public abstract class GTextBase extends GAbstractControl {
 	 * @param font AWT font to use
 	 */
 	public void setFont(Font font) {
-		if(font != null && font != localFont) {// && buffer != null){
+		if(font != null && font != localFont) {
 			localFont = font;
 			bufferInvalid = true;
 		}
@@ -110,7 +110,7 @@ public abstract class GTextBase extends GAbstractControl {
 
 	/**
 	 * Allows the user to provide their own styled text for this component
-	 * @param ss
+	 * @param ss the styled string to display
 	 */
 	public void setStyledText(StyledString ss){
 		if(ss != null) {
@@ -139,7 +139,7 @@ public abstract class GTextBase extends GAbstractControl {
 	
 	/**
 	 * Make the selected characters bold. <br>
-	 * Characters affected are >= start and < end
+	 * Characters affected are &ge; start and &lt; end
 	 * 
 	 * @param start the first character to style
 	 * @param end the first character not to style
@@ -157,7 +157,7 @@ public abstract class GTextBase extends GAbstractControl {
 
 	/**
 	 * Make the selected characters italic. <br>
-	 * Characters affected are >= start and < end
+	 * Characters affected are &ge; start and &lt; end
 	 * 
 	 * @param start the first character to style
 	 * @param end the first character not to style

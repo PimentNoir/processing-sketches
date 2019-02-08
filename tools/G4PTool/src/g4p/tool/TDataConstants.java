@@ -130,7 +130,11 @@ public interface TDataConstants {
 
 	//		GLabel(PApplet theApplet, String text, int x, int y, int width, int height) {
 	String CTOR_GLABEL			=	"  {0} = new GLabel({1}, {2}, {3}, {4}, {5});\n";
-	String CTOR_SPAD			=	"  {0} = new GSketchPad({1}, {2}, {3}, {4}, {5});\n";
+	
+	//		GLabel(PApplet theApplet, String text, int x, int y, int width, int height, String Renderer) {	
+	String CTOR_VIEW			=	"  {0} = new GView({1}, {2}, {3}, {4}, {5}, {6});\n";
+	String CTOR_VIEW_PCAM_6	    =	"  {0} = new GViewPeasyCam({1}, {2}, {3}, {4}, {5}, {6});\n";
+	String CTOR_VIEW_PCAM_9	    =	"  {0} = new GViewPeasyCam({1}, {2}, {3}, {4}, {5}, new PVector({6}, {7}, {8}), {9});\n";
 
 	//		GOption(PApplet theApplet, String text, int x, int y, int width, int height){
 	String CTOR_GOPTION			=	"  {0} = new GOption({1}, {2}, {3}, {4}, {5});\n";
@@ -199,7 +203,7 @@ public interface TDataConstants {
 
 	
 	//													  app,   x     y    w    y    nbr
-	String CTOR_DROPLIST		=	"  {0} = new GDropList({1}, {2}, {3}, {4}, {5}, {6});\n";
+	String CTOR_DROPLIST		=	"  {0} = new GDropList({1}, {2}, {3}, {4}, {5}, {6}, {7});\n";
 	String CTOR_SET_LIST		=	"  {0}.setItems(loadStrings(\"{1}\"), {2});\n";
 
 			
@@ -213,7 +217,7 @@ public interface TDataConstants {
 	String CODE_GWINDOW_DRAW	=	"  appc.background(230);\n";
 	String CODE_GWINDOW_MOUSE	=	"  println(\"{0} - mouse event \" " + TIME;
 	String CODE_GWINDOW_KEY		=	"  println(\"{0} - key event \" " + TIME;
-	String CODE_GWINDOW_PEE		=	"  println(\"{0} - pre method called \" " + TIME;
+	String CODE_GWINDOW_PRE		=	"  println(\"{0} - pre method called \" " + TIME;
 	String CODE_GWINDOW_POST	=	"  println(\"{0} - post method called \" " + TIME;
 	String CODE_GWINDOW_CLOSE	=	"  println(\"{0} - window closed at \" " + TIME;
 

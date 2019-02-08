@@ -50,7 +50,7 @@ public class DPanel extends DTextStyle {  // was DTextIcon now DText since no ic
 		text_label = "Panel tab text";
 		text_tooltip = "text to appear in panel tab";
 		_0826_width = 100;
-		_0827_height = 60;
+		_0827_height = 80;
 		textZone.x = PAD;
 		textZone.y = PAD;
 		textZone.w = _0826_width - 2 * PAD;

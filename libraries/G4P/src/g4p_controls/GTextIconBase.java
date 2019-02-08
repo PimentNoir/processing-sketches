@@ -39,13 +39,13 @@ import processing.core.PImage;
  * 
  * It allows the user to control the position of the icon relative to the text and also their alignment. <br>
  * 
- * <b>Icon Position</b><br/>
+ * <b>Icon Position</b><br>
  * Use the <b>setIconPos(GAlign pos);</b> where <b>pos</b> is either 
  * <pre> GAlign.NORTH, GAlign.SOUTH, GAlign.EAST or GAlign.WEST </pre> 
- * to position the icon relative to the text. <br/><br/>
+ * to position the icon relative to the text. <br><br>
  * The icon will reserve just enough space vertically (NORTH/SOUTH) or horizontally (EAST/WEST) to display 
  * itself. The <b>setIconAlign(GAlign horz, GAlign vert);</b> can be used to align the icon within its space so
- * usable combinations are <br/><br/>
+ * usable combinations are <br><br>
  * 
  * <pre>
  * <b>Icon positions         Usable Icon Alignment </b>
@@ -53,13 +53,13 @@ import processing.core.PImage;
  * EAST, WEST             TOP, MIDDLE, BOTTOM
  * </pre>
  * 
- * Specifying unusable icon alignments will be accepted but will have no visual effect on the control e.g. <br/>
+ * Specifying unusable icon alignments will be accepted but will have no visual effect on the control e.g. <br>
  * <pre>
  * control.setIconPos(GAlign.NORTH);  // Icon above text
  * control.setIconAlign(GAlign.TOP);  // Instruction is accepted but has no visual effect
- * </pre> <br/>
+ * </pre> <br>
  * 
- * <i>This is new to V4.0.6 replaces the GTextAlign and GTextIconAlignBase classes</i><br/>
+ * <i>This is new to V4.0.6 replaces the GTextAlign and GTextIconAlignBase classes</i><br>
  * 
  * @author Peter Lager
  * 
@@ -89,6 +89,15 @@ public abstract class GTextIconBase extends GTextBase {
 	// NORTH, SOUTH, EAST or WEST
 	protected GAlign iconPos = GAlign.WEST;
 
+	/**
+	 * Base class for controls able to display text and icons.
+	 * 
+	 * @param theApplet  the main sketch or GWindow control for this control
+	 * @param p0 x position based on control mode
+	 * @param p1 y position based on control mode
+	 * @param p2 x position or width based on control mode
+	 * @param p3 y position or height based on control mode
+	 */
 	public GTextIconBase(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		super(theApplet, p0, p1, p2, p3);
 	}
@@ -107,7 +116,7 @@ public abstract class GTextIconBase extends GTextBase {
 	 * Determines whether this control has an icon then recalculates the 
 	 * size / position of the text and icon zones. The current text length 
 	 * is zero (i.e. no text) then a parameter value of true will force the 
-	 * calculation to assume there is some text. <br/>
+	 * calculation to assume there is some text. <br>
 	 * 
 	 * Useful to prevent errors when adding text to an icon only control.
 	 * 
@@ -164,7 +173,7 @@ public abstract class GTextIconBase extends GTextBase {
 	}
 
 	/**
-	 * Set the <b><i>non-animated</i></b> icon to be used, keeping the current icon alignment and position.  <br/>
+	 * Set the <b><i>non-animated</i></b> icon to be used, keeping the current icon alignment and position.  <br>
 	 * 
 	 * @param fname name of the icon image file
 	 * @param nbrImages number of tiles in the image
@@ -179,7 +188,7 @@ public abstract class GTextIconBase extends GTextBase {
 	 * Set the <b><i>non-animated</i></b> icon to be used and the horizontal and/or vertical icon alignment. 
 	 * Use the constants in GAlign e.g. <b>GAlign.LEFT</b> <br>
 	 * 
-	 * You can pass <b>null</b> if you don't want to change a particular alignment.   <br/>
+	 * You can pass <b>null</b> if you don't want to change a particular alignment.   <br>
 	 * 
 	 * @param fname name of the icon image file
 	 * @param nbrImages number of tiles in the image
@@ -196,7 +205,7 @@ public abstract class GTextIconBase extends GTextBase {
 	 * Set the <b><i>non-animated</i></b> icon to be used and the horizontal and/or vertical icon alignment. 
 	 * Use the constants in GAlign e.g. <b>GAlign.LEFT</b> <br>
 	 * 
-	 * You can pass <b>null</b> if you don't want to change a particular position/alignment.   <br/>
+	 * You can pass <b>null</b> if you don't want to change a particular position/alignment.   <br>
 	 * 
 	 * @param fname name of the icon image file
 	 * @param nbrImages number of tiles in the image
@@ -214,7 +223,7 @@ public abstract class GTextIconBase extends GTextBase {
 	 * Set the <b><i>non-animated</i></b> icon to be used and the horizontal and/or vertical icon alignment. 
 	 * Use the constants in GAlign e.g. <b>GAlign.LEFT</b> <br>
 	 * 
-	 * You can pass <b>null</b> if you don't want to change a particular position/alignment.   <br/>
+	 * You can pass <b>null</b> if you don't want to change a particular position/alignment.   <br>
 	 * 
 	 * @param img the icon
 	 * @param nbrImages number of tiles in the image
@@ -227,11 +236,11 @@ public abstract class GTextIconBase extends GTextBase {
 	}
 
 	/**
-	 * Set the <b><i>non-animated</i></b> icon to be used for this control. <br/> 
+	 * Set the <b><i>non-animated</i></b> icon to be used for this control. <br> 
 	 * Use the constants in GAlign e.g. <b>GAlign.LEFT</b> <br>
 	 * 
 	 * 
-	 * You can pass <b>null</b> if you don't want to change a particular position/alignment.   <br/>
+	 * You can pass <b>null</b> if you don't want to change a particular position/alignment.   <br>
 	 * 
 	 * @param img the icon
 	 * @param nbrImages number of tiles in the image
@@ -245,13 +254,13 @@ public abstract class GTextIconBase extends GTextBase {
 	}
 
 	/**
-	 * Set the icon to be used for this control. <br/> 
+	 * Set the icon to be used for this control. <br> 
 	 * Use the constants in GAlign e.g. <b>GAlign.LEFT</b> <br>
 	 * 
 	 * This is the only method that allows you to use an animated icon. Create and configure the icon before adding 
 	 * to this control. You can use the getIcon() method to access its methods.
 	 * 
-	 * You can pass <b>null</b> if you don't want to change a particular position/alignment.   <br/>
+	 * You can pass <b>null</b> if you don't want to change a particular position/alignment.   <br>
 	 * 
 	 * @param g_icon the icon to use
 	 * @param pos GAlign.NORTH, SOUTH, EAST or WEST
@@ -263,7 +272,7 @@ public abstract class GTextIconBase extends GTextBase {
 	}
 
 	/**
-	 * Implementation method for all setIcon(...) methods.<br/> 
+	 * Implementation method for all setIcon(...) methods.<br> 
 	 * Use the constants in GAlign e.g. <b>GAlign.LEFT</b> <br>
 	 * 
 	 * You can pass <b>null</b> if you don't want to change a particular position/alignment. 
@@ -292,10 +301,12 @@ public abstract class GTextIconBase extends GTextBase {
 	}
 
 	/**
-	 * If an animated icon (GAnimIcon) is associated with this control then it is returned otherwise it returns null. <br/>
+	 * If an animated icon (GAnimIcon) is associated with this control then it is returned 
+	 * otherwise it returns null. <br>
 	 * 
 	 * This is used to access the icon if we want to animate it e.g.
 	 * <pre>control.getIcon().animate();</pre>
+	 * @return the icon if any
 	 */
 	public GAnimIcon getIcon(){
 		return icon.me();
@@ -327,7 +338,7 @@ public abstract class GTextIconBase extends GTextBase {
 	 * If you want to set just one of the alignments then pass null 
 	 * in the other.
 	 * 
-	 * @param text
+	 * @param text the text to display
 	 * @param horz GAlign.LEFT, CENTER, RIGHT or JUSTIFY
 	 * @param vert GAlign.TOP, MIDDLE, BOTTOM
 	 */
@@ -349,7 +360,7 @@ public abstract class GTextIconBase extends GTextBase {
 	 * Set the text to be displayed and calculate the wrap length taking into
 	 * account any icon set.
 	 * 
-	 * @param text
+	 * @param text the text to display
 	 */
 	public void setText(String text){
 		setText(text, null, null);

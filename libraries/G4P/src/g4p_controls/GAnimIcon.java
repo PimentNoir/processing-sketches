@@ -31,10 +31,10 @@ import processing.core.PImage;
 
 /**
  * 
- * Class for the creation of animated icons to be used with GButton, GLabel, GCheckbox and GOption controls. <br/>
+ * Class for the creation of animated icons to be used with GButton, GLabel, GCheckbox and GOption controls. <br>
  * 
  * All animated icons will have an animation clip called 'ALL' which displays all the 
- * frames starting at zero with the user specified frame interval. <br/>
+ * frames starting at zero with the user specified frame interval. <br>
  * 
  * Introduced in v4.1
  * @author Peter Lager
@@ -87,23 +87,24 @@ public class GAnimIcon extends GIcon {
 	}
 
 	/**
-	 * Returns this icon.
+	 * @return returns this icon.
 	 */
 	GAnimIcon me(){
 		return this;
 	}
 	
 	/**
-	 * Returns true if there is already an animation clip called 'id'
+	 * @ return true if there is already an animation clip called 'id'
 	 */
 	boolean hasClip(String id){
 		return clips.containsKey(id);
 	}
 
 	/**
-	 * Returns a copy of this animated icon to be used with another control. <br/>
+	 * Returns a copy of this animated icon to be used with another control. <br>
 	 * <b>Note:</b> animated icons must only be used with one second control. Use copy()
 	 * to get a duplicate icon which can be used with another control.
+	 * @return a copy of this icon
 	 */
 	public GAnimIcon copy(){
 		GAnimIcon icon = new GAnimIcon();
@@ -130,7 +131,7 @@ public class GAnimIcon extends GIcon {
 	 * @param start first frame for this clip
 	 * @param end last frame for this clip
 	 * @param interval the time (ms) between frames
-	 * @return
+	 * @return the icon being stored
 	 */
 	public GAnimIcon storeAnim(String id, int start, int end, int interval){
 		return storeAnim(id, start, end, interval, 0);
@@ -145,6 +146,7 @@ public class GAnimIcon extends GIcon {
 	 * @param end last frame for this clip
 	 * @param interval the time (ms) between frames
 	 * @param nbrLoops the number of times this clip is played, (0 = play forever)
+	 * @return the icon being stored
 	 */
 	public GAnimIcon storeAnim(String id, int start, int end, int interval, int nbrLoops){
 		AnimClip ac = new AnimClip(id, start, end, interval, nbrLoops);
@@ -154,6 +156,7 @@ public class GAnimIcon extends GIcon {
 
 	/**
 	 * Animate the entire sequence.
+	 * @return the icon being animated
 	 */
 	public GAnimIcon animate(){
 		if(hasClip("ALL"))
@@ -167,8 +170,7 @@ public class GAnimIcon extends GIcon {
 	 * You can also decide on the number of times the clip is to be shown.
 	 * 
 	 * @param id the unique id for the clip
-	 * @param frameInterval the time between frames 
-	 * @param nbrLoops the number of times the clip is to be shown (<=0 will repeat the clip for ever).
+	 * @return the icon being animated
 	 */
 	public GAnimIcon animate(String id){
 		AnimClip c = clips.get(id);
@@ -187,6 +189,7 @@ public class GAnimIcon extends GIcon {
 	 * Change the interval between frames for the current animation clip.
 	 * 
 	 * @param interval the time between frames in milliseconds
+	 * @return this icon
 	 */
 	public GAnimIcon setInterval(int interval){
 		if(anim_clip != null){
@@ -199,8 +202,9 @@ public class GAnimIcon extends GIcon {
 	/**
 	 * Change the interval between frames for the animation clip with 
 	 * specified id.
-	 * 
+	 * @param id the animation id
 	 * @param interval the time between frames in milliseconds
+	 * @return this icon
 	 */
 	public GAnimIcon setInterval(String id, int interval){
 		AnimClip c = clips.get(id);
@@ -214,6 +218,7 @@ public class GAnimIcon extends GIcon {
 
 	/**
 	 * Resume an animation that has previously been stopped with stop()
+	 * @return this icon
 	 */
 	public GAnimIcon start(){
 		if(!timer.isRunning())
@@ -223,6 +228,7 @@ public class GAnimIcon extends GIcon {
 
 	/**
 	 * Stop the current animation. The animation can be resumed with start()
+	 * @return this icon
 	 */
 	public GAnimIcon stop(){
 		timer.stop();
@@ -231,10 +237,11 @@ public class GAnimIcon extends GIcon {
 
 	/**
 	 * Set the current frame to be displayed. The supplied frame number will be constrained 
-	 * to a valid value. <br/>
+	 * to a valid value. <br>
 	 * This is ignored if the animation clip is running.
 	 * 
 	 * @param fn the frame number to display.
+	 * @return this icon
 	 */
 	public GAnimIcon setFrame(int fn){
 		if(!timer.isRunning())
@@ -242,6 +249,10 @@ public class GAnimIcon extends GIcon {
 		return this;
 	}
 
+	/**
+	 * Required by GTimer to advance frame
+	 * @param timer
+	 */
 	public void advanceAnimationFrame(GTimer timer){
 		currFrame = (currFrame == anim_clip.end) ? anim_clip.start : currFrame + anim_clip.dir;
 		if(owner != null) owner.bufferInvalid = true;
@@ -262,6 +273,11 @@ public class GAnimIcon extends GIcon {
 		int nLoops;
 		int size; // Number of frames to display based on nbr loops
 
+
+		/**
+		 * 
+		 * @return a copy of this animation clip
+		 */
 		AnimClip copy(){
 			return new AnimClip(id, start, end, interval, nLoops);
 		}
@@ -302,6 +318,9 @@ public class GAnimIcon extends GIcon {
 			size = nLoops <= 0 ? 0 : nLoops * size - 1;
 		}
 
+		/**
+		 * @return textual description of animclip
+		 */
 		public String toString(){
 			return id + "  [ " + start + " > " + end + "   step " + dir + "   interval " + interval + "ms ]";
 		}

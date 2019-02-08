@@ -34,7 +34,7 @@ public class DTextField extends DTextBase {
 		componentClass = "GTextField";
 		set_name(NameGen.instance().getNext("textfield"));
 		set_event_name(NameGen.instance().getNext(get_name()+ "_change"));
-		_0826_width = 160;
+		_0826_width = 120;
 		_0827_height = 30;
 		_0600_opaque  = true;
 	}

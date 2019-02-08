@@ -1,7 +1,22 @@
 G4P changes incorporated into version
 
+V4.2.0 (35)
+New control, GView that encapsulates a visual 2D/3D canvas that responds to Processing mouse events. This replaces GSketchPad
+
+GSketchPad controls have been removed (replaced by GView controls)
+
+Mouse PRESSED and RELEASED methods for buttons have been removed.
+
+By default the mouse pointer changing as it passes over different controls is turned off by default due to bug in Processing (Issue 5712)
+
+
+V4.1.5 (34)
+Bug fixes and visual enhancement to GDropList making it easier to use on small screens.
+
+
 V4.1.4 (33)
 Fixes bug in StyledString that throws exception when text with multiple consecutive newline characters are in the text to set (ticket 24)
+
 
 Fixes bug in GTextArea where the text does not scroll to the end when appending text. (ticket 25)
 
@@ -11,6 +26,7 @@ The select file dialog boxes now support option to specify starting folder. (Tic
 The select colour dialog now supports optional start colour. (Ticket 21)
 
 fixes bug in GtextField when trying to set tthe tex when the control already has focus and selected text. (Ticket 22)
+
 
 V4.1.2 (31)
 fixes bug caused by a Processing issue introduced with 3.3.1 (https://github.com/processing/processing/issues/5026)

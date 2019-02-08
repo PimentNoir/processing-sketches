@@ -3,7 +3,7 @@
   	http://www.lagers.org.uk/g4p/index.html
 	http://sourceforge.net/projects/g4p/files/?source=navbar
 
-  Copyright (c) 2008-13 Peter Lager
+  Copyright (c) 2008+  Peter Lager
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -59,7 +59,7 @@ import processing.core.PConstants;
  * Prior to version 3.5 G4P used logical fonts to be cross-platform, 
  * unfortunately logical fonts do not use uniform metrics so it caused 
  * serious errors when formatting the text layout. In version 3.5 G4P 
- * will attempt to use a system fonts selected from this list <br>
+ * will attempt to use a system font selected from this list <br>
  * "Arial", "Trebuchet MS", "Tahoma", "Helvetica", "Verdana" <br>
  * 
  * Arial is the preferred font (since most systems will have it installed)
@@ -90,17 +90,17 @@ public class G4P implements GConstants, PConstants {
 	static boolean announced = false;
 
 	/**
-	 * return the pretty version of the library.
+	 * @return the pretty version of the library. This will be shown in Processing
 	 */
 	public static String getPrettyVersion() {
-		return "4.1.5";
+		return "4.2.0";
 	}
 
 	/**
-	 * return the version of the library used by Processing
+	 * @return the version of the library. 
 	 */
 	public static String getVersion() {
-		return "34";
+		return "35";
 	}
 
 	static int globalColorScheme = GCScheme.BLUE_SCHEME;
@@ -115,7 +115,9 @@ public class G4P implements GConstants, PConstants {
 	static GAbstractControl.Z_Order zorder = new GAbstractControl.Z_Order();
 
 	/* INTERNAL USE ONLY  Mouse over changer */
-	static boolean cursorChangeEnabled = true;
+	// The default value for this has been changed to false for 4.2.0
+	// See Processing issue 5712
+	static boolean cursorChangeEnabled = false;
 	static int mouseOff = ARROW;
 
 	static boolean showMessages = true;
@@ -177,7 +179,7 @@ public class G4P implements GConstants, PConstants {
 	 * In which case either a G4P control should be created or this method called
 	 * before creating a PeasyCam object.
 	 * 
-	 * @param app
+	 * @param app the main sketch PApplet usually 'this'
 	 */
 	public static void registerSketch(PApplet app){
 		if(sketchWindow == null && app != null) {
@@ -230,8 +232,8 @@ public class G4P implements GConstants, PConstants {
 	 * Set the colour scheme for all the controls drawn by the given 
 	 * PApplet. This will override any previous colour scheme for 
 	 * these controls.
-	 * @param app
-	 * @param cs
+	 * @param app either the main sketch PApplet or GWindo
+	 * @param cs colour scheme number
 	 */
 	public static void setWindowColorScheme(PApplet app, int cs){
 		cs = Math.abs(cs) % 16; // Force into valid range
@@ -267,7 +269,7 @@ public class G4P implements GConstants, PConstants {
 	 * G4P.ALPHA_BLOCK then it will no longer respond to mouse
 	 * and keyboard events.
 	 * 
-	 * @param app
+	 * @param app the main sketch window or GWindow instance
 	 * @param alpha value in the range 0 (transparent) to 255 (opaque)
 	 */
 	public static void setWindowAlpha(PApplet app, int alpha){
@@ -286,7 +288,7 @@ public class G4P implements GConstants, PConstants {
 	static void announceG4P(){
 		if(!announced){
 			System.out.println("===================================================");
-			System.out.println("   G4P V4.1.5 created by Peter Lager");
+			System.out.println("   G4P V4.2.0 created by Peter Lager");
 			System.out.println("===================================================");
 			announced = true;
 		}
@@ -318,9 +320,9 @@ public class G4P implements GConstants, PConstants {
 	 * Change the way position and size parameters are interpreted when a control is created. 
 	 * or added to another control e.g. GPanel. <br>
 	 * There are 3 modes. <br><pre>
-	 * PApplet.CORNER	 (x, y, w, h) <br>
-	 * PApplet.CORNERS	 (x0, y0, x1, y1) <br>
-	 * PApplet.CENTER	 (cx, cy, w, h) </pre><br>
+	 * GCtrlMode.CORNER	 (x, y, w, h) <br>
+	 * GCtrlMode.CORNERS (x0, y0, x1, y1) <br>
+	 * GCtrlMode.CENTER	 (cx, cy, w, h) </pre><br>
 	 * 
 	 * @param mode illegal values are ignored leaving the mode unchanged
 	 */
@@ -348,7 +350,7 @@ public class G4P implements GConstants, PConstants {
 	 * If you are adding your own event handlers then I suggest that you disable 
 	 * messages.
 	 * 
-	 * @param enable
+	 * @param enable whether to enable messages or not
 	 */
 	public static void messagesEnabled(boolean enable){
 		showMessages = enable;
@@ -367,7 +369,7 @@ public class G4P implements GConstants, PConstants {
 
 	/**
 	 * Determines how the direction of the mouse wheel rotation is interpreted
-	 * for sliders and knobs. This value applies to all sliders and knobs.<br/>
+	 * for sliders and knobs. This value applies to all sliders and knobs. <br>
 	 * The default value is FORWARD
 	 * @param dir FORWARD or REVERSE, illegal values are ignored
 	 */
@@ -378,7 +380,7 @@ public class G4P implements GConstants, PConstants {
 
 	/**
 	 * Determines how the direction of the mouse wheel rotation is interpreted
-	 * for sliders. This value applies to all sliders.<br/>
+	 * for sliders. This value applies to all sliders. <br>
 	 * The default value is FORWARD
 	 * @param dir FORWARD or REVERSE, illegal values are ignored
 	 */
@@ -388,6 +390,7 @@ public class G4P implements GConstants, PConstants {
 	}
 
 	/**
+	 * @param cursorOff the cursor shape.
 	 * @deprecated use setCursor(int)
 	 */
 	@Deprecated
@@ -411,15 +414,16 @@ public class G4P implements GConstants, PConstants {
 
 	/**
 	 * Get the cursor shape used when the mouse is not over a G4P 
-	 * control
-	 * set for the 
+	 * control'
 	 * 
+	 * @return the cursor not-over shape id
 	 */
 	public static int getCursor(){
 		return mouseOff;
 	}
 
 	/**
+	 * @return the cursor not-over shape id
 	 * @deprecated use getCursor()
 	 */
 	@Deprecated
@@ -509,7 +513,7 @@ public class G4P implements GConstants, PConstants {
 	 * 
 	 * If you click on Cancel then it returns the last color previously selected.
 	 * 
-	 * @return the ARGB colour as a 32 bit integer (as used in Processing). 
+	 * @return the RGB color as a 32 bit integer (as used in Processing). 
 	 */
 	public static int selectColor(){
 		return selectColorImpl(null);
@@ -522,10 +526,23 @@ public class G4P implements GConstants, PConstants {
 	 * If you click on Cancel then it returns the last color previously selected.
 	 * 
 	 * @param color the color to start the dialog 
-	 * @return the ARGB colour as a 32 bit integer (as used in Processing). 
+	 * @return the RGB color as a 32 bit integer (as used in Processing). 
 	 */
 	public static int selectColor(Color color){
 		return selectColorImpl(color);
+	}
+	
+	/**
+	 * This will open a version of the Java Swing color chooser dialog. The dialog's
+	 * UI is dependent on the OS and JVM implementation running. <br>
+	 * 
+	 * If you click on Cancel then it returns the last color previously selected.
+	 * 
+	 * @param color the color to start the dialog. RGB color
+	 * @return the RGB color as a 32 bit integer (as used in Processing). 
+	 */
+	public static int selectColor(int color){
+		return selectColorImpl(new Color(color));
 	}
 	
 	/**
@@ -538,7 +555,7 @@ public class G4P implements GConstants, PConstants {
 	 * @param red red channel value (0-255)
 	 * @param green green channel value (0-255)
 	 * @param blue red channel value (0-255)
-	 * @return  the ARGB colour as a 32 bit integer (as used in Processing).
+	 * @return the RGB color as a 32 bit integer (as used in Processing).
 	 */
 	public static int selectColor(int red, int green, int blue){
 		red &= 255;
@@ -553,10 +570,10 @@ public class G4P implements GConstants, PConstants {
 	 * 
 	 * If you click on Cancel then it returns the last color previously selected.
 	 * 
-	 * @return the ARGB colour as a 32 bit integer (as used in Processing). 
+	 * @return the RGB color as a 32 bit integer (as used in Processing). 
 	 */
 	protected static int selectColorImpl(Color color){
-		lastColor = color == null ? color.WHITE : color;
+		lastColor = color == null ? Color.WHITE : color;
 		Frame frame = getFrame(sketchWindow);
 		if(chooser == null){
 			chooser = new JColorChooser(lastColor);
@@ -940,8 +957,12 @@ public class G4P implements GConstants, PConstants {
 	 * @param message the text to be displayed in the main area of the dialog
 	 * @param title the text to appear in the dialog's title bar.
 	 * @param messageType the message type
-	 * @param optionType
-	 * @return which button was clicked
+     * @param optionType an integer designating the options available on the dialog
+     *                  <code>DEFAULT_OPTION</code>,
+     *                  <code>YES_NO_OPTION</code>,
+     *                  <code>YES_NO_CANCEL_OPTION</code>,
+     *                  or <code>OK_CANCEL_OPTION</code>	 
+     * @return which button was clicked
 	 */
 	public static int selectOption(PApplet owner, String message, String title, int messageType, int optionType){
 		Frame frame = getFrame(owner);
@@ -966,7 +987,7 @@ public class G4P implements GConstants, PConstants {
 	private static Frame getFrame(PApplet owner){
 		Frame frame = null;
 		try {
-			frame = (Frame) ((processing.awt.PSurfaceAWT.SmoothCanvas) owner.getSurface().getNative()).getFrame();
+			frame = ((processing.awt.PSurfaceAWT.SmoothCanvas) owner.getSurface().getNative()).getFrame();
 		}
 		catch(Exception e){
 		}

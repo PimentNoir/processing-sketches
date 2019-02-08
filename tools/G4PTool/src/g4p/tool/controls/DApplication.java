@@ -32,7 +32,7 @@ public final class DApplication extends DBase {
 	public String 		col_scheme_label = "Colour scheme";
 	public String 		col_scheme_updater = "colourSchemeChange";
 
-	public Boolean 		_0953_cursor  = true;
+	public Boolean 		_0953_cursor  = false;
 	public Boolean 		cursor_edit = true;
 	public Boolean 		cursor_show = true;
 	public String 		cursor_label = "Enable mouse over";

@@ -1,4 +1,4 @@
-/*
+/**
  This sketch is used show controls that use a mixture of
  text and icons i.e. GButton, GLabel, GCheckbox and GOption.
  

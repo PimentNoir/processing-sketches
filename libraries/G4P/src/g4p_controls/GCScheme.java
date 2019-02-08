@@ -33,10 +33,10 @@ import processing.core.PGraphics;
 import processing.core.PImage;
 
 /**
- * Defines a number of color schemes for the GUI components. <br/>
- * G4P supports 16 colour schemes and each scheme has a <b>palette</b> of 16 colours. <br/>
+ * Defines a number of color schemes for the GUI components. <br>
+ * G4P supports 16 colour schemes and each scheme has a <b>palette</b> of 16 colours. <br>
  * 
- * When G4P is used it loads an image file with all the colors used by the various colour schemes. <br/>
+ * When G4P is used it loads an image file with all the colors used by the various colour schemes. <br>
  * First it will search for a file containing a user defined scheme (user_gui_palette.png) and
  * if it can't find it, will use the library default scheme (default_gui_palette.png).
  * 
@@ -198,6 +198,8 @@ public class GCScheme implements GConstants, PConstants {
 	 * DO NOT CALL THIS METHOD<br>
 	 * 
 	 * This method is only to be used by GUI Builder.
+	 * @param schemeNo the colour scheme ID
+	 * @return an array of java.awt.Color values that make up the colour scheme.
 	 */
 	public static Color[] getJavaColor(int schemeNo){
 		schemeNo = Math.abs(schemeNo) % 16;

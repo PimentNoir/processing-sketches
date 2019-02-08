@@ -1,4 +1,4 @@
-/*
+/**
  This sketch demonstrates how to use animated icons with
  text-icon controls i.e. GButton, GLabel, GCheckbox and GOption.
  

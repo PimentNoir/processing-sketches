@@ -144,6 +144,7 @@ public final class GGroup extends GAbstractControl {
 	/**
 	 * Enable / disable the controls.
 	 * @param delay delay time before action is performed (milli-seconds)
+	 * @param enable whether the control group is to be enabled or not
 	 */
 	public void setEnabled(int delay, boolean enable){
 		actions.add(new Action(ENABLE, delay, new Object[] { enable }));		
@@ -172,6 +173,7 @@ public final class GGroup extends GAbstractControl {
 	 * If you simply want to change the controls' visibility status then
 	 * use this in preference to fadeIn/fadeOut
 	 * @param delay delay time before action is performed (milli-seconds)
+	 * @param visible whether to make the control visible or not
 	 */
 	public void setVisible(int delay, boolean visible){
 		actions.add(new Action(VISIBLE, delay, new Object[] { visible }));		
@@ -181,6 +183,7 @@ public final class GGroup extends GAbstractControl {
 	 * Make the control visible or invisible with immediate effect. <br>
 	 * If you simply want to change the controls' visibility status then 
 	 * use this in preference to fadeIn/fadeOut
+	 * @param visible whether to make the control visible or not
 	 */
 	public void setVisible(boolean visible){
 		setVisible(0, visible);	
