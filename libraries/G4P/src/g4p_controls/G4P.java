@@ -93,14 +93,14 @@ public class G4P implements GConstants, PConstants {
 	 * @return the pretty version of the library. This will be shown in Processing
 	 */
 	public static String getPrettyVersion() {
-		return "4.2.0";
+		return "4.2.1";
 	}
 
 	/**
 	 * @return the version of the library. 
 	 */
 	public static String getVersion() {
-		return "35";
+		return "36";
 	}
 
 	static int globalColorScheme = GCScheme.BLUE_SCHEME;
@@ -288,7 +288,7 @@ public class G4P implements GConstants, PConstants {
 	static void announceG4P(){
 		if(!announced){
 			System.out.println("===================================================");
-			System.out.println("   G4P V4.2.0 created by Peter Lager");
+			System.out.println("   G4P V4.2.1 created by Peter Lager");
 			System.out.println("===================================================");
 			announced = true;
 		}

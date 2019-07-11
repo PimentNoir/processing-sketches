@@ -118,7 +118,6 @@ public class GTextArea extends GEditableTextControl {
 	 */
 	public GTextArea(PApplet theApplet, float p0, float p1, float p2, float p3, int sbPolicy, int wrapWidth) {
 		super(theApplet, p0, p1, p2, p3, sbPolicy);
-		makeBuffer();
 		children = new LinkedList<GAbstractControl>();
 		tx = ty = TPAD6;
 		tw = width - 2 * TPAD6 - ((scrollbarPolicy & SCROLLBAR_VERTICAL) != 0 ? 18 : 0);

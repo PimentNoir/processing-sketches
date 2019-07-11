@@ -35,7 +35,7 @@ public void setup() {
   
   // ##########################################################################
   // Create 16 state switch button with mouse over image
-  btnToggle2 = new GImageToggleButton(this, 340, 70, "s2.png", "smile_4x4_grey.png", 4, 4);
+  btnToggle2 = new GImageToggleButton(this, 340, 70, "smile_4x4.png", "smile_4x4_grey.png", 4, 4);
   btnToggle2.tag = "User 16 state button with over image ";
   
   // ##########################################################################

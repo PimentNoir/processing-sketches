@@ -52,6 +52,7 @@ public abstract class GTextBase extends GAbstractControl {
 	 */
 	public GTextBase(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		super(theApplet, p0, p1, p2, p3);
+		makeBuffer();
 		setFont(localFont);
 	}
 
@@ -61,8 +62,8 @@ public abstract class GTextBase extends GAbstractControl {
 	 * @param text the text to display
 	 */
 	public void setText(String text){
-		if(text == null || text.length() == 0 )
-			text = " ";
+		text = text == null || text.length() == 0 ? " " : text;
+		// Create the stext
 		stext.setText(text, Integer.MAX_VALUE);
 		bufferInvalid = true;
 	}
@@ -102,8 +103,9 @@ public abstract class GTextBase extends GAbstractControl {
 	 * @param font AWT font to use
 	 */
 	public void setFont(Font font) {
-		if(font != null && font != localFont) {
+		if(font != null && localFont != font) {
 			localFont = font;
+			buffer.g2.setFont(localFont);
 			bufferInvalid = true;
 		}
 	}

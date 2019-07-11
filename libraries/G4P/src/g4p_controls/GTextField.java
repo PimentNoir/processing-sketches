@@ -94,7 +94,6 @@ public class GTextField extends GEditableTextControl {
 	 */
 	public GTextField(PApplet theApplet, float p0, float p1, float p2, float p3, int sbPolicy) {
 		super(theApplet, p0, p1, p2, p3, sbPolicy);
-		makeBuffer();
 		children = new LinkedList<GAbstractControl>();
 		tx = ty = 2;
 		tw = width - 2 * 2;

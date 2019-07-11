@@ -57,17 +57,30 @@ import processing.event.MouseEvent;
  * 
  * 
  * Three types of event can be generated :-  <br>
- * <b> GEvent.PRESSED  GEvent.RELEASED  GEvent.CLICKED </b><br>
+ * <b> PRESSED  RELEASED  CLICKED </b><br>
  * 
- * To simplify event handling the button only fires off CLICKED events 
- * when the mouse button is pressed and released over the button face 
- * (the default behaviour). <br>
+ * By default the button only fires the CLICKED event which is typical of 
+ * most GUIs. G4P supports two other events PRESSED and RELEASED which can
+ * be enabled using <pre>button1.fireAllEvents(true);</pre>.<br>
  * 
- * Using <pre>button1.fireAllEvents(true);</pre> enables the other 2 events
- * for button <b>button1</b>. A PRESSED event is created if the mouse button
- * is pressed down over the button face, the CLICKED event is then generated 
- * if the mouse button is released over the button face. Releasing the 
- * button off the button face creates a RELEASED event. <br>
+ * A PRESSED event is created if the mouse button is pressed down over the 
+ * button face. When the mouse button is released one of two events will 
+ * be generated, the RELEASED event if the mouse has moved since the 
+ * PRESSED event or CLICKED event if it has not moved. If you use this 
+ * feature remember to test the event type in the event-handler.<br>
+ * 
+ * Note that if you disable the button in its event handler e.g.
+ * 
+ * If you want the button is disable itself it should only be done on the 
+ * CLICKED event e.g.
+ * <pre>
+ * public void handleButtonEvents(GButton button, GEvent event) {
+ *   if (button == button1 && event == GEvent.CLICKED) {
+ *       button1.setEnabled(false);
+ *   }
+ * }
+ * do not try this with the RELEASED or PRESSED event as it will lead to inconsistent 
+ * behaviour.
  * 
  * 
  * @author Peter Lager
@@ -81,7 +94,7 @@ public class GImageButton extends GAbstractControl {
 	protected PImage mask = null;
 
 	protected int status;
-//	protected boolean reportAllButtonEvents = false;
+	protected boolean reportAllButtonEvents = false;
 
 
 	/**
@@ -317,8 +330,8 @@ public class GImageButton extends GAbstractControl {
 				dragging = false;
 				status = PRESS_CONTROL;
 				takeFocus();
-//				if(reportAllButtonEvents)
-//					fireEvent(this, GEvent.PRESSED);
+				if(reportAllButtonEvents)
+					fireEvent(this, GEvent.PRESSED);
 			}
 			break;
 		case MouseEvent.CLICK:
@@ -338,11 +351,11 @@ public class GImageButton extends GAbstractControl {
 			if(focusIsWith == this && dragging){
 				if(currSpot >= 0)
 					fireEvent(this, GEvent.CLICKED);
-//				else {
-//					if(reportAllButtonEvents){
-//						fireEvent(this, GEvent.RELEASED);
-//					}
-//				}
+				else {
+					if(reportAllButtonEvents){
+						fireEvent(this, GEvent.RELEASED);
+					}
+				}
 				dragging = false;
 				loseFocus(null);
 				status = OFF_CONTROL;
@@ -366,9 +379,9 @@ public class GImageButton extends GAbstractControl {
 	 * only CLICKED events are generated (default behaviour).
 	 * @param all
 	 */
-//	public void fireAllEvents(boolean all){
-//		reportAllButtonEvents = all;
-//	}
+	public void fireAllEvents(boolean all){
+		reportAllButtonEvents = all;
+	}
 
 	/**
 	 * Enable or disable the ability of the component to generate mouse events.<br>

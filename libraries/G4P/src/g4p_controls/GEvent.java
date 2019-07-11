@@ -70,6 +70,8 @@ public enum GEvent {
 
 	// Button control events (PRESSED and RELEASED are not fired by default)
 	CLICKED  			( "CLICKED", "Mouse button was clicked" ),
+	PRESSED  			( "PRESSED", "Mouse button was clicked" ),
+	RELEASED  			( "RELEASED", "Mouse button was clicked" ),
 
 	// Slider control events events 
 	VALUE_CHANGING		( "VALUE_CHANGING", "Value is changing" ),

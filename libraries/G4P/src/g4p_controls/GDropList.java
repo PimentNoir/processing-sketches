@@ -139,8 +139,6 @@ public class GDropList extends GTextBase {
 	 */
 	public GDropList(PApplet theApplet, float p0, float p1, float p2, float p3, int listSize, float buttonWidth) {
 		super(theApplet, p0, p1, p2, p3);
-		makeBuffer();
-
 		children = new LinkedList<GAbstractControl>();
 		this.viewListSize = Math.max(listSize, 3);
 		itemHeight = height / (viewListSize + 1); // make allowance for selected text at top

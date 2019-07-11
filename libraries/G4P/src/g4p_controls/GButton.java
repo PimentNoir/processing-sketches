@@ -37,14 +37,14 @@ import processing.event.MouseEvent;
  * This class is the Button component.
  * 
  * The button face can have either text or an image or both just
- * pick the right constructor.
+ * pick the right constructor. <br>
  * 
  * Three types of event can be generated :-  <br>
  * <b> PRESSED  RELEASED  CLICKED </b><br>
  * 
  * By default the button only fires the CLICKED event which is typical of 
  * most GUIs. G4P supports two other events PRESSED and RELEASED which can
- * be enabled using <pre>button1.fireAllEvents(true);</pre>.<br>
+ * be enabled using <pre>button1.fireAllEvents(true);</pre><br>
  * 
  * A PRESSED event is created if the mouse button is pressed down over the 
  * button face. When the mouse button is released one of two events will 
@@ -58,11 +58,10 @@ import processing.event.MouseEvent;
  * CLICKED event e.g.
  * <pre>
  * public void handleButtonEvents(GButton button, GEvent event) {
- *   if (button == button1 &amp;&amp; event == GEvent.CLICKED) {
+ *   if (button == button1 && event == GEvent.CLICKED) {
  *       button1.setEnabled(false);
  *   }
  * }
- * </pre>
  * do not try this with the RELEASED or PRESSED event as it will lead to inconsistent 
  * behaviour.
  * 
@@ -97,7 +96,7 @@ public class GButton extends GTextIconBase {
 	protected int status = 0;
 
 	// Only report CLICKED events
-//	protected boolean reportAllButtonEvents = false;
+	protected boolean reportAllButtonEvents = false;
 
 	/**
 	 * New button without text
@@ -122,7 +121,6 @@ public class GButton extends GTextIconBase {
 	 */
 	public GButton(PApplet theApplet, float p0, float p1, float p2, float p3, String text) {
 		super(theApplet, p0, p1, p2, p3);
-		makeBuffer();
 		// Create mask for hotspots
 		PGraphics mask = winApp.createGraphics((int) width, (int) height, JAVA2D);
 		mask.beginDraw();
@@ -162,14 +160,14 @@ public class GButton extends GTextIconBase {
 		G4P.registerControl(this);
 	}
 
-	/*
-	 * If the parameter is true all 3 event types are generated, if false
-	 * only CLICKED events are generated (default behaviour).
-	 * @param all
+	/**
+	 * If the parameter is true all 3 event types PRESSED, RELEASED and CLICKED
+	 * are generated, if false only CLICKED events are generated (default behaviour).
+	 * @param all true for all events
 	 */
-//	public void fireAllEvents(boolean all){
-//		reportAllButtonEvents = all;
-//	}
+	public void fireAllEvents(boolean all){
+		reportAllButtonEvents = all;
+	}
 
 	/**
 	 * Enable or disable the ability of the component to generate mouse events.<br>
@@ -216,8 +214,8 @@ public class GButton extends GTextIconBase {
 				dragging = false;
 				status = PRESS_CONTROL;
 				takeFocus();
-//				if(reportAllButtonEvents)
-//					fireEvent(this, GEvent.PRESSED);
+				if(reportAllButtonEvents)
+					fireEvent(this, GEvent.PRESSED);
 				bufferInvalid = true;
 			}
 			break;
@@ -237,8 +235,8 @@ public class GButton extends GTextIconBase {
 			// if the mouse has moved then release focus otherwise
 			// MOUSE_CLICKED will handle it
 			if(focusIsWith == this && dragging){
-//				if(reportAllButtonEvents)
-//					fireEvent(this, GEvent.RELEASED);
+				if(reportAllButtonEvents)
+					fireEvent(this, GEvent.RELEASED);
 				dragging = false;
 				loseFocus(null);
 				status = OFF_CONTROL;

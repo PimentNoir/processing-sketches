@@ -109,7 +109,6 @@ public class GPanel extends GTextBase {
 	 */
 	public GPanel(PApplet theApplet, float p0, float p1, float p2, float p3, String text) {
 		super(theApplet, p0, p1, p2, p3);
-		makeBuffer();
 		// Set the values used to constrain movement of the panel
 		if(x < 0 || y < 0 || x + width > winApp.width || y+  height > winApp.height)
 			clearDragArea();
@@ -169,25 +168,29 @@ public class GPanel extends GTextBase {
 	}
 	
 	public void setText(String text){
-		super.setText(text);
-		buffer.beginDraw();
+		// Make sure we have some text
+		text = text == null || text.length() == 0 ? " " : text;
+		// Create the stext
+		stext.setText(text, Integer.MAX_VALUE);
+		// Get the stext attributes and resize the tab
 		stext.getLines(buffer.g2);
-		buffer.endDraw();
 		tabHeight = (int) (stext.getMaxLineHeight() + 4);
 		tabWidth = (int) (stext.getMaxLineLength() + 8);
+		// Recalculate the mouse hotspots
 		calcHotSpots();
+		// Invalidate the buffer
 		bufferInvalid = true;
 	}
 
-//	public void setFont(Font font) {
-//		if(font != null)
-//			localFont = font;
-//		tabHeight = (int) (1.2f * localFont.getSize() + 2);
-//		buffer.g2.setFont(localFont);
-//		bufferInvalid = true;
-//		calcHotSpots();
-//		bufferInvalid = true;
-//	}
+	public void setFont(Font font) {
+		// If we have a new font then make the buffer use it
+		// and then reset the text / tab size
+		if(font != null && localFont != font) {
+			localFont = font;
+			buffer.g2.setFont(localFont);
+			setText(stext.getPlainText());
+		}
+	}
 
 	/**
 	 * What to do when the FPanel loses focus.

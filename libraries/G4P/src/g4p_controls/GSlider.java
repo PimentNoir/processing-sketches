@@ -159,7 +159,6 @@ public class GSlider extends GLinearTrackControl {
 			buffer.noStroke();
 			buffer.ellipse((parametricPos - 0.5f) * trackLength, 0, trackWidth, trackWidth);
 
-		
 			// Display slider values
 			g2d.setColor(palette[2]);
 			if(labels != null){
